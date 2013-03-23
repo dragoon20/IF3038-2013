@@ -5,7 +5,7 @@
 		private static $host = "localhost";
 		private static $username = "progin";
 		private static $password = "progin";
-		private static $dbname = "progin_405_13510033";
+		private static $dbname = "progin_439_13510033";
 		// private static $username = "root";
 		// private static $password = "";
 		// private static $dbname = "kmb";
