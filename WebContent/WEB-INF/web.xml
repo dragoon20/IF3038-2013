@@ -3,7 +3,7 @@
   <display-name>MOA</display-name>
   <filter>
     <filter-name>App</filter-name>
-    <filter-class>controller.App</filter-class>
+    <filter-class>controllers.App</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>App</filter-name>
