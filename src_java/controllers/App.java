@@ -47,8 +47,8 @@ public class App implements Filter {
 		}
 		else
 		{
-			// render normal page
-			String page = topfolder;
+			// render normal page	
+		String page = topfolder;
 			String parameter = "";
 			if (topfolder.contains("?"))
 			{
