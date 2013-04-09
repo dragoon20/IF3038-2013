@@ -4,13 +4,14 @@
  */
 package models;
 
-import java.sql.Timestamp;
+import java.sql.*;
 
 /**
  *
  * @author Abraham Krisnanda
  */
 public class User {
+    
     private int id_user;
     private String username;
     private String email;
