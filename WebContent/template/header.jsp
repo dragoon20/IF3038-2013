@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 
+<%@page import="models.User"%>
 <%@page import="java.util.HashMap"%>
 <%@page import="controllers.MainApp"%>
 <html>
@@ -18,55 +19,50 @@
 				<p><%= MainApp.appTagline %></p>
 
 				<% 
-					if ((session.getAttribute("LoggedIn")!=null) && ((Boolean)session.getAttribute("LoggedIn")))
+					if (MainApp.LoggedIn(session))
 					{
 				%>
 					<nav>
 						<ul class="main-links">
 							<% 
-								/*
 								HashMap<String, String> pages = new HashMap<String, String>();
 								pages.put("dashboard", "Dashboard");
-								pages.put("profile", ((User)session.getAttribute("currentUser")).fullname);
+								pages.put("profile", ((User)session.getAttribute("currentUser")).getFullname());
 								pages.put("logout", "Logout");
 
-								for (String page: pages.keySet())
+								for (String key: pages.keySet())
 								{
-									String label = pages.get(page);
-									boolean active = (session.getAttribute("currentPage") == page);
-								*/
+									String label = pages.get(key);
+									boolean active = (session.getAttribute("currentPage") == key);
 							%>	
 									<li class="<%//= page %> -link<%// if (active) out.print("active"); %>" id="<%//= page %> Li">
 									<%
-										//if ("profile".equals(page)) 
-										if (false)
+										if ("profile".equals(key)) 
 										{
 									%>
-											<img src="upload/user_profile_pict/<% //= ((User)session.getAttribute("currentUser")).avatar %>" alt="">
+											<img src="upload/user_profile_pict/<%= ((User)session.getAttribute("currentUser")).getAvatar() %>" alt="">
 									<%
 										}
 									%>
-									<a href="<%//= page %>>" id="<%//= page %>>Link"><%//= label %></a></li>
+									<a href="<%= key %>>" id="<%= key %>>Link"><%= label %></a></li>
 							<%
-								//}
+								}
 							%>
 						</ul>
 	
 						<%
-							/*
 							String q = "";
 							String type = "";
 							if ("search".equals(session.getAttribute("currentPage")))
 							{
 								q = request.getParameter("q");
 								type = request.getParameter("type");
-							}*/
+							}
 						%>
 						<div class="search-box">
 							<form action="search" method="get" id="searchForm">
 								<select name="type" id="searchType">
 								<%
-									/*
 									HashMap<String, String> types = new HashMap<String, String>();
 									types.put("all", "All");
 									types.put("task", "Tasks");
@@ -78,10 +74,10 @@
 										String v = types.get(k);
 										String selected = (k.equals(type)) ? " selected" : "";
 										out.println("<option value=\""+k+selected+"\">"+v+"</option>");
-									}*/
+									}
 								%>
 								</select>
-								<input type="search" name="q" placeholder="Search" value="<% //= q %>" id="searchQuery">
+								<input type="search" name="q" placeholder="Search" value="<%= q %>" id="searchQuery">
 								<button type="submit">Search</button>
 							</form>
 						</div>

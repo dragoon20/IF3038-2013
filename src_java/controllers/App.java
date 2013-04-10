@@ -63,8 +63,8 @@ public class App implements Filter {
 				page = topfolder.substring(topfolder.indexOf('?'));
 				parameter = topfolder.substring(topfolder.indexOf('?')+1, topfolder.length() - topfolder.indexOf('?') - 1);
 			}
-			request.setAttribute("page", page+parameter);
-			request.getRequestDispatcher("/MainApp").forward(request, response);
+			request.setAttribute("page", page);
+			request.getRequestDispatcher("/MainApp?"+parameter).forward(request, response);
 		}
 	}
 
