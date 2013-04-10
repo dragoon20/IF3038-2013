@@ -12,18 +12,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet implementation class MainApp
+ * Servlet implementation class RestApi
  */
-@WebServlet("/MainApp")
-public class MainApp extends HttpServlet {
+@WebServlet("/RestApi")
+public class RestApi extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	public static final String appName = "MOA";
-    public static final String appTagline = "Multiuser Online Agenda";
-    
+	
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public MainApp() {
+    public RestApi() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -33,7 +31,20 @@ public class MainApp extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
-		String page = ("".equals((String)request.getAttribute("page")))? "index" : (String)request.getAttribute("page");
+		proccessRequest(request, response);
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		proccessRequest(request, response);
+	}
+	
+	private void proccessRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		String api = request.getRequestURL().substring(request.getRequestURL().lastIndexOf("/")+1, request.getRequestURL().length());
 		
 		Class<?>[] param_handler = new Class[2];
 		param_handler[0] = HttpServletRequest.class;
@@ -41,12 +52,12 @@ public class MainApp extends HttpServlet {
 		
 		try {
 			Method method;
-			method = this.getClass().getMethod(page, param_handler);				
+			method = this.getClass().getMethod(api, param_handler);				
 			method.invoke(this, request, response);			
 		} catch (NoSuchMethodException e) {
 			// TODO Redirect to error page
 			System.out.println("-----------------");
-			System.out.println(page);
+			System.out.println(api);
 			System.out.println("-----------------");
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -61,19 +72,18 @@ public class MainApp extends HttpServlet {
 		} catch (SecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	
-	}
-
-	public void index(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		request.getRequestDispatcher("pages/index.jsp").forward(request, response);
+		}
 	}
 	
-	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	public void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		PrintWriter pw = response.getWriter();
-		pw.println(request.getLocalAddr()+"<br>"+request.getLocalName());
-		pw.println(request.getRequestURL());
-		pw.close();
+		if ("POST".equals(request.getMethod().toUpperCase()))
+		{
+			PrintWriter pw = response.getWriter();
+			pw.println(request.getParameter("username"));
+			pw.println(request.getParameter("password"));
+			pw.close();
+		}
+		//request.getRequestDispatcher("pages/index.jsp").forward(request, response);
 	}
 }

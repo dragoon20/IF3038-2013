@@ -10,6 +10,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servlet Filter implementation class App
@@ -37,6 +38,13 @@ public class App implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException 
 	{
 		HttpServletRequest req = (HttpServletRequest) request;
+		HttpSession sess = req.getSession();
+		
+		if (sess.getAttribute("base_url")==null)
+		{
+			sess.setAttribute("base_url", req.getRequestURL().substring(0, req.getRequestURL().lastIndexOf("/")+1));
+		}
+				
 		String path = req.getRequestURI().replaceFirst(req.getContextPath(), "");				
 		
 		String topfolder = path.substring(1);
@@ -55,7 +63,8 @@ public class App implements Filter {
 				page = topfolder.substring(topfolder.indexOf('?'));
 				parameter = topfolder.substring(topfolder.indexOf('?')+1, topfolder.length() - topfolder.indexOf('?') - 1);
 			}
-			request.getRequestDispatcher("/MainApp?page="+page+parameter).forward(request, response);
+			request.setAttribute("page", page+parameter);
+			request.getRequestDispatcher("/MainApp").forward(request, response);
 		}
 	}
 
