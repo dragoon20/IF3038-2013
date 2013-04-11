@@ -9,13 +9,18 @@
 		response.sendRedirect("index");
 	}
 
-	int id = session.getAttribute("user_id");
+	int id = (int)session.getAttribute("user_id");
 	if (request.getParameter("id")!=null)
 	{
-		id = request.getParameter("id");
+		try
+		{
+			id = Integer.parseInt(request.getParameter("id"));
+		}
+		catch (NumberFormatException e)
+		{
+		}
 	}
-	User user;
-	//$user = User::model()->find("id_user = ".$id, array("id_user","username","email","fullname","avatar","birthdate"));
+	User user = (User)User.getModel().find("id_user = "+id, new String[]{"id_user", "username", "email", "fullname", "avatar", "birthdate"});
 	//$tasks = $user->getAssignedTasks();
 	Task[] tasks;
 	
