@@ -4,13 +4,13 @@
  */
 package models;
 
-import java.sql.*;
+import java.sql.Timestamp;
 
 /**
  *
  * @author Abraham Krisnanda
  */
-public class User {
+public class User extends DBSimpleRecord {
     
     private int id_user;
     private String username;
@@ -19,7 +19,29 @@ public class User {
     private String avatar;
     private Timestamp birthdate;
     private String password;
-        
+    
+    private static User model;    
+    public static User getModel()
+    {
+        if (model==null)
+        {
+            model = new User();
+        }
+        return model;
+    }
+    
+    @Override
+    protected  String GetClassName() 
+    {
+        return "models.User";
+    }
+    
+    @Override
+    protected String GetTableName() 
+    {
+    	return "user";
+    }
+    
     /**
      * @return the id_user
      */
