@@ -13,74 +13,75 @@ import java.util.logging.Logger;
  *
  * @author Abraham Krisnanda
  */
-public class DBSimpleRecord {
+public abstract class DBSimpleRecord 
+{
     private Connection connection;
-    private static Class c;
-    protected static Object model;
-    protected static HashMap<String, String> tuples;
+    protected HashMap<String, Object> data;
     
-    public DBSimpleRecord() {
+    public DBSimpleRecord() 
+    {
         connection = DBConnection.getConnection();
     }
     
-    public static Object getModel()
+    protected abstract String GetClassName();
+    protected abstract String GetTableName();
+    
+    public void putData(String key, Object value)
     {
-        try {
-            if (model==null)
-            {
-                
-                c = Class.forName(this.);
-                model = c.newInstance();
-            }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(DBSimpleRecord.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return model;
+    	data.put(key, value);
     }
-        
-    public Object find(String query, String[] selection)
+    
+    public DBSimpleRecord find(String query, String[] selection)
     {
-        if (query != "")
-        {
-            query = " WHERE "+query;
-        }
-        String[] select = {}; // temp variable for selected attribute
-        String cmd;
-        if (selection.length!=0) {
-            for (int i=0;i<selection.length;i++)
+    	try
+    	{
+			Class c = Class.forName(GetClassName());
+			DBSimpleRecord result = (DBSimpleRecord)c.newInstance();
+
+			if (query != "")
+	        {
+	            query = " WHERE "+query;
+	        }
+	        StringBuilder cmd = new StringBuilder();
+	        if (selection.length!=0) 
+	        {
+	            for (int i=0;i<selection.length;i++)
+	            {
+	            	cmd.append(selection[i]);
+	            	cmd.append(", ");
+	            }
+	            cmd.substring(0, cmd.length()-2);
+	        }
+	        else {
+	            cmd.append("*");
+	        }
+	        
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT" + cmd.toString() + " FROM " + this.GetTableName() + query) ;
+
+            ResultSetMetaData meta_data = rs.getMetaData();
+            int column_count = meta_data.getColumnCount();
+            
+            if (rs.next())
             {
-                select[select.length] = (selection[i] +", ");
+            	for (int i=0;i<column_count;++i)
+            	{
+            		String label = meta_data.getColumnLabel(i);
+            		result.putData(label, rs.getObject(i));
+            	}
             }
-            int maxlength = select.toString().length();
-            cmd = (select.toString().substring(0,maxlength -2)) ; // menghapus ", " pada akhir query
-        }
-        else {
-            cmd ="*";
-        }
-        try {
-                Statement statement = connection.createStatement();
-                ResultSet rs = statement.executeQuery("SELECT" + select.toString() + " FROM " + this.GetClassName()) ;
-                while (rs.next()) {
-                    try {
-                        Class c = Class.forName(this.GetClassName());
-                        model = c.newInstance();
-                    }
-                    catch (LinkageError e) {
-                        e.printStackTrace();
-                    }
-                    catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (InstantiationException ex) {
-                        Logger.getLogger(DBSimpleRecord.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (IllegalAccessException ex) {
-                        Logger.getLogger(DBSimpleRecord.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-            catch (SQLException e) {
-                e.printStackTrace();
-            }
-        return model;
+            return result;
+    	} catch (SQLException e) {
+            e.printStackTrace();
+    	} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return null;
     }
 }

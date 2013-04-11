@@ -6,7 +6,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title><?php echo $this->title ?></title>
+		<title><%= request.getAttribute("title") %></title>
 		<base href="<%= session.getAttribute("base_url") %>">
 		<link rel="stylesheet" href="css/style.css">
 		<link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
@@ -33,7 +33,7 @@
 								for (String key: pages.keySet())
 								{
 									String label = pages.get(key);
-									boolean active = (session.getAttribute("currentPage") == key);
+									boolean active = (key.equals(request.getAttribute("currentPage")));
 							%>	
 									<li class="<%//= page %> -link<%// if (active) out.print("active"); %>" id="<%//= page %> Li">
 									<%
