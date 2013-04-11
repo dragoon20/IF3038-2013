@@ -10,7 +10,7 @@ import java.sql.*;
  *
  * @author Abraham Krisnanda
  */
-public class User {
+public class User extends DBSimpleRecord {
     
     private int id_user;
     private String username;
@@ -20,6 +20,12 @@ public class User {
     private Timestamp birthdate;
     private String password;
 
+    @Override
+    protected  String GetClassName() {
+        return "models.User";
+    }
+    
+    
     /**
      * @return the id_user
      */
