@@ -11,6 +11,7 @@ package models;
 import java.io.*;
 import java.sql.*;
 import java.util.Properties;
+
 public class DBConnection 
 {
     private static Connection connection = null;
@@ -19,7 +20,8 @@ public class DBConnection
     {
         if (connection != null) 
             return connection;
-        else {
+        else 
+        {
             try {
                 Properties prop = new Properties();
                 InputStream inputStream = DBConnection.class.getClassLoader().getResourceAsStream("/db.properties");

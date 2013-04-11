@@ -21,6 +21,7 @@ public abstract class DBSimpleRecord
     public DBSimpleRecord() 
     {
         connection = DBConnection.getConnection();
+        data = new HashMap<>();
     }
     
     protected abstract String GetClassName();
@@ -45,7 +46,7 @@ public abstract class DBSimpleRecord
 	        StringBuilder cmd = new StringBuilder();
 	        if ((selection!=null) && (selection.length!=0))
 	        {
-	            for (int i=0;i<selection.length;i++)
+	            for (int i=1;i<=selection.length;i++)
 	            {
 	            	cmd.append(selection[i]);
 	            	cmd.append(", ");
@@ -57,14 +58,13 @@ public abstract class DBSimpleRecord
 	        }
 	        
             Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT" + cmd.toString() + " FROM " + this.GetTableName() + query) ;
+            ResultSet rs = statement.executeQuery("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query) ;
 
             ResultSetMetaData meta_data = rs.getMetaData();
             int column_count = meta_data.getColumnCount();
-            
             if (rs.next())
             {
-            	for (int i=0;i<column_count;++i)
+            	for (int i=1;i<=column_count;++i)
             	{
             		String label = meta_data.getColumnLabel(i);
             		result.putData(label, rs.getObject(i));
@@ -79,6 +79,9 @@ public abstract class DBSimpleRecord
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+	    } catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
