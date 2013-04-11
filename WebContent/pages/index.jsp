@@ -1,10 +1,12 @@
 <%@page import="com.sun.xml.internal.bind.v2.schemagen.xmlschema.List"%>
 <%@page import="java.util.ArrayList"%>
 <%
-	if ((session.getAttribute("LoggedIn")!=null) && ((Boolean)session.getAttribute("LoggedIn")))
+	if (MainApp.LoggedIn(session))
 	{
 		response.sendRedirect("dashboard");
 	}
+	request.setAttribute("title", "MOA - Multiuser Online Agenda");
+	request.setAttribute("currentPage", "index");
 %>
 <%@ include file="../template/header.jsp" %>
 		<div class="content">

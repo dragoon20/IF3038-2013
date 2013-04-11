@@ -1,22 +1,36 @@
-<?php
-	if (!$this->loggedIn) 
+<%@page import="models.Category"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="controllers.MainApp"%>
+<%
+	if (!MainApp.LoggedIn(session))
 	{
-		header('Location: index');
-		return;
+		response.sendRedirect("index");
 	}
-
+	
 	// Business Logic Here
 
-	$cat = (int) $_GET['cat'];
+	int cat = 0;
+	if (request.getParameter("cat")!=null)
+	{
+		try
+		{
+			cat = Integer.parseInt(request.getParameter("cat"));
+		}
+		catch (NumberFormatException e)
+		{
+			
+		}
+	}
 
-	$todoQ = 'status=0';
-	$doneQ = 'status=1';
-	$narrowQ = '';
+	String todoQ = "status=0";
+	String doneQ = "status=1";
+	String narrowQ = "";
 
-	if ($cat) {
-		$currentCat = Category::model()->findAll('id_kategori=' . $cat);
-		//$currentCat = Category::model()->find('id_user=' . $this->currentUserId);
-		if ($currentCat) {
+	Category currentCat;
+	if (cat != 0) 
+	{
+		//$currentCat = Category::model()->findAll('id_kategori=' . $cat);
+		/*if ($currentCat) {
 			$currentCat = $currentCat[0];
 			$narrowQ = ' AND id_kategori=' . $cat;
 			$canDelete = $currentCat->id_user == $this->currentUserId;
@@ -24,28 +38,34 @@
 		else {
 			unset($currentCat);
 			unset($cat);
-		}
+		}*/
 	}
 
 	//$tasks = $this->currentUser->getTasks();
-	$todo = $this->currentUser->getTasks($todoQ . $narrowQ);
-	$done = $this->currentUser->getTasks($doneQ . $narrowQ);
+	//$todo = $this->currentUser->getTasks($todoQ . $narrowQ);
+	//$done = $this->currentUser->getTasks($doneQ . $narrowQ);
 
-	$categories = $this->currentUser->getCategories();
+	//$categories = $this->currentUser->getCategories();
 
 	// Presentation Logic Here
 
-	if ($cat) {
+	/*if ($cat) {
 		$pageTitle = $currentCat->nama_kategori;
 	}
 	else {
 		$pageTitle = 'All Tasks';
-	}
+	}*/
+	
+	String pageTitle = "";
 
-	$this->requireJS('checker');
-	$this->requireJS('dashboard');
-	$this->header('Dashboard', 'dashboard');
-?>
+	ArrayList<String> javascripts = new ArrayList<String>();
+	javascripts.add("checker");
+	javascripts.add("dashboard");
+	request.setAttribute("javascripts", javascripts);
+	request.setAttribute("title", "MOA - Dashboard");
+	request.setAttribute("currentPage", "dashboard");
+%>
+<%@ include file="../template/header.jsp" %>
 		<div class="content">
 			<div class="dashboard">	
 				<header>
@@ -59,7 +79,7 @@
 					<form action="" method="POST">
 					<section class="tasks current">
 						<header>
-							<h3 id="pageTitle"><?php echo $pageTitle ?></h3>
+							<h3 id="pageTitle"><%= pageTitle %></h3>
 						</header>
 
 						<div id="tasksList">
@@ -86,7 +106,7 @@ foreach ($done as $task) { include dirname(__FILE__) . '/../template/task.php'; 
 							<h3>Categories</h3>
 						</header>
 						<ul id="categoryList">
-							<li id="categoryLi0" <?php if ($currentCat->id_kategori == 0) echo ' class="active"';?>><a href="dashboard.php" data-category-id="<?php echo 0; ?>">All Tasks</a></li>
+							<li id="categoryLi0" <% if (currentCat.getId_kategori()==0) out.print("class=\"active\""); %>><a href="dashboard.php" data-category-id="0">All Tasks</a></li>
 							<?php foreach ($categories as $cat): ?>
 							<li data-deletable="<?php echo $cat->id_user == $this->currentUserId ? 'true' : 'false' ?>" id="categoryLi<?php echo $cat->id_kategori ?>"<?php if ($currentCat->id_kategori == $cat->id_kategori) echo ' class="active"' ?>><a href="dashboard.php?cat=<?php echo $cat->id_kategori ?>" data-category-id="<?php echo $cat->id_kategori ?>"><?php echo $cat->nama_kategori ?></a></li>
 							<?php endforeach; ?>
@@ -98,10 +118,17 @@ foreach ($done as $task) { include dirname(__FILE__) . '/../template/task.php'; 
 			</div>
 
 		</div>
-		<?php if ($currentCat): ?><script>
-			var currentCat = <?php echo $currentCat->id_kategori ?>;
-			var canDelete = <?php echo json_encode($canDelete) ?>;
-		</script><?php endif; ?>
+		<% 
+			//if ($currentCat):
+			//{
+		%>
+		<script>
+			//var currentCat = <?php echo $currentCat->id_kategori ?>;
+			//var canDelete = <?php echo json_encode($canDelete) ?>;
+		</script>
+		<%
+			//}
+		%>
 		<div class="modal-overlay" id="modalOverlay">
 			<div class="modal-dialog">
 				<a class="close">&times;</a>

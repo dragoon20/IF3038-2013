@@ -19,7 +19,7 @@ public class User {
     private String avatar;
     private Timestamp birthdate;
     private String password;
-
+        
     /**
      * @return the id_user
      */

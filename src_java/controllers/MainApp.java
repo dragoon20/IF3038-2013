@@ -12,12 +12,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import models.User;
+
 /**
  * Servlet implementation class MainApp
  */
 @WebServlet("/MainApp")
 public class MainApp extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
 	public static final String appName = "MOA";
     public static final String appTagline = "Multiuser Online Agenda";
     
@@ -31,7 +34,7 @@ public class MainApp extends HttpServlet {
 
     public static boolean LoggedIn(HttpSession session)
 	{
-		return ((session.getAttribute("LoggedIn")!=null) && ((Boolean)session.getAttribute("LoggedIn")));
+		return ((session.getAttribute("user_id")!=null));
 	}
     
 	/**
