@@ -3,12 +3,12 @@
  * and open the template in the editor.
  */
 package models;
-import java.sql.*;
-import java.lang.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 /**
  *
  * @author Abraham Krisnanda
@@ -35,7 +35,7 @@ public abstract class DBSimpleRecord
     {
     	try
     	{
-			Class c = Class.forName(GetClassName());
+			Class<?> c = Class.forName(GetClassName());
 			DBSimpleRecord result = (DBSimpleRecord)c.newInstance();
 
 			if (query != "")
@@ -43,7 +43,7 @@ public abstract class DBSimpleRecord
 	            query = " WHERE "+query;
 	        }
 	        StringBuilder cmd = new StringBuilder();
-	        if (selection.length!=0) 
+	        if ((selection!=null) && (selection.length!=0))
 	        {
 	            for (int i=0;i<selection.length;i++)
 	            {

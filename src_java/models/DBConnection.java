@@ -11,10 +11,12 @@ package models;
 import java.io.*;
 import java.sql.*;
 import java.util.Properties;
-public class DBConnection {
+public class DBConnection 
+{
     private static Connection connection = null;
     
-    public static Connection getConnection() {
+    public static Connection getConnection() 
+    {
         if (connection != null) 
             return connection;
         else {

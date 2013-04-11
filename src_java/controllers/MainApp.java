@@ -144,9 +144,11 @@ public class MainApp extends HttpServlet {
 	
 	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
+		User user = (User) User.getModel().find("", null);
 		PrintWriter pw = response.getWriter();
-		pw.println(request.getLocalAddr()+"<br>"+request.getLocalName());
-		pw.println(request.getRequestURL());
+		pw.println(user.getUsername());
+		pw.println(user.getBirthdate());
+		pw.println(user.getId_user());
 		pw.close();
 	}
 }
