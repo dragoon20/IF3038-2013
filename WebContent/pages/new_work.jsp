@@ -1,28 +1,39 @@
-<?php
-	if (!$this->loggedIn) 
+<%@page import="models.Category"%>
+<%@page import="controllers.MainApp"%>
+<%
+	if (!MainApp.LoggedIn(session))
 	{
-		header('Location: index');
-		return;
+		response.sendRedirect("index");
+	}
+
+	int id = 0;
+	if (request.getParameter("cat")!=null)
+	{
+		try
+		{
+			id = Integer.parseInt(request.getParameter("cat"));
+		}
+		catch (NumberFormatException e)
+		{
+		}
 	}
 	
-	$cat = Category::model()->find("id_kategori=".addslashes($_GET['cat']));
-
-	if ((!$cat)||(!$cat->getEditable($this->currentUserId)))
+	Category cat = Category.getModel().find("id_kategori="+id);
+	if ((cat==null) || (cat.getEditable(MainApp.currentUserId(session))))
 	{
 		// redirect to error page
-	} 
+	}
 	
-	$this->header();
-	$id = $_GET['cat'];
-
-?>
+	request.setAttribute("title", "MOA - New Task");
+	request.setAttribute("currentPage", (request.getParameter("id")!=null) ? "" : "");
+%>
 		<div class="content">
 			<div class="add-task">
 				<header>
 					<h1>Add Task</h1>
 				</header>
 				<form id="new_tugas" action="new_task" method="post" enctype="multipart/form-data">
-					<input name="id_kategori" type="hidden" value="<?php echo $id; ?>">
+					<input name="id_kategori" type="hidden" value="<%= id %>">
 					<div class="field">
 						<label>Task Name</label>
 						<input size="25" maxlength="25" name="nama_task" pattern="^[a-zA-Z0-9 ]{1,25}$" id="nama" type="text">
@@ -49,14 +60,14 @@
 				</form>
 			</div>
 		</div>
-		<?php
-			$this->calendar();
-		?>
+		<%@ include file="../template/calendar.jsp" %>	
 		<script type="text/javascript">
-			var id_user = <?php echo $this->currentUserId; ?>;
+			var id_user = <%= MainApp.currentUserId(session) %>;
 		</script>
-<?php 
-	$this->requireJS('datepicker');
-	$this->requireJS('tugas');
-	$this->footer();
-?>
+<% 
+	ArrayList<String> javascripts = new ArrayList<String>();
+	javascripts.add("datepicker");
+	javascripts.add("tugas");
+	request.setAttribute("javascripts", javascripts);
+%>
+<%@ include file="../template/footer.jsp" %>

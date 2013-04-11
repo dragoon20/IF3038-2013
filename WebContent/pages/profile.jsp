@@ -21,10 +21,7 @@
 		}
 	}
 	User user = (User)User.getModel().find("id_user = "+id, new String[]{"id_user", "username", "email", "fullname", "avatar", "birthdate"});
-	//$tasks = $user->getAssignedTasks();
-	Task[] tasks;
-	
-	//$birth_date = new Datetime($user->birthdate);
+	Task[] tasks = user.getAssignedTasks();
 
 	request.setAttribute("title", "MOA - Profile");
 	request.setAttribute("currentPage", (request.getParameter("id")!=null) ? "" : "profile");
