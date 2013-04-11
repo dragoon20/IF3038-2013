@@ -15,7 +15,7 @@ form_login.onsubmit = function(e)
 				console.log(result);
 				if (result.status == "success")
 				{
-					window.location = "dashboard.php";
+					window.location = "dashboard";
 				}
 				else
 				{

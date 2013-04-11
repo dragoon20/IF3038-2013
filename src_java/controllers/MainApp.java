@@ -44,10 +44,10 @@ public class MainApp extends HttpServlet {
     
     public static User currentUser(HttpSession session)
     {
-    	return ((User)session.getAttribute("currentUser"));
+    	return ((User)session.getAttribute("current_user"));
     }
     
-	/**
+    /**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 

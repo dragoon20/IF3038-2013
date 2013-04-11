@@ -3,12 +3,21 @@
  * and open the template in the editor.
  */
 package models;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Formatter;
 import java.util.HashMap;
+
 /**
  *
  * @author Abraham Krisnanda
@@ -27,12 +36,47 @@ public abstract class DBSimpleRecord
     protected abstract String GetClassName();
     protected abstract String GetTableName();
     
+    public static String MD5(String input)
+    {
+    	try {
+    		MessageDigest MD5 = MessageDigest.getInstance("MD5");
+			DigestInputStream dis = new DigestInputStream(new ByteArrayInputStream(input.getBytes("UTF-8")), MD5);
+			
+			while (dis.read()!=-1);
+			byte[] hash = MD5.digest();
+			
+			Formatter formatter = new Formatter();
+			for (byte b : hash)
+			{
+				formatter.format("%02x", b);
+			}
+			return formatter.toString();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "";
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "";
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "";
+		}
+    }
+    
     public void putData(String key, Object value)
     {
     	data.put(key, value);
     }
     
-    public DBSimpleRecord find(String query, String[] selection)
+    public boolean isEmpty()
+    {
+    	return data.isEmpty();
+    }
+    
+    public DBSimpleRecord find(String query, Object[] params, String[] params_type , String[] selection)
     {
     	try
     	{
@@ -57,8 +101,15 @@ public abstract class DBSimpleRecord
 	            cmd.append("*");
 	        }
 	        
-            Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query) ;
+	        PreparedStatement statement = connection.prepareStatement("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query);
+	        for (int i=0;i<params.length;++i)
+	        {
+	        	if ("string".equals(params_type[i]))
+	        	{
+	        		statement.setNString(i+1, (String)params[i]);
+	        	}
+	        }
+            ResultSet rs = statement.executeQuery() ;
 
             ResultSetMetaData meta_data = rs.getMetaData();
             int column_count = meta_data.getColumnCount();
@@ -70,6 +121,7 @@ public abstract class DBSimpleRecord
             		result.putData(label, rs.getObject(i));
             	}
             }
+            
             return result;
     	} catch (SQLException e) {
             e.printStackTrace();

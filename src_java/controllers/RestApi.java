@@ -1,6 +1,9 @@
 package controllers;
 
+import helper.JSONObject;
+
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -12,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import models.Comment;
+import models.DBSimpleRecord;
+import models.User;
 
 /**
  * Servlet implementation class RestApi
@@ -544,35 +549,40 @@ public class RestApi extends HttpServlet
 	 */
 	public void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
+		JSONObject ret = new JSONObject();
 		if (("POST".equals(request.getMethod().toUpperCase())) && 
 				(request.getParameter("username")!=null) && (request.getParameter("password")!=null))
 		{
-			/*$user = User::model()->find("username='".addslashes($params['username'])."' AND password='".md5($params['password'])."'");
-			if ($user->data)
+			
+			User user = (User)User.getModel().find("username = ? AND password = ?", 
+						new Object[]{request.getParameter("username"), DBSimpleRecord.MD5(request.getParameter("password"))}, 
+						new String[]{"string", "string"},
+						null);
+			if ((user!=null) && (!user.isEmpty()))
 			{
-				$_SESSION['user_id'] = $user->id_user;
-				$u = new User;
-				$u->id_user = $user->id_user;
-				$u->fullname = $user->fullname;
-				$u->username = $user->username;
-				$u->email = $user->email;
-
-				$_SESSION['current_user'] = $u;
-
-				$return["status"] = "success";
+				session.setAttribute("user_id", user.getId_user());
+				
+				User u = new User();
+				u.setId_user(user.getId_user());
+				u.setFullname(user.getFullname());
+				u.setUsername(user.getUsername());
+				u.setEmail(user.getEmail());
+				session.setAttribute("current_user", u);
+				
+				ret.put("status", "success");
 			}
-			else {
-				$return["status"] = "fail";
+			else
+			{
+				ret.put("status", "fail");
 			}
-			*/
 		}
 		else 
 		{
-			//$return["status"] = "fail";
+			ret.put("status", "fail");
 		}
 		
-		// print result
-		//return $return;
+		PrintWriter pw = response.getWriter();
+		pw.println(ret.toString());
 	}
 	
 	/**

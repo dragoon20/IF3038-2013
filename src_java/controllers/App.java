@@ -45,7 +45,7 @@ public class App implements Filter {
 			sess.setAttribute("base_url", req.getRequestURL().substring(0, req.getRequestURL().lastIndexOf("/")+1));
 		}
 				
-		String path = req.getRequestURI().replaceFirst(req.getContextPath(), "");				
+		String path = req.getRequestURI().replaceFirst(req.getContextPath(), "");
 		
 		String topfolder = path.substring(1);
 		if (topfolder.contains("/"))
@@ -55,8 +55,8 @@ public class App implements Filter {
 		}
 		else
 		{
-			// render normal page	
-		String page = topfolder;
+			// render normal page
+			String page = topfolder;
 			String parameter = "";
 			if (topfolder.contains("?"))
 			{
