@@ -4,22 +4,21 @@
  */
 package models;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 
 /**
- *
+ * 
  * @author Abraham Krisnanda
  */
+/*private int id_user;
+private String username;
+private String email;
+private String fullname;
+private String avatar;
+private Timestamp birthdate;
+private String password;*/
 public class User extends DBSimpleRecord 
 {
-    /*private int id_user;
-    private String username;
-    private String email;
-    private String fullname;
-    private String avatar;
-    private Timestamp birthdate;
-    private String password;*/
-    
     private static User model;    
     public static User getModel()
     {
@@ -133,15 +132,15 @@ public class User extends DBSimpleRecord
     /**
      * @return the birthdate
      */
-    public Timestamp getBirthdate() 
+    public Date getBirthdate() 
     {
-    	return ((Timestamp)data.get("birthdate"));
+    	return ((Date)data.get("birthdate"));
     }
 
     /**
      * @param birthdate the birthdate to set
      */
-    public void setBirthdate(Timestamp birthdate) 
+    public void setBirthdate(Date birthdate) 
     {
     	data.put("birthdate", birthdate);
     }
