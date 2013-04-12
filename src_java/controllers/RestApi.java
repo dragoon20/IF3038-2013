@@ -44,9 +44,9 @@ public class RestApi extends HttpServlet
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public RestApi() {
+    public RestApi() 
+    {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
@@ -110,16 +110,16 @@ public class RestApi extends HttpServlet
 				
 				if (request.getParameter("category_id")!=null)
 				{
-					Task[] ret = Task.getModel().findAll("task_id > ? AND EXISTS (SELECT * FROM "+Category.getTableName()+
+					Task[] ret = (Task[])Task.getModel().findAll("task_id > ? AND EXISTS (SELECT * FROM "+Category.getTableName()+
 										"WHERE category_id = ? AND task_id = task.id)", 
 										new Object[]{request.getParameter("task_id"), request.getParameter("task_id")}, 
-										new String[]{"integer", "integer"});
+										new String[]{"integer", "integer"}, null);
 					res.put("", Arrays.asList(ret));
 				}
 				else
 				{
 					// retrieve all
-					Task[] ret = Task.getModel().findAll("task_id > ?", new Object[]{request.getParameter("task_id")}, new String[]{"integer"}, null);
+					Task[] ret = (Task[])Task.getModel().findAll("task_id > ?", new Object[]{request.getParameter("task_id")}, new String[]{"integer"}, null);
 					res.put("", Arrays.asList(ret));
 				}
 				pw.println(res.toJSONString());
@@ -166,6 +166,8 @@ public class RestApi extends HttpServlet
 			StringBuilder not_query = new StringBuilder();
 			List<Object> param = new ArrayList<Object>();
 			List<String> paramTypes = new ArrayList<String>();
+			param.add(tags[tags.length-1]);
+			paramTypes.add("string");
 			for (int i=0;i<tags.length-1;++i)
 			{
 				not_query.append(" tag_name <> ? ");
@@ -177,7 +179,7 @@ public class RestApi extends HttpServlet
 				paramTypes.add("string");
 			}
 			
-			Tag[] ret = Tag.getModel().findAll(" tag_name LIKE '?%' "+not_query+" LIMIT 10");
+			Tag[] ret = (Tag[])Tag.getModel().findAll(" tag_name LIKE '?%' "+not_query+" LIMIT 10", param.toArray(), (String[])paramTypes.toArray(), null);
 			
 			JSONObject res = new JSONObject();
 			for (int i=0;i<ret.length;++i)
@@ -275,7 +277,7 @@ public class RestApi extends HttpServlet
 					Task[] tasks = (Task[])Task.getModel().findAll("id_kategori = ?", new Object[]{request.getParameter("category_id")}, new String[]{"string"}, null);
 					
 					SimpleDateFormat sdf = new SimpleDateFormat("j F Y");
-					Map<String, Object>[] maps = new HashMap<String, Object>[tasks.length];
+					Map<String, Object>[] maps = new HashMap[tasks.length];
 					for (int i=0;i<tasks.length;++i)
 					{
 						maps[i] = new HashMap<String, Object>();
@@ -315,7 +317,7 @@ public class RestApi extends HttpServlet
 																new Object[]{id, id, id, id}, new String[]{"integer", "integer", "integer", "integer"}, null);
 				
 				SimpleDateFormat sdf = new SimpleDateFormat("j F Y");
-				Map<String, Object>[] maps = new HashMap<String, Object>[tasks.length];
+				Map<String, Object>[] maps = new HashMap[tasks.length];
 				for (int i=0;i<tasks.length;++i)
 				{
 					maps[i] = new HashMap<String, Object>();
@@ -346,7 +348,7 @@ public class RestApi extends HttpServlet
 			// todo use prepared statement
 			String id_task = request.getParameter("id_task");
 			//$task = array();
-			Task task = Task.getModel().find("id_task = ? ", new Object[]{id_task}, new String[]{"integer"}, new String[]{"id_task", "nama_task", "status", "deadline"});
+			Task task = (Task)Task.getModel().find("id_task = ? ", new Object[]{id_task}, new String[]{"integer"}, new String[]{"id_task", "nama_task", "status", "deadline"});
 	
 			User[] users = task.getAssignee();
 			List<Map<String, Object>> temp = new ArrayList<Map<String,Object>>();
@@ -471,67 +473,73 @@ public class RestApi extends HttpServlet
 		{
 			if (("POST".equals(request.getMethod().toUpperCase())) && (request.getParameter("nama_kategori")!=null) && (request.getParameter("usernames_list")!=null))
 			{
-				PrintWriter pw = response.getWriter();
-				JSONObject res = new JSONObject();
-				
-				String nama_kategori = request.getParameter("nama_kategori");
-				int id_user = MainApp.currentUserId(session);
-				
-				Category category = new Category();
-				category.setNama_kategori(nama_kategori);
-				category.setId_user(id_user);
-				category.save();
-				
-				String[] usernames = request.getParameter("usernames_list").split(";");
-				String[] paramType = new String[usernames.length];
-				for (int i=0;i<usernames.length;++i)
+				try 
 				{
-					usernames[i] = usernames[i].trim();
-				}
-				if (usernames.length > 1)
-				{
-					StringBuilder query = new StringBuilder("username IN (");
+					PrintWriter pw = response.getWriter();
+					JSONObject res = new JSONObject();
+					
+					String nama_kategori = request.getParameter("nama_kategori");
+					int id_user = MainApp.currentUserId(session);
+					
+					Category category = new Category();
+					category.setNama_kategori(nama_kategori);
+					category.setId_user(id_user);
+					category.save();
+					
+					String[] usernames = request.getParameter("usernames_list").split(";");
+					String[] paramType = new String[usernames.length];
 					for (int i=0;i<usernames.length;++i)
 					{
-						query.append("?");
-						if (i!=usernames.length-1)
-						{
-							query.append(",");
-						}
-						paramType[i] = "string";
+						usernames[i] = usernames[i].trim();
 					}
-					query.append(")");
-					
-					User[] users = (User[])User.getModel().findAll(query, usernames, paramType, null);
-					Connection conn = DBConnection.getConnection();
-					for (User user : users)
+					if (usernames.length > 1)
 					{
-						PreparedStatement prep = conn.prepareStatement("INSERT INTO edit_kategori (id_user, id_katego) VALUES (?, ?)");
-						prep.setInt(1, user.getId_user());
-						prep.setInt(2, category.getId_kategori());
+						StringBuilder query = new StringBuilder("username IN (");
+						for (int i=0;i<usernames.length;++i)
+						{
+							query.append("?");
+							if (i!=usernames.length-1)
+							{
+								query.append(",");
+							}
+							paramType[i] = "string";
+						}
+						query.append(")");
+						
+						User[] users = (User[])User.getModel().findAll(query.toString(), usernames, paramType, null);
+						Connection conn = DBConnection.getConnection();
+						for (User user : users)
+						{
+							PreparedStatement prep = conn.prepareStatement("INSERT INTO edit_kategori (id_user, id_katego) VALUES (?, ?)");
+							prep.setInt(1, user.getId_user());
+							prep.setInt(2, category.getId_kategori());
+						}
 					}
-				}
-			
-				res.put("categoryID", category.getId_kategori());
-				res.put("categoryName", category.getNama_kategori());
 				
-				
-				Category[] raw = MainApp.currentUser(session).getCategories();
-				
-				List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
-				for (Category cat : raw)
-				{
-					Map<String, Object> map = new HashMap<String, Object>();
-					map.put("nama_kategori", cat.getNama_kategori());
-					map.put("id", cat.getId_kategori());
-					map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
-					map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
+					res.put("categoryID", category.getId_kategori());
+					res.put("categoryName", category.getNama_kategori());
 					
-					result.add(map);
+					
+					Category[] raw = MainApp.currentUser(session).getCategories();
+					
+					List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
+					for (Category cat : raw)
+					{
+						Map<String, Object> map = new HashMap<String, Object>();
+						map.put("nama_kategori", cat.getNama_kategori());
+						map.put("id", cat.getId_kategori());
+						map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
+						map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
+						
+						result.add(map);
+					}
+					res.put("categories", result);
+					
+					pw.println(res.toJSONString());
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				res.put("categories", result);
-				
-				pw.println(res.toJSONString());
 			}
 		}
 	}
@@ -552,7 +560,7 @@ public class RestApi extends HttpServlet
 				int id_kategori = Integer.parseInt(request.getParameter("category_id"));
 				boolean success = false;
 				
-				if (Category.getModel().find("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"}, null).getDeletable(MainApp.currentUserId(session)))
+				if (((Category)Category.getModel().find("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"}, null)).getDeletable(MainApp.currentUserId(session)))
 				{
 					if (Category.getModel().delete("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"})==1)
 					{
@@ -686,8 +694,7 @@ public class RestApi extends HttpServlet
 				param.add(users[i]);
 				paramTypes.add("string");
 			}
-			User[] ret = (User[])User.getModel().findAll(" username LIKE '?%' "+not_query+" LIMIT 10", param, paramTypes, new String[]{"id_user", "username"});
-			
+			User[] ret = (User[])User.getModel().findAll(" username LIKE '?%' "+not_query+" LIMIT 10", param.toArray(), (String[])paramTypes.toArray(), null);
 			JSONObject res = new JSONObject();
 			for (int i=0;i<ret.length;++i)
 			{
@@ -801,7 +808,7 @@ public class RestApi extends HttpServlet
 				List<String> suggestion = new ArrayList<String>();
 				if (("task".equals(type)) || (all))
 				{
-					Tasks[] tasks  = MainApp.currentUser(session).getTasksLike(q);
+					Task[] tasks  = MainApp.currentUser(session).getTasksLike(q);
 					for (Task task : tasks)
 					{
 						if (!suggestion.contains(task.getNama_task()))

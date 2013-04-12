@@ -123,7 +123,7 @@
 									<source src="upload/attachments/<%= attachment.getAttachment() %>" type="video/mp4">
 						<%		
 								}
-								else if ((atch[atch.length-1].toUpperCase().matches("JPG"))) || ("PNG".equals(atch[atch.length-1].toUpperCase())) || ("GIF".equals(atch[atch.length-1].toUpperCase())))
+								else if ((atch[atch.length-1].toUpperCase().matches("JPG")) || ("PNG".equals(atch[atch.length-1].toUpperCase())) || ("GIF".equals(atch[atch.length-1].toUpperCase())))
 								{
 						%>
 									<img class="atchmt" src="upload/attachments/<%= attachment.getAttachment() %>" alt="Task Attachment">
@@ -226,7 +226,7 @@
 							}
 							else
 							{
-								firsttimestamp = date_format3.format(new Date());'
+								firsttimestamp = date_format3.format(new Date());
 							}
 							String lasttimestamp = date_format3.format(new Date());
 							
@@ -241,7 +241,7 @@
 										out.println(date_format4.format(comment.getTimestamp()));
 										if (user.getId_user()==MainApp.currentUserId(session))
 										{
-											out.println("<a href=\"javascript:delete_comment("+comment.getId_komentar()+"")">DELETE</a>");
+											out.println("<a href=\"javascript:delete_comment("+comment.getId_komentar()+")>DELETE</a>");
 										}
 									out.println("</div>");
 									out.println("<header>");

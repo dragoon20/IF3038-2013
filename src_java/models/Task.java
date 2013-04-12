@@ -4,7 +4,6 @@
  */
 package models;
 
-import controllers.MainApp;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -85,6 +84,7 @@ public class Task extends DBSimpleRecord {
             
             return true;
         }
+        return false;
     }
     
     public boolean checkValidity() {

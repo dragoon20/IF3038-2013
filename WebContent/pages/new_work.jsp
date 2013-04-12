@@ -18,7 +18,7 @@
 		}
 	}
 	
-	Category cat = Category.getModel().find("id_kategori="+id);
+	Category cat = (Category)Category.getModel().find("id_kategori=?", new Object[]{id}, new String[]{"integer"}, null);
 	if ((cat==null) || (cat.getEditable(MainApp.currentUserId(session))))
 	{
 		// redirect to error page
