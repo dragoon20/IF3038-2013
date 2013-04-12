@@ -33,12 +33,14 @@ public class Tag extends DBSimpleRecord{
     	return "tag";
     }
     
-    public void save() {
-        
+    public boolean save() 
+    {
+        return true;
     }
     
-    public void checkValidity() {
-        
+    public boolean checkValidity() 
+    {
+        return true;
     }
     /**
      * @return the id_tag

@@ -39,12 +39,14 @@ public class Comment extends DBSimpleRecord{
         return "comment";
     }
     
-    public void save() {
-        
+    public boolean save() 
+    {
+        return true;
     }
     
-    public void checkValidity() {
-        
+    public boolean checkValidity() 
+    {
+        return true;
     }
     /**
      * @return the id_komentar

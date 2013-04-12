@@ -37,12 +37,14 @@ public class Category extends DBSimpleRecord{
     	return "kategori";
     }
     
-    public void save() {
-        
+    public boolean save() 
+    {
+        return true;
     }
     
-    public void checkValidity() {
-        
+    public boolean checkValidity() 
+    {
+        return true;
     }
     
     public int getId_kategori() {

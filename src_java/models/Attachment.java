@@ -21,12 +21,14 @@ public class Attachment extends DBSimpleRecord {
         return model;
     }
     
-    public void save () {
-        
+    public boolean save() 
+    {
+        return true;
     }
     
-    public void checkValidity() {
-        
+    public boolean checkValidity() 
+    {
+        return true;
     }
     
     @Override
