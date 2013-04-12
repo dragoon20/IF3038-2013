@@ -1,3 +1,4 @@
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="models.User"%>
 <%@page import="controllers.MainApp"%>
 <%
@@ -7,7 +8,7 @@
 	}
 
 	int id = MainApp.currentUserId(session);
-	User user = User.getModel().find("id_user = " + id, new String[]{"username", "email", "fullname", "avatar", "birthdate"});
+	User user = (User)User.getModel().find("id_user = ?", new Object[]{id}, new String[]{"integer"}, new String[]{"username", "email", "fullname", "avatar", "birthdate"});
 	
 	ArrayList<String> javascripts = new ArrayList<String>();
 	javascripts.add("edit_profile");

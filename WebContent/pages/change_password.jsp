@@ -7,7 +7,7 @@
 	}
 
 	int id = MainApp.currentUserId(session);
-	User user = User.getModel().find("id_user = " + id, new String[]{"username", "email", "fullname", "avatar", "birthdate"});
+	User user = (User)User.getModel().find("id_user = ? ", new Object[]{id}, new String[]{"integer"}, new String[]{"username", "email", "fullname", "avatar", "birthdate"});
 	
 	request.setAttribute("title", "MOA - Profile");
 	request.setAttribute("currentPage", "profile");

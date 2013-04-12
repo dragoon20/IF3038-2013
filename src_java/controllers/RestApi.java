@@ -473,67 +473,73 @@ public class RestApi extends HttpServlet
 		{
 			if (("POST".equals(request.getMethod().toUpperCase())) && (request.getParameter("nama_kategori")!=null) && (request.getParameter("usernames_list")!=null))
 			{
-				PrintWriter pw = response.getWriter();
-				JSONObject res = new JSONObject();
-				
-				String nama_kategori = request.getParameter("nama_kategori");
-				int id_user = MainApp.currentUserId(session);
-				
-				Category category = new Category();
-				category.setNama_kategori(nama_kategori);
-				category.setId_user(id_user);
-				category.save();
-				
-				String[] usernames = request.getParameter("usernames_list").split(";");
-				String[] paramType = new String[usernames.length];
-				for (int i=0;i<usernames.length;++i)
+				try 
 				{
-					usernames[i] = usernames[i].trim();
-				}
-				if (usernames.length > 1)
-				{
-					StringBuilder query = new StringBuilder("username IN (");
+					PrintWriter pw = response.getWriter();
+					JSONObject res = new JSONObject();
+					
+					String nama_kategori = request.getParameter("nama_kategori");
+					int id_user = MainApp.currentUserId(session);
+					
+					Category category = new Category();
+					category.setNama_kategori(nama_kategori);
+					category.setId_user(id_user);
+					category.save();
+					
+					String[] usernames = request.getParameter("usernames_list").split(";");
+					String[] paramType = new String[usernames.length];
 					for (int i=0;i<usernames.length;++i)
 					{
-						query.append("?");
-						if (i!=usernames.length-1)
-						{
-							query.append(",");
-						}
-						paramType[i] = "string";
+						usernames[i] = usernames[i].trim();
 					}
-					query.append(")");
-					
-					User[] users = (User[])User.getModel().findAll(query.toString(), usernames, paramType, null);
-					Connection conn = DBConnection.getConnection();
-					for (User user : users)
+					if (usernames.length > 1)
 					{
-						PreparedStatement prep = conn.prepareStatement("INSERT INTO edit_kategori (id_user, id_katego) VALUES (?, ?)");
-						prep.setInt(1, user.getId_user());
-						prep.setInt(2, category.getId_kategori());
+						StringBuilder query = new StringBuilder("username IN (");
+						for (int i=0;i<usernames.length;++i)
+						{
+							query.append("?");
+							if (i!=usernames.length-1)
+							{
+								query.append(",");
+							}
+							paramType[i] = "string";
+						}
+						query.append(")");
+						
+						User[] users = (User[])User.getModel().findAll(query.toString(), usernames, paramType, null);
+						Connection conn = DBConnection.getConnection();
+						for (User user : users)
+						{
+							PreparedStatement prep = conn.prepareStatement("INSERT INTO edit_kategori (id_user, id_katego) VALUES (?, ?)");
+							prep.setInt(1, user.getId_user());
+							prep.setInt(2, category.getId_kategori());
+						}
 					}
-				}
-			
-				res.put("categoryID", category.getId_kategori());
-				res.put("categoryName", category.getNama_kategori());
 				
-				
-				Category[] raw = MainApp.currentUser(session).getCategories();
-				
-				List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
-				for (Category cat : raw)
-				{
-					Map<String, Object> map = new HashMap<String, Object>();
-					map.put("nama_kategori", cat.getNama_kategori());
-					map.put("id", cat.getId_kategori());
-					map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
-					map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
+					res.put("categoryID", category.getId_kategori());
+					res.put("categoryName", category.getNama_kategori());
 					
-					result.add(map);
+					
+					Category[] raw = MainApp.currentUser(session).getCategories();
+					
+					List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
+					for (Category cat : raw)
+					{
+						Map<String, Object> map = new HashMap<String, Object>();
+						map.put("nama_kategori", cat.getNama_kategori());
+						map.put("id", cat.getId_kategori());
+						map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
+						map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
+						
+						result.add(map);
+					}
+					res.put("categories", result);
+					
+					pw.println(res.toJSONString());
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				res.put("categories", result);
-				
-				pw.println(res.toJSONString());
 			}
 		}
 	}
@@ -554,7 +560,7 @@ public class RestApi extends HttpServlet
 				int id_kategori = Integer.parseInt(request.getParameter("category_id"));
 				boolean success = false;
 				
-				if (Category.getModel().find("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"}, null).getDeletable(MainApp.currentUserId(session)))
+				if (((Category)Category.getModel().find("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"}, null)).getDeletable(MainApp.currentUserId(session)))
 				{
 					if (Category.getModel().delete("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"})==1)
 					{
@@ -802,7 +808,7 @@ public class RestApi extends HttpServlet
 				List<String> suggestion = new ArrayList<String>();
 				if (("task".equals(type)) || (all))
 				{
-					Tasks[] tasks  = MainApp.currentUser(session).getTasksLike(q);
+					Task[] tasks  = MainApp.currentUser(session).getTasksLike(q);
 					for (Task task : tasks)
 					{
 						if (!suggestion.contains(task.getNama_task()))

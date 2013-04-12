@@ -4,7 +4,6 @@
  */
 package models;
 
-import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -95,6 +94,64 @@ public class User extends DBSimpleRecord
         return false;
     }
     
+    public Category[] getCategories()
+    {
+		return (Category[])Category.getModel().findAll(
+			"(id_user='?' OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user='?') "+
+			"OR id_kategori IN (SELECT id_kategori FROM "+Task.getTableName()+" AS t LEFT OUTER JOIN assign AS a "+
+			"ON t.id_task=a.id_task WHERE t.id_user = '?' OR a.id_user = '?' ))", 
+			new Object[]{getId_user(), getId_user(), getId_user(), getId_user()}, 
+			new String[]{"integer", "integer", "integer", "integer"}, null);
+    }
+    
+    public Task[] getTasks()
+    {
+    	// TODO Add this
+    	return (Task[])Task.getModel().findAll("(id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+
+    			" WHERE id_user='?' OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user='?') "+
+    			"OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
+    			"ON t.id_task=a.id_task WHERE t.id_user = '?' OR a.id_user = '?' )))", 
+    			new Object[]{getId_user(), getId_user(), getId_user(), getId_user()}, 
+    			new String[]{"integer", "integer", "integer", "integer"}, null);
+    }
+    
+    public Task[] getTasksLike(String q)
+    {
+    	q = q.replaceAll(" ", "%");
+    	
+    	return (Task[])Task.getModel().findAll("(id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+
+    			" WHERE id_user='?' OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user='?') "+
+    			"OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
+    			"ON t.id_task=a.id_task WHERE t.id_user = '?' OR a.id_user = '?' ))) AND nama_task LIKE '%?%'", 
+    			new Object[]{getId_user(), getId_user(), getId_user(), getId_user(), q}, 
+    			new String[]{"integer", "integer", "integer", "integer", "string"}, null);
+    }
+    
+    public Category[] getCategoriesLike(String q)
+    {
+    	q = q.replaceAll(" ", "%");
+    	
+    	return (Category[])Category.getModel().findAll(
+    			"(id_user='?' OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user='?') "+
+    			"OR id_kategori IN (SELECT id_kategori FROM "+Task.getTableName()+" AS t LEFT OUTER JOIN assign AS a "+
+    			"ON t.id_task=a.id_task WHERE t.id_user = '?' OR a.id_user = '?' )) AND nama_kategori LIKE '%?%'", 
+    			new Object[]{getId_user(), getId_user(), getId_user(), getId_user(), q}, 
+    			new String[]{"integer", "integer", "integer", "integer", "string"}, null);
+    }
+    
+    public User[] findAllLike(String q)
+    {
+    	q = q.replaceAll(" ", "%");
+    	
+    	return (User[])User.getModel().findAll("username LIKE '?' OR fullname LIKE '?' OR email LIKE '?' OR birthdate LIKE '?' LIMIT 0, 10", 
+    					new Object[]{q, q, q, q}, new String[]{"string", "string", "string", "string"}, null);
+    }
+	
+	public User findByUsername(String username)
+	{
+		return (User)User.getModel().find("username = ?", new Object[]{username}, new String[]{"string"}, null);
+	}
+	    
     /**
      * @return the id_user
      */

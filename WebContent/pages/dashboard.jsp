@@ -32,7 +32,7 @@
 	Category currentCat;
 	if (cat != 0) 
 	{
-		currentCat = Category.getModel().find("id_kategori="+cat);
+		currentCat = (Category)Category.getModel().find("id_kategori = ?", new Object[]{cat}, new String[]{"integer"}, null);
 		if (currentCat!=null)
 		{
 			narrowQ = "AND id_kategori=" + cat;
@@ -45,9 +45,9 @@
 		}*/
 	}
 
-	Task[] tasks = MainApp.currentUser(session).getTasks("");
-	Task[] todo = MainApp.currentUser(session).getTasks(todoQ . narrowQ);
-	Task[] done = MainApp.currentUser(session).getTasks(doneQ . narrowQ);
+	Task[] tasks = MainApp.currentUser(session).getTasks();
+	Task[] todo = MainApp.currentUser(session).getTasks(todoQ + narrowQ);
+	Task[] done = MainApp.currentUser(session).getTasks(doneQ + narrowQ);
 
 	Category[] categories = ((User)session.getAttribute("currentUser")).getCategories();
 
