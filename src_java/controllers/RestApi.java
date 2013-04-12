@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+
+
 import net.sf.json.JSONObject;
 
 import models.Category;
@@ -724,4 +726,10 @@ public class RestApi extends HttpServlet
 
 		return $suggestions;*/
 	}
+        
+        public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+        {
+            PrintWriter pw = response.getWriter();
+            pw.println("tes");
+        }
 }
