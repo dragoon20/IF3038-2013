@@ -39,14 +39,17 @@ public class Task extends DBSimpleRecord {
     	return "task";
     }
     
-    public boolean save() 
+    public static String getTableName() 
     {
-        return true;
+    	return "task";
     }
     
-    public boolean checkValidity() 
-    {
-        return true;
+    public void save() {
+        
+    }
+    
+    public void checkValidity() {
+        
     }
     /**
      * @return the id_task

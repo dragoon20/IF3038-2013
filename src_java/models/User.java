@@ -35,7 +35,7 @@ public class User extends DBSimpleRecord
     }
     
     @Override
-    protected  String GetClassName() 
+    protected String GetClassName() 
     {
         return "models.User";
     }

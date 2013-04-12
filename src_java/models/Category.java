@@ -26,7 +26,7 @@ public class Category extends DBSimpleRecord{
     }
     
     @Override
-    protected  String GetClassName() 
+    protected String GetClassName() 
     {
         return "models.Category";
     }
@@ -37,14 +37,17 @@ public class Category extends DBSimpleRecord{
     	return "kategori";
     }
     
-    public boolean save() 
+    public static String getTableName() 
     {
-        return true;
+    	return "kategori";
     }
     
-    public boolean checkValidity() 
-    {
-        return true;
+    public void save() {
+        
+    }
+    
+    public void checkValidity() {
+        
     }
     
     public int getId_kategori() {
