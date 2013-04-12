@@ -1,9 +1,13 @@
 package controllers;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -11,14 +15,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
+import models.DBSimpleRecord;
 import models.User;
 
 /**
  * Servlet implementation class MainApp
  */
 @WebServlet("/MainApp")
-public class MainApp extends HttpServlet {
+public class MainApp extends HttpServlet 
+{
 	private static final long serialVersionUID = 1L;
 	
 	public static final String appName = "MOA";
@@ -45,6 +52,11 @@ public class MainApp extends HttpServlet {
     public static User currentUser(HttpSession session)
     {
     	return ((User)session.getAttribute("current_user"));
+    }
+    
+    public static String fullPath(HttpSession session)
+    {
+    	return ((String)session.getAttribute("full_path"));
     }
     
     /**
@@ -124,7 +136,47 @@ public class MainApp extends HttpServlet {
 	
 	public void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		// TODO register logic
+		if ("POST".equals(request.getMethod().toUpperCase()))
+		{
+			User user = new User();
+			user.addData(request.getParameterMap());
+			Part avatar = request.getPart("avatar");
+			user.setAvatar(avatar.getName());
+			boolean temperror = user.checkValidity();
+			
+			if (temperror)
+			{
+				// TODO print error screen
+			}
+			else
+			{
+				String temp = avatar.getName().split(".")[avatar.getName().split(".").length-1];
+				String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+temp;
+				user.setAvatar(new_filename);
+				if (user.save())
+				{
+					InputStream in = avatar.getInputStream();
+					FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())));
+					
+					int read = 0;
+					byte[] bytes = new byte[1024];
+					while ((read = in.read(bytes)) != -1)
+					{
+						out.write(bytes, 0, read);
+					}
+					out.close();
+					response.sendRedirect("dashboard");
+				}
+				else
+				{
+					// TODO print error screen
+				}
+			}
+		}
+		else
+		{
+			// TODO print error screen
+		}
 	}
 	
 	public void new_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -154,11 +206,8 @@ public class MainApp extends HttpServlet {
 	
 	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		User user = (User) User.getModel().find("", null);
 		PrintWriter pw = response.getWriter();
-		pw.println(user.getUsername());
-		pw.println(user.getBirthdate());
-		pw.println(user.getId_user());
+		pw.println(request.getServletContext().getRealPath("/"));
 		pw.close();
 	}
 }

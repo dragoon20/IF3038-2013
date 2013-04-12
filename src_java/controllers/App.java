@@ -43,6 +43,7 @@ public class App implements Filter {
 		if (sess.getAttribute("base_url")==null)
 		{
 			sess.setAttribute("base_url", req.getRequestURL().substring(0, req.getRequestURL().lastIndexOf("/")+1));
+			sess.setAttribute("full_path", request.getServletContext().getRealPath("/"));
 		}
 				
 		String path = req.getRequestURI().replaceFirst(req.getContextPath(), "");

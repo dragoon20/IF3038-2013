@@ -31,9 +31,9 @@ form_login.onsubmit = function(e)
 				document.getElementById("login_password").value = "";
 			}
 		}
-	}
+	};
 	request.open("POST", "api/login", true);
 	request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	request.send(data);
 	return false;
-}
+};

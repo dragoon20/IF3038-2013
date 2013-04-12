@@ -41,12 +41,14 @@ public class User extends DBSimpleRecord
     	return "user";
     }
     
-    public void save() {
-        
+    public boolean save() 
+    {
+        return true;
     }
     
-    public void checkValidity() {
-        
+    public boolean checkValidity() 
+    {
+        return true;
     }
     
     /**

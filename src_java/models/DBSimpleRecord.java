@@ -14,9 +14,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  *
@@ -50,6 +51,7 @@ public abstract class DBSimpleRecord
 			{
 				formatter.format("%02x", b);
 			}
+			formatter.close();
 			return formatter.toString();
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
@@ -69,6 +71,14 @@ public abstract class DBSimpleRecord
     public void putData(String key, Object value)
     {
     	data.put(key, value);
+    }
+    
+    public void addData(Map<String, String[]> map)
+    {
+    	for (Entry<String, String[]> entry : map.entrySet())
+    	{
+    		data.put(entry.getKey(), entry.getValue().toString());
+    	}
     }
     
     public boolean isEmpty()
