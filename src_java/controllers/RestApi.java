@@ -18,9 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-
-
-import net.sf.json.JSONObject;
+import org.json.simple.JSONObject;
 
 import models.Category;
 import models.Comment;
@@ -199,28 +197,25 @@ public class RestApi extends HttpServlet
 	{
 		if ("POST".equals(request.getMethod().toUpperCase()))
 		{
-			// todo use prepared statement
+			PrintWriter pw = response.getWriter();
+			JSONObject ret = new JSONObject();
+			
 			String id_task = request.getParameter("task_id");
 			boolean success = false;
-	
-			/*if ((Task::model()->find("id_task=".$id_task)->getDeletable($this->app->currentUserId))&& ($this->app->loggedIn))
+			if ((Task.getModel().find("id_task = ?", new Object[]{id_task}, new String[]{"string"}, null)).getDeletable(MainApp.currentUserId(session)) && (MainApp.LoggedIn(session)))
 			{
-				if (Task::model()->delete("id_task=".$id_task)==1)
+				if (Task.getModel().delete("id_task = ?", new Object[]{id_task}, new String[]{"string"})==1)
 				{
-					// delete was success
-					success = true;
+					ret.put("success", true);
 				}
-				else {
-					success = false;
+				else
+				{
+					ret.put("success", false);
 				}
-			}*/
+			}
+			ret.put("taskID", id_task);
+			pw.println(ret.toString());
 		}
-
-		// print result
-		/*return array(
-			'success' => $success,
-			'taskID' => $id_task
-		);*/
 	}
 	
 	/**
@@ -321,14 +316,23 @@ public class RestApi extends HttpServlet
 
 	public void get_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if (request.getParameter("id_task")!=null)
+		if ((MainApp.LoggedIn(session)) && (request.getParameter("id_task")!=null))
 		{
 			// todo use prepared statement
 			String id_task = request.getParameter("id_task");
 			//$task = array();
+			Task task = Task.getModel().find("id_task = ? ", new Object[]{id_task}, new String[]{"integer"}, new String[]{"id_task", "nama_task", "status", "deadline"});
 	
-			if (MainApp.LoggedIn(session))
+			User[] users = task.getAssignee();
+			List<Map<String, Object>> temp = new ArrayList<Map<String,Object>>();
+			for (User user : users)
 			{
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("username", user.getUsername());
+				map.put("id_user", user.getId_user());
+				temp.add(map);
+			}
+			
 				/*$task = Task::model()->find("id_task=".$_GET['id_task'], array("id_task","nama_task","status","deadline"));
 	
 				$users = $task->getAssignee();
@@ -349,8 +353,6 @@ public class RestApi extends HttpServlet
 					$temp[] = $tag->tag_name;
 				}
 				$task->tag = $temp;*/
-			}
-			
 			// print result
 			//return $task->data;
 		}
@@ -666,13 +668,13 @@ public class RestApi extends HttpServlet
 				errors.add("Data-data yang dimasukkan tidak valid.");
 			}
 			
-			if (User.getModel().find("username = ? OR email = ? ", new Object[]{request.getParameter("username"), request.getParameter("email")}, new String[]{"string", "string"}, null).isEmpty())
+			if (!User.getModel().find("username = ? OR email = ? ", new Object[]{request.getParameter("username"), request.getParameter("email")}, new String[]{"string", "string"}, null).isEmpty())
 			{
 				status = "fail";
 				errors.add("Username/email sudah digunakan.");
 			}
 			ret.put("status", status);
-			ret.put("errors", errors.toArray());
+			ret.put("errors", errors);
 		}
 		else
 		{
@@ -680,7 +682,7 @@ public class RestApi extends HttpServlet
 		}
 
 		PrintWriter pw = response.getWriter();
-		pw.println(ret.toString());
+		pw.println(ret.toJSONString());
 	}
 
 	/*** ----- END OF USER MODULE -----***/	

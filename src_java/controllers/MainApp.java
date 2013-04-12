@@ -104,6 +104,39 @@ public class MainApp extends HttpServlet
 			e.printStackTrace();
 		}	
 	}
+	
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String page = ("".equals((String)request.getAttribute("page")))? "index" : (String)request.getAttribute("page");
+		Class<?>[] param_handler = new Class[2];
+		param_handler[0] = HttpServletRequest.class;
+		param_handler[1] = HttpServletResponse.class;
+		
+		try {
+			Method method;
+			method = this.getClass().getMethod(page, param_handler);				
+			method.invoke(this, request, response);			
+		} catch (NoSuchMethodException e) {
+			// TODO Redirect to error page
+			System.out.println("-----------------");
+			System.out.println(page);
+			System.out.println("-----------------");
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+	}
 
 	public void index(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
@@ -147,22 +180,51 @@ public class MainApp extends HttpServlet
 	
 	public void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if (("POST".equals(request.getMethod().toUpperCase())) && (request.getPart("avatar")!=null))
+		if ("POST".equals(request.getMethod().toUpperCase()))
 		{
 			User user = new User();
-			user.addData(request.getParameterMap());
-			Part avatar = request.getPart("avatar");
-			user.setAvatar(avatar.getName());
+			
+			FileItem avatar = null;
+			boolean check = false;
+			FileItemFactory factory = new DiskFileItemFactory();
+			ServletFileUpload upload = new ServletFileUpload(factory);
+			List<FileItem> items = null;
+			try
+			{
+				items = upload.parseRequest(request);
+			}
+			catch (FileUploadException e)
+			{
+				e.printStackTrace();
+			}
+			for (FileItem fi : items)
+			{
+				if (fi.isFormField())
+				{
+					user.putData(fi.getFieldName(), fi.getString());
+				}
+				else
+				{
+					if ("avatar".equals(fi.getFieldName()))
+					{
+						check = true;
+						user.setAvatar(fi.getName());
+						avatar = fi;
+					}
+				}
+			}
+			
 			boolean temperror = user.checkValidity();
 			
-			if (temperror)
+			if ((temperror) || (!check))
 			{
 				// TODO print error screen
+				System.out.println("error1");
 			}
 			else
 			{
-				String extension = avatar.getName().split(".")[avatar.getName().split(".").length-1];
-				String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+extension;
+				String extension = avatar.getName().split("\\.")[avatar.getName().split("\\.").length-1];
+				String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
 				user.setAvatar(new_filename);
 				if (user.save())
 				{
@@ -176,17 +238,19 @@ public class MainApp extends HttpServlet
 						out.write(bytes, 0, read);
 					}
 					out.close();
-					response.sendRedirect("dashboard");
+					//response.sendRedirect("dashboard");
 				}
 				else
 				{
 					// TODO print error screen
+					System.out.println("error2");
 				}
 			}
 		}
 		else
 		{
 			// TODO print error screen
+			System.out.println("error3");
 		}
 	}
 	

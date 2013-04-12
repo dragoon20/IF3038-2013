@@ -49,25 +49,34 @@ public class User extends DBSimpleRecord
     public boolean save() 
     {
         // check same username or email
-        if (this.data.containsKey("id_user"))
+        if (!this.data.containsKey("id_user"))
         {
             // new user
-            if ((User.getModel().find("username = ?",new Object[] {this.data.containsKey("username")}, new String[]{"integer"}, null)).isEmpty())
+            if ((User.getModel().find("username = ?",new Object[] {this.data.get("username")}, new String[]{"string"}, null)).isEmpty())
             {
                 try {
                     PreparedStatement statement = connection.prepareStatement
                             (
                                 "INSERT INTO `"+ User.getModel().GetTableName()+"` (username, email, fullname, avatar, birthdate, password) VALUES ('" + 
-                                this.data.containsKey("username") + "','" +
-                                this.data.containsKey("email") + "','" +
-                                this.data.containsKey("fullname") + "','" +
-                                this.data.containsKey("avatar") + "','" +
-                                this.data.containsKey("birthdate") + "','" +
-                                this.data.containsKey("password") + "'"
+                                getUsername() + "','" +
+                                getEmail() + "','" +
+                                getFullname() + "','" +
+                                getAvatar() + "','" +
+                                getBirthdate() + "','" +
+                                getPassword() + "')"
                             );
                     statement.executeUpdate();
                     //INSERT INTO `progin_439_13510007`.`user` (`id_user`, `username`, `email`, `fullname`, `avatar`, `birthdate`, `password`) VALUES ('1', 'a', '2', 'a', 'a', '2013-04-02', '1');
                 } catch (SQLException ex) {
+                	System.out.println("----------------------------------------------------------");
+                	System.out.println("INSERT INTO `"+ User.getModel().GetTableName()+"` (username, email, fullname, avatar, birthdate, password) VALUES ('" + 
+                            getUsername() + "','" +
+                            getEmail() + "','" +
+                            getFullname() + "','" +
+                            getAvatar() + "','" +
+                            getBirthdate() + "','" +
+                            getPassword() + "')");
+                	System.out.println("----------------------------------------------------------");
                     Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 return true;
@@ -85,7 +94,7 @@ public class User extends DBSimpleRecord
     
     public boolean checkValidity() 
     {
-        return true;
+        return false;
     }
     
     /**
@@ -171,9 +180,9 @@ public class User extends DBSimpleRecord
     /**
      * @return the birthdate
      */
-    public Date getBirthdate() 
+    public String getBirthdate() 
     {
-    	return ((Date)data.get("birthdate"));
+    	return ((String)data.get("birthdate"));
     }
 
     /**

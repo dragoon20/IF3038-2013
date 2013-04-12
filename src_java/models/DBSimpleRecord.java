@@ -41,6 +41,7 @@ public abstract class DBSimpleRecord
     
     public static String MD5(String input)
     {
+    	String result = "";
     	try {
     		MessageDigest MD5 = MessageDigest.getInstance("MD5");
 			DigestInputStream dis = new DigestInputStream(new ByteArrayInputStream(input.getBytes("UTF-8")), MD5);
@@ -53,8 +54,8 @@ public abstract class DBSimpleRecord
 			{
 				formatter.format("%02x", b);
 			}
+			result = formatter.toString();
 			formatter.close();
-			return formatter.toString();
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -68,6 +69,7 @@ public abstract class DBSimpleRecord
 			e.printStackTrace();
 			return "";
 		}
+    	return result;
     }
     
     public void putData(String key, Object value)
