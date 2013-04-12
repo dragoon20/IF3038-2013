@@ -7,6 +7,7 @@ package models;
 import controllers.MainApp;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,21 +54,35 @@ public class Task extends DBSimpleRecord {
     {
         // TIDAK MENGGUNAKAN USER ID, USER ID HARUS DITANGANI DI LUAR
         // check task name
+        int affected_row=0;
+        ResultSet generatedkeys = null; 
         if (!this.data.containsKey(this))
         {
             try {
                 PreparedStatement statement = connection.prepareStatement
-                ("INSERT INTO `"+ Task.getModel().GetTableName()+"` (id_task, nama_task, status, deadline, id_kategori) VALUES (?, ?, ?, ?, ?)");
+                ("INSERT INTO `"+ Task.getModel().GetTableName()+"` (nama_task, deadline, id_kategori) VALUES (?, ?, ?)");
                 // Parameters start with 1
-                statement.setInt(1, getId_task());
-                statement.setString(2, getNama_task());
-                statement.setBoolean(3, isStatus());
-                statement.setDate(4, getDeadline());
-                statement.setInt(5, getId_kategori());
-                statement.executeUpdate();
+                statement.setString(1, getNama_task());
+                statement.setDate(2, getDeadline());
+                statement.setInt(3, getId_kategori());
+                affected_row = statement.executeUpdate();
+                if (affected_row ==0) {
+                    throw new SQLException("Creating user failed, no rows affected");
+                }
+                
+                generatedkeys = statement.getGeneratedKeys();
+                // get generated Id from last SQL Execution
+                if (generatedkeys.next()) {
+                    PreparedStatement statement0 = connection.prepareStatement
+                    ("INSERT INTO `assign` (id_user, id_task) VALUES (?,?)");
+                    statement0.setInt(1, affected_row);
+                    statement0.setInt(2, (int) generatedkeys.getLong(1));
+                }
+                
             } catch (SQLException ex) {
                 Logger.getLogger(Task.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
             return true;
         }
     }
