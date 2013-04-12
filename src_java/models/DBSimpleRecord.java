@@ -101,10 +101,10 @@ public abstract class DBSimpleRecord
     {
     	try
     	{
-                Class<?> c = Class.forName(GetClassName());
-		DBSimpleRecord result = (DBSimpleRecord)c.newInstance();
+            Class<?> c = Class.forName(GetClassName());
+            DBSimpleRecord result = (DBSimpleRecord)c.newInstance();
 
-		if (query != "")
+			if (query != "")
 	        {
 	            query = " WHERE "+query;
 	        }

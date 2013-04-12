@@ -229,7 +229,7 @@ public class RestApi extends HttpServlet
 			
 			String id_task = request.getParameter("task_id");
 			boolean success = false;
-			if ((Task.getModel().find("id_task = ?", new Object[]{id_task}, new String[]{"string"}, null)).getDeletable(MainApp.currentUserId(session)) && (MainApp.LoggedIn(session)))
+			if (((Task)(Task.getModel().find("id_task = ?", new Object[]{id_task}, new String[]{"string"}, null))).getDeletable(MainApp.currentUserId(session)) && (MainApp.LoggedIn(session)))
 			{
 				if (Task.getModel().delete("id_task = ?", new Object[]{id_task}, new String[]{"string"})==1)
 				{
@@ -603,7 +603,7 @@ public class RestApi extends HttpServlet
 			PrintWriter pw = response.getWriter();
 			JSONObject ret = new JSONObject();
 			
-			Comment[] comments = Comment.getLatest(request.getParameter("id_task"), request.getParameter("timestamp"));
+			Comment[] comments = Comment.getModel().getLatest(Integer.parseInt(request.getParameter("id_task")), request.getParameter("timestamp"));
 			
 			int i = 0;
 			for (Comment c : comments)

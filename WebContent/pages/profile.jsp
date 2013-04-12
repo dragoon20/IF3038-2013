@@ -20,7 +20,7 @@
 		{
 		}
 	}
-	User user = (User)User.getModel().find("id_user = "+id, new String[]{"id_user", "username", "email", "fullname", "avatar", "birthdate"});
+	User user = (User)User.getModel().find("id_user = '?'", new Object[]{id}, new String[]{"integer"}, new String[]{"id_user", "username", "email", "fullname", "avatar", "birthdate"});
 	Task[] tasks = user.getAssignedTasks();
 
 	request.setAttribute("title", "MOA - Profile");
@@ -95,7 +95,7 @@
 								<p class="tags">
 									<span class="detail-label">Tag:</span>
 									<%
-										//Tag[] tags = task.getTags();
+										Tag[] tags = task.getTags();
 										for (Tag tag : tags)
 										{
 											out.println("<span class=\"tag\">" + tag.getTag_name() + "</span>");

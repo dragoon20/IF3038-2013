@@ -8,6 +8,9 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -90,6 +93,49 @@ public class Task extends DBSimpleRecord {
     public boolean checkValidity() {
         return true;
     }
+    
+    public Tag[] getTags() 
+	{
+    	return (Tag[])Tag.getModel().findAll("id_tag IN (SELECT id_tag FROM have_tags WHERE id_task = '?')", new Object[]{getId_task()}, new String[]{"integer"}, null);
+	}
+	
+	public Category getCategory()
+	{
+		return (Category)Category.getModel().find("id_kategori = '?'", new Object[]{getId_kategori()}, new String[]{"integer"}, null);
+	}
+	
+	public Attachment[] getAttachment()
+	{
+		return (Attachment[])Attachment.getModel().findAll("id_task = '?'", new Object[]{getId_task()}, new String[]{"integer"}, null);
+	}
+	
+	public User[] getAssignee()
+	{
+		return (User[])User.getModel().findAll("id_user IN (SELECT id_user FROM assign WHERE id_task = '?')", new Object[]{getId_task()}, new String[]{"integer"}, new String[]{"id_user", "username"});
+	}
+	
+	public Comment[] getComment()
+	{
+		List<DBSimpleRecord> list = Arrays.asList(Comment.getModel().findAll("id_task = '?' ORDER BY timestamp DESC LIMIT 10", new Object[]{getId_task()}, new String[]{"integer"}, null));
+		Collections.reverse(list);
+		return (Comment[])list.toArray();
+	}
+	
+	public int getTotalComment()
+	{
+		return Comment.getModel().findAll("id_task = '?'", new Object[]{getId_task()}, new String[]{"integer"}, null).length;
+	}
+
+	public boolean getEditable(int id_user)
+	{
+		return !User.getModel().find("id_user IN (SELECT id_user FROM assign WHERE id_task='?' AND id_user='?')", new Object[]{getId_task(), id_user}, new String[]{"integer", "integer"}, null).isEmpty();
+	}
+	
+	public boolean getDeletable(int id_user)
+	{
+		return (id_user == getId_user());
+	}
+    
     /**
      * @return the id_task
      */

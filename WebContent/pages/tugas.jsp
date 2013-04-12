@@ -12,14 +12,14 @@
 		response.sendRedirect("index");
 	}
 
-	Task task;
-	User[] users;
-	Tag[] tags;
-	Attachment[] attachments;
-	Comment[] comments;
+	Task task = null;
+	User[] users = null;
+	Tag[] tags = null;
+	Attachment[] attachments = null;
+	Comment[] comments = null;
 	if (request.getParameter("id")!=null)
 	{
-		task = Task.getModel().find("id_task = " + (int)request.getParameter("id"));
+		task = (Task)Task.getModel().find("id_task = '?'", new Object[]{request.getParameter("id")}, new String[]{"integer"}, null);
 		if (task==null)
 		{
 			// redirect to error page

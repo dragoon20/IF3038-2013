@@ -45,6 +45,11 @@ public class User extends DBSimpleRecord
     	return "user";
     }
     
+    public static String getTableName() 
+    {
+    	return "user";
+    }
+    
     public boolean save() 
     {
         // check same username or email
@@ -94,6 +99,16 @@ public class User extends DBSimpleRecord
         return false;
     }
     
+    public Task[] getCreatedTasks()
+    {
+    	return (Task[])Task.getModel().findAll("id_task IN (SELECT id_task FROM have_task WHERE id_user='?')", new Object[]{getId_user()}, new String[]{"integer"}, null);
+    }
+    
+    public Task[] getAssignedTasks()
+    {
+    	return (Task[])Task.getModel().findAll("id_task IN (SELECT id_task FROM assign WHERE id_user='?') OR id_user='?'", new Object[]{getId_user(), getId_user()}, new String[]{"integer", "integer"}, null);
+    }
+        
     public Category[] getCategories()
     {
 		return (Category[])Category.getModel().findAll(

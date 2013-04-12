@@ -4,9 +4,14 @@
  */
 package models;
 
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +48,11 @@ public class Comment extends DBSimpleRecord{
         return "comment";
     }
     
+    public static String getTableName()
+    {
+        return "comment";
+    }
+    
     public boolean save() 
     {
         try {
@@ -64,6 +74,91 @@ public class Comment extends DBSimpleRecord{
     {
         return true;
     }
+    
+    public User getUser()
+	{
+    	return (User)User.getModel().find("id_user = '?'", new Object[]{getId_user()}, new String[]{"integer"}, new String[]{"id_user", "username", "fullname", "avatar"});
+	}
+	
+	public Task getTask()
+	{
+		return (Task)Task.getModel().find("id_task = '?'", new Object[]{getId_task()}, new String[]{"integer"}, null);
+	}
+    
+    public Comment[] getLatest(int id_task, String timestamp)
+    {
+		try 
+		{
+	    	Connection conn = DBConnection.getConnection();
+	    	PreparedStatement prep = conn.prepareStatement("SELECT id_komentar, timestamp, komentar, c.id_user, username, fullname, avatar"+
+										" FROM "+Comment.getTableName()+" as c INNER JOIN "+User.getTableName()+" as u "+
+										" ON c.id_user=u.id_user WHERE id_task = '?' AND timestamp > '?' ORDER BY timestamp");
+			prep.setInt(1, id_task);
+	    	prep.setString(2, timestamp);
+	    	
+	    	List<Comment> result = new ArrayList<Comment>();
+	    	ResultSet rs = prep.executeQuery();
+	    	if (rs.next())
+	    	{
+	    		ResultSetMetaData metadata = rs.getMetaData();
+	    		int column_count = metadata.getColumnCount();
+	    		
+	    		do
+	    		{
+	    			Comment c = new Comment();
+	    			for (int i=1;i<=column_count;++i)
+	    			{
+	    				String label = metadata.getColumnLabel(i);
+	    				c.putData(label, rs.getObject(i));
+	    			}
+	        		result.add(c);
+	    		}while (rs.next());
+	    	}
+	    	return (Comment[])result.toArray();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+    }
+    
+    public Comment[] getOlder(int id_task, String timestamp)
+    {
+    	try 
+		{
+	    	Connection conn = DBConnection.getConnection();
+	    	PreparedStatement prep = conn.prepareStatement("SELECT id_komentar, timestamp, komentar, c.id_user, username, fullname, avatar"+
+	    							" FROM "+Comment.getTableName()+" as c INNER JOIN "+User.getTableName()+" as u "+
+	    							" ON c.id_user=u.id_user WHERE id_task = '?' AND timestamp < '?' ORDER BY timestamp DESC LIMIT 10");
+	    	prep.setInt(1, id_task);
+	    	prep.setString(2, timestamp);
+	    	
+	    	List<Comment> result = new ArrayList<Comment>();
+	    	ResultSet rs = prep.executeQuery();
+	    	if (rs.next())
+	    	{
+	    		ResultSetMetaData metadata = rs.getMetaData();
+	    		int column_count = metadata.getColumnCount();
+	    		
+	    		do
+	    		{
+	    			Comment c = new Comment();
+	    			for (int i=1;i<=column_count;++i)
+	    			{
+	    				String label = metadata.getColumnLabel(i);
+	    				c.putData(label, rs.getObject(i));
+	    			}
+	        		result.add(c);
+	    		}while (rs.next());
+	    	}
+	    	return (Comment[])result.toArray();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+    }
+
     /**
      * @return the id_komentar
      */
@@ -81,14 +176,14 @@ public class Comment extends DBSimpleRecord{
     /**
      * @return the timestamp
      */
-    public Date getTimestamp() {
-        return ((Date)data.get("timestamp"));
+    public String getTimestamp() {
+        return ((String)data.get("timestamp"));
     }
 
     /**
      * @param timestamp the timestamp to set
      */
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(String timestamp) {
         data.put ("timestamp",timestamp);
     }
 

@@ -27,7 +27,7 @@
 								<p class="tags">
 									<span class="detail-label">Tag:</span>
 									<%
-										for (Tag tag : task.getTags())
+										for (Tag tag : temptask.getTags())
 										{
 											out.println("<span class=\"tag\">"+tag.getTag_name()+"</span>");
 										}
