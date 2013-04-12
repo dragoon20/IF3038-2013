@@ -26,13 +26,18 @@ public class Category extends DBSimpleRecord{
     }
     
     @Override
-    protected  String GetClassName() 
+    protected String GetClassName() 
     {
         return "models.Category";
     }
     
     @Override
     protected String GetTableName() 
+    {
+    	return "kategori";
+    }
+    
+    public static String getTableName() 
     {
     	return "kategori";
     }

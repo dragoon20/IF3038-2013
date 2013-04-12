@@ -86,6 +86,11 @@ public abstract class DBSimpleRecord
     	return data.isEmpty();
     }
     
+    public HashMap<String, Object> getData()
+    {
+    	return data;
+    }
+    
     public DBSimpleRecord find(String query, Object[] params, String[] params_type , String[] selection)
     {
     	try

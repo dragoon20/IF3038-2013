@@ -39,6 +39,11 @@ public class Task extends DBSimpleRecord {
     	return "task";
     }
     
+    public static String getTableName() 
+    {
+    	return "task";
+    }
+    
     public void save() {
         
     }

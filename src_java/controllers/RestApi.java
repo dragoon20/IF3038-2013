@@ -1,11 +1,15 @@
 package controllers;
 
-import helper.JSONObject;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,8 +18,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import net.sf.json.JSONObject;
+
+import models.Category;
 import models.Comment;
 import models.DBSimpleRecord;
+import models.Tag;
+import models.Task;
 import models.User;
 
 /**
@@ -88,23 +97,26 @@ public class RestApi extends HttpServlet
 	
 	public void fetch_latest_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if (request.getParameter("task_id")!=null)
+		if (MainApp.LoggedIn(session))
 		{
-			if (request.getParameter("category_id")!=null)
+			if (request.getParameter("task_id")!=null)
 			{
-				// TODO check session current user
-				// retrieve based on category
-				//$ret = Task::model()->findAll("task_id > ".$params['task_id']." AND EXISTS (SELECT * FROM ".Categoory::tableName().
-				//	" WHERE category_id = " . $params['category_id']." AND task_id = task.id)");
+				if (request.getParameter("category_id")!=null)
+				{
+					// TODO check session current user
+					// retrieve based on category
+					//$ret = Task::model()->findAll("task_id > ".$params['task_id']." AND EXISTS (SELECT * FROM ".Categoory::tableName().
+					//	" WHERE category_id = " . $params['category_id']." AND task_id = task.id)");
+				}
+				else
+				{
+					// retrieve all
+					//$ret = Task::model()->findAll("task_id > ".$params['task_id']);
+				}
 			}
-			else
-			{
-				// retrieve all
-				//$ret = Task::model()->findAll("task_id > ".$params['task_id']);
-			}
+			// print result
+			//return $ret;
 		}
-		// print result
-		//return $ret;
 	}
 	
 	public void retrieve_tags(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -215,65 +227,94 @@ public class RestApi extends HttpServlet
 	 */
 	public void retrieve_tasks(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		//$ret = array();
-		if (request.getParameter("category_id")!=null)
+		if (MainApp.LoggedIn(session))
 		{
-			// TODO check if user session is in some category
-			// retrieve based on category
-			/*$cat = Category::model()->find("id_kategori = '" . addslashes($params['category_id']) . "'");
-
-			if ($cat) 
+			PrintWriter pw = response.getWriter();
+			JSONObject ret = new JSONObject();
+			if (request.getParameter("category_id")!=null)
 			{
-				// found
-				$success = true;
-
-				$categoryID = $cat->id_kategori;
-				$categoryName = $cat->nama_kategori;
-				$canDeleteCategory = $cat->id_user == $this->app->currentUserId;
-				$canEditCategory = $cat->getEditable($this->app->currentUserId);
-
-				$ret = Task::model()->findAll("id_kategori = '" . (int) $params['category_id'] . "'");
-				//$canAddTask = Category::model()->find("id_kategori = '". $cat->id_kategori."' AND "$this->app->currentUserId;
+				// TODO check if user session is in some category
+				// retrieve based on category
+				Category cat = (Category)Category.getModel().find("id_kategori = ?", new Object[]{request.getParameter("category_id")}, new String[]{"integer"}, null);
+	
+				if (!cat.isEmpty()) 
+				{
+					int categoryId = cat.getId_kategori();
+					String categoryName = cat.getNama_kategori();
+					boolean canDeleteCategory = (cat.getId_user()==MainApp.currentUserId(session));
+					boolean canEditCategory = (cat.getEditable(MainApp.currentUserId(session)));
+					
+					ret.put("success", true);
+					ret.put("categoryId", categoryId);
+					ret.put("categoryName", categoryName);
+					ret.put("canDeleteCategory", canDeleteCategory);
+					ret.put("canEditCategory", canEditCategory);
+					
+					Task[] tasks = (Task[])Task.getModel().findAll("id_kategori = ?", new Object[]{request.getParameter("category_id")}, new String[]{"string"}, null);
+					
+					SimpleDateFormat sdf = new SimpleDateFormat("j F Y");
+					Map<String, Object>[] maps = new HashMap<String, Object>[tasks.length];
+					for (int i=0;i<tasks.length;++i)
+					{
+						maps[i] = new HashMap<String, Object>();
+						maps[i].put("name", tasks[i].getNama_task());
+						maps[i].put("id", tasks[i].getId_task());
+						maps[i].put("done", tasks[i].isStatus());
+						maps[i].put("deadline", sdf.format(tasks[i].getDeadline()));
+						maps[i].put("deletable", tasks[i].getDeletable(MainApp.currentUserId(session)));
+						
+						Tag[] tags = tasks[i].getTags();
+						List<String> str_tags = new ArrayList<String>();
+						for (Tag t : tags)
+						{
+							str_tags.add(t.getTag_name());
+						}
+						maps[i].put("tags", str_tags);
+					}
+					ret.put("tasks", maps);
+					
+					pw.println(ret.toString());
+				}
+				else 
+				{
+					// not found
+					ret.put("success", false);
+					pw.println(ret.toString());
+				}
 			}
-			else {
-				// not found
-				$success = false;
-				$ret = array();
-			}*/
-		}
-		else {
-			// retrieve all
-			/*$success = true;
-			$id = $this->app->currentUserId;
-			$ret = Task::model()->findAll("id_kategori IN ( SELECT id_kategori FROM ".Category::tableName()." WHERE id_user='$id' ".
-											"OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user='$id') ".
-											"OR id_kategori IN (SELECT id_kategori FROM ". Task::tableName() ." AS t LEFT OUTER JOIN assign AS a ".
-											"ON t.id_task=a.id_task WHERE t.id_user = '". $id ."' OR a.id_user = '". $id ."' ))");*/
-		}
-
-		/*$tasks = array();
-		foreach ($ret as $task) 
-		{
-			$dummy = new StdClass;
-			$dummy->name = $task->nama_task;
-			$dummy->id = $task->id_task;
-			$dummy->done = (bool) $task->status;
-			$dl = new DateTime($task->deadline);
-			$dummy->deadline = $dl->format('j F Y');
-
-			$dummy->deletable = $task->getDeletable($this->app->currentUserId);
-
-			$tags = $task->getTags();
-			$dummy->tags = array();
-			foreach ($tags as $tag) {
-				$dummy->tags[] = $tag->tag_name;
+			else 
+			{
+				ret.put("success", true);
+				int id = MainApp.currentUserId(session);
+				Task[] tasks = (Task[])Task.getModel().findAll("id_kategori IN (SELECT id_kategori FROM "+Category.getTableName()+" WHERE id_user = ? "+
+																"OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user = ?) "+
+																"OR id_kategori IN (SELECT id_kategori FROM "+Task.getTableName()+" AS t LEFT OUTER JOIN assign AS a "+
+																"OR t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ?))", 
+																new Object[]{id, id, id, id}, new String[]{"integer", "integer", "integer", "integer"}, null);
+				
+				SimpleDateFormat sdf = new SimpleDateFormat("j F Y");
+				Map<String, Object>[] maps = new HashMap<String, Object>[tasks.length];
+				for (int i=0;i<tasks.length;++i)
+				{
+					maps[i] = new HashMap<String, Object>();
+					maps[i].put("name", tasks[i].getNama_task());
+					maps[i].put("id", tasks[i].getId_task());
+					maps[i].put("done", tasks[i].isStatus());
+					maps[i].put("deadline", sdf.format(tasks[i].getDeadline()));
+					maps[i].put("deletable", tasks[i].getDeletable(MainApp.currentUserId(session)));
+					
+					Tag[] tags = tasks[i].getTags();
+					List<String> str_tags = new ArrayList<String>();
+					for (Tag t : tags)
+					{
+						str_tags.add(t.getTag_name());
+					}
+					maps[i].put("tags", str_tags);
+				}
+				ret.put("tasks", maps);
+				pw.println(ret.toString());
 			}
-
-			$tasks[] = $dummy;
-		}*/
-
-		// print result
-		//return compact('success', 'tasks', 'categoryID', 'categoryName', 'canDeleteCategory', 'canEditCategory');
+		}
 	}
 
 	public void get_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -529,18 +570,31 @@ public class RestApi extends HttpServlet
 		if ((request.getParameter("username")!=null) && (MainApp.LoggedIn(session))) 
 		{
 			String[] users = request.getParameter("username").split(",");
-			/*$not_query = array();
-			for ($i=0;$i<count($users)-1;++$i)
+			StringBuilder not_query = new StringBuilder();
+			
+			List<Object> param = new ArrayList<Object>();
+			List<String> paramTypes = new ArrayList<String>();
+			param.add(users[users.length-1]);
+			paramTypes.add("string");
+			for (int i=0;i<users.length-1;++i)
 			{
-				$not_query [] = " username <> '".addslashes($users[$i])."' ";
+				not_query.append(" username <> ? ");
+				if (i!=users.length-1)
+				{
+					not_query.append(" AND ");
+				}
+				
+				param.add(users[i]);
+				paramTypes.add("string");
 			}
-			$user = $users[count($users)-1];
-			$string = ($not_query) ? " AND ".implode("AND",$not_query) : "";
-			$return = User::model()->findAll(" username LIKE '".addslashes($user)."%' ".$string." LIMIT 10", array("id_user", "username"));*/
+			User[] ret = User.getModel().findAll(" username LIKE '?%' "+not_query+" LIMIT 10", param, paramTypes, new String[]{"id_user", "username"});
+			
+			JSONObject res = new JSONObject();
+			for (int i=0;i<ret.length;++i)
+			{
+				res.put(i, ret[i]);
+			}
 		}
-
-		// print result
-		//return $return;
 	}
 	
 	/**
@@ -591,40 +645,40 @@ public class RestApi extends HttpServlet
 	 */
 	public void register_check(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if ("POST".equals(request.getMethod().toUpperCase()))
+		JSONObject ret = new JSONObject();
+		if (("POST".equals(request.getMethod().toUpperCase())) && (request.getParameter("username")!=null) &&
+				(request.getParameter("email")!=null) && (request.getParameter("password")!=null) && 
+				(request.getParameter("confirm_password")!=null) && (request.getParameter("fullname")!=null) && 
+				(request.getParameter("birthdate")!=null) && (request.getParameter("avatar")!=null))
 		{
-			/*if (($_SERVER['REQUEST_METHOD'] === 'POST') && (ISSET($params['username'])) && (ISSET($params['email']))
-					&& (ISSET($params['password'])) && (ISSET($params['confirm_password'])) 
-					&& (ISSET($params['fullname'])) && (ISSET($params['birthdate']))
-					&& (ISSET($params['avatar']))*/
-			/*
-			 * $return["status"] = "success";
-			$return["error"] = array();
+			String status = "success";
+			List<String> errors = new ArrayList<String>();
 			
-			$user = new User();
-			$user->data = $params;
-			$temperror = $user->checkValidity();
+			User user = new User();
+			user.addData(request.getParameterMap());
+			boolean temperror = user.checkValidity();
 			
-			if ($temperror)
+			if (temperror)
 			{
-				$return["status"] = "fail";
-				$return["error"] = array_merge($return["error"], $temperror);
+				status = "fail";
+				errors.add("Data-data yang dimasukkan tidak valid.");
 			}
 			
-			if (User::model()->find("username='".addslashes($params['username'])."' OR email='".addslashes($params['email'])."'")->data)
+			if (User.getModel().find("username = ? OR email = ? ", new Object[]{request.getParameter("username"), request.getParameter("email")}, new String[]{"string", "string"}, null).isEmpty())
 			{
-				$return["status"] = "fail";
-				$return["error"]["duplicate"] .= "Username/email sudah digunakan.";
+				status = "fail";
+				errors.add("Username/email sudah digunakan.");
 			}
-			 */
+			ret.put("status", status);
+			ret.put("errors", errors.toArray());
 		}
 		else
 		{
-			//$return["status"] = "fail";
+			ret.put("status", "fail");
 		}
 
-		// print result
-		//return $return;
+		PrintWriter pw = response.getWriter();
+		pw.println(ret.toString());
 	}
 
 	/*** ----- END OF USER MODULE -----***/	
