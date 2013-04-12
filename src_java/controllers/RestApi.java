@@ -316,14 +316,23 @@ public class RestApi extends HttpServlet
 
 	public void get_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if (request.getParameter("id_task")!=null)
+		if ((MainApp.LoggedIn(session)) && (request.getParameter("id_task")!=null))
 		{
 			// todo use prepared statement
 			String id_task = request.getParameter("id_task");
 			//$task = array();
+			Task task = Task.getModel().find("id_task = ? ", new Object[]{id_task}, new String[]{"integer"}, new String[]{"id_task", "nama_task", "status", "deadline"});
 	
-			if (MainApp.LoggedIn(session))
+			User[] users = task.getAssignee();
+			List<Map<String, Object>> temp = new ArrayList<Map<String,Object>>();
+			for (User user : users)
 			{
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("username", user.getUsername());
+				map.put("id_user", user.getId_user());
+				temp.add(map);
+			}
+			
 				/*$task = Task::model()->find("id_task=".$_GET['id_task'], array("id_task","nama_task","status","deadline"));
 	
 				$users = $task->getAssignee();
@@ -344,8 +353,6 @@ public class RestApi extends HttpServlet
 					$temp[] = $tag->tag_name;
 				}
 				$task->tag = $temp;*/
-			}
-			
 			// print result
 			//return $task->data;
 		}
