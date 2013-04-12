@@ -16,13 +16,13 @@
 	
 	request.setAttribute("title", "MOA - Profile");
 	request.setAttribute("currentPage", "profile");
-	SimpleDateFormat date_format = new SimpleDateFormat("Y-m-j");
+	SimpleDateFormat date_format = new SimpleDateFormat("YYYY-MM-dd");
 %>
 <%@ include file="../template/header.jsp" %>
 	<div class="content">
 		<div class="profile">
 			<header>
-				<h1><?php echo $user->fullname; ?></h1>
+				<h1><%= user.getFullname() %></h1>
 			</header>
 
 			<section class="profile-details">

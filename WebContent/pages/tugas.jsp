@@ -19,7 +19,7 @@
 	Comment[] comments = null;
 	if (request.getParameter("id")!=null)
 	{
-		task = (Task)Task.getModel().find("id_task = '?'", new Object[]{request.getParameter("id")}, new String[]{"integer"}, null);
+		task = (Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id"))}, new String[]{"integer"}, null);
 		if (task==null)
 		{
 			// redirect to error page
@@ -36,10 +36,10 @@
 	request.setAttribute("title", "MOA - Dashboard");
 	request.setAttribute("currentPage", "dashboard");
 	
-	SimpleDateFormat date_format = new SimpleDateFormat("j F Y");
-	SimpleDateFormat date_format2 = new SimpleDateFormat("Y-m-j");
-	SimpleDateFormat date_format3 = new SimpleDateFormat("Y-m-d G:i:s");
-	SimpleDateFormat date_format4 = new SimpleDateFormat("H:i – D/M");
+	SimpleDateFormat date_format = new SimpleDateFormat("dd MMMM YYYY");
+	SimpleDateFormat date_format2 = new SimpleDateFormat("YYYY-MM-dd");
+	SimpleDateFormat date_format3 = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+	SimpleDateFormat date_format4 = new SimpleDateFormat("HH:mm – EEE/MMMM");
 %>
 <%@ include file="../template/header.jsp" %>
 		<div class="content">
@@ -86,7 +86,7 @@
 									{
 										string.append("<a href='profile?id="+user.getId_user()+"'>"+user.getUsername()+"</a>,");
 									}
-									string.substring(0, string.length()-1);
+									string.substring(0, (string.length()==0) ? 0 :string.length()-1);
 									out.println(string.toString());
 								%>
 							</span>
@@ -115,7 +115,7 @@
 							int i = 1;
 							for (Attachment attachment : attachments)
 							{
-								String[] atch = attachment.getAttachment().split(".");
+								String[] atch = attachment.getAttachment().split("\\.");
 								if ("MP4".equals(atch[atch.length-1].toUpperCase()))
 								{
 						%>
@@ -175,7 +175,7 @@
 									{
 										string.append(user.getUsername()+",");
 									}
-									string.substring(0, string.length()-1);
+									string.substring(0, (string.length()==0) ? 0 :string.length()-1);
 									out.println(string.toString());
 								%>">
 							<div id="auto_comp_assignee">
@@ -222,7 +222,7 @@
 							String firsttimestamp = "";
 							if (total_comment > 0)
 							{
-								firsttimestamp = comments[0].getTimestamp();
+								firsttimestamp = comments[0].getTimestamp().toString();
 							}
 							else
 							{
@@ -253,7 +253,7 @@
 										out.println(comment.getKomentar());
 									out.println("</p>");
 								out.println("</article>");
-								lasttimestamp = comment.getTimestamp();
+								lasttimestamp = comment.getTimestamp().toString();
 							}
 						%>
 					</div>

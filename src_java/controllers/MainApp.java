@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Date;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +53,9 @@ public class MainApp extends HttpServlet
 
     public static boolean LoggedIn(HttpSession session)
 	{
-		return ((session.getAttribute("user_id")!=null));
+		return (((session.getAttribute("user_id")!=null)) && 
+				(((User)session.getAttribute("current_user"))!=null) && 
+				(((String)session.getAttribute("full_path"))!=null));
 	}
     
     public static int currentUserId(HttpSession session)
@@ -200,7 +204,19 @@ public class MainApp extends HttpServlet
 			{
 				if (fi.isFormField())
 				{
-					user.putData(fi.getFieldName(), fi.getString());
+					if ("birthdate".equals(fi.getFieldName()))
+					{
+						try {
+							user.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					else
+					{
+						user.putData(fi.getFieldName(), fi.getString());
+					}
 				}
 				else
 				{
@@ -237,6 +253,18 @@ public class MainApp extends HttpServlet
 						out.write(bytes, 0, read);
 					}
 					out.close();
+					
+					HttpSession session = request.getSession();
+					session.setAttribute("user_id", user.getId_user());
+					
+					User u = new User();
+					u.setId_user(user.getId_user());
+					u.setFullname(user.getFullname());
+					u.setUsername(user.getUsername());
+					u.setEmail(user.getEmail());
+					u.setAvatar(user.getAvatar());
+					session.setAttribute("current_user", u);
+					
 					response.sendRedirect("dashboard");
 				}
 				else
@@ -514,6 +542,7 @@ public class MainApp extends HttpServlet
 	{
 		HttpSession session = request.getSession();
 		session.removeAttribute("user_id");
+		response.sendRedirect("index");
 	}
 	
 	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException

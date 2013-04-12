@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -76,12 +77,12 @@ public class Comment extends DBSimpleRecord{
     
     public User getUser()
 	{
-    	return (User)User.getModel().find("id_user = '?'", new Object[]{getId_user()}, new String[]{"integer"}, new String[]{"id_user", "username", "fullname", "avatar"});
+    	return (User)User.getModel().find("id_user = ?", new Object[]{getId_user()}, new String[]{"integer"}, new String[]{"id_user", "username", "fullname", "avatar"});
 	}
 	
 	public Task getTask()
 	{
-		return (Task)Task.getModel().find("id_task = '?'", new Object[]{getId_task()}, new String[]{"integer"}, null);
+		return (Task)Task.getModel().find("id_task = ?", new Object[]{getId_task()}, new String[]{"integer"}, null);
 	}
     
     public Comment[] getLatest(int id_task, String timestamp)
@@ -91,7 +92,7 @@ public class Comment extends DBSimpleRecord{
 	    	Connection conn = DBConnection.getConnection();
 	    	PreparedStatement prep = conn.prepareStatement("SELECT id_komentar, timestamp, komentar, c.id_user, username, fullname, avatar"+
 										" FROM "+Comment.getTableName()+" as c INNER JOIN "+User.getTableName()+" as u "+
-										" ON c.id_user=u.id_user WHERE id_task = '?' AND timestamp > '?' ORDER BY timestamp");
+										" ON c.id_user=u.id_user WHERE id_task = ? AND timestamp > ? ORDER BY timestamp");
 			prep.setInt(1, id_task);
 	    	prep.setString(2, timestamp);
 	    	
@@ -113,7 +114,7 @@ public class Comment extends DBSimpleRecord{
 	        		result.add(c);
 	    		}while (rs.next());
 	    	}
-	    	return (Comment[])result.toArray();
+	    	return result.toArray(new Comment[result.size()]);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -128,7 +129,7 @@ public class Comment extends DBSimpleRecord{
 	    	Connection conn = DBConnection.getConnection();
 	    	PreparedStatement prep = conn.prepareStatement("SELECT id_komentar, timestamp, komentar, c.id_user, username, fullname, avatar"+
 	    							" FROM "+Comment.getTableName()+" as c INNER JOIN "+User.getTableName()+" as u "+
-	    							" ON c.id_user=u.id_user WHERE id_task = '?' AND timestamp < '?' ORDER BY timestamp DESC LIMIT 10");
+	    							" ON c.id_user=u.id_user WHERE id_task = ? AND timestamp < ? ORDER BY timestamp DESC LIMIT 10");
 	    	prep.setInt(1, id_task);
 	    	prep.setString(2, timestamp);
 	    	
@@ -150,7 +151,7 @@ public class Comment extends DBSimpleRecord{
 	        		result.add(c);
 	    		}while (rs.next());
 	    	}
-	    	return (Comment[])result.toArray();
+	    	return result.toArray(new Comment[result.size()]);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -175,14 +176,15 @@ public class Comment extends DBSimpleRecord{
     /**
      * @return the timestamp
      */
-    public String getTimestamp() {
-        return ((String)data.get("timestamp"));
+    public Timestamp getTimestamp() 
+    {
+        return ((Timestamp)data.get("timestamp"));
     }
 
     /**
      * @param timestamp the timestamp to set
      */
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(Timestamp timestamp) {
         data.put ("timestamp",timestamp);
     }
 

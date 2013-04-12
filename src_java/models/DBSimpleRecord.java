@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -31,6 +32,8 @@ public abstract class DBSimpleRecord
 {
     protected Connection connection;
     protected HashMap<String, Object> data;
+    
+    public static SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
     
     public DBSimpleRecord() 
     {
@@ -111,12 +114,12 @@ public abstract class DBSimpleRecord
 	        StringBuilder cmd = new StringBuilder();
 	        if ((selection!=null) && (selection.length!=0))
 	        {
-	            for (int i=1;i<=selection.length;i++)
+	            for (int i=0;i<selection.length;i++)
 	            {
 	            	cmd.append(selection[i]);
 	            	cmd.append(", ");
 	            }
-	            cmd.substring(0, cmd.length()-2);
+	            cmd.delete(cmd.length()-2, cmd.length());
 	        }
 	        else {
 	            cmd.append("*");
@@ -135,7 +138,7 @@ public abstract class DBSimpleRecord
 	        		statement.setInt(i+1, (Integer)params[i]);
 	        	}
 	        }
-            ResultSet rs = statement.executeQuery() ;
+	        ResultSet rs = statement.executeQuery() ;
 
             ResultSetMetaData meta_data = rs.getMetaData();
             int column_count = meta_data.getColumnCount();
@@ -178,18 +181,19 @@ public abstract class DBSimpleRecord
 	        StringBuilder cmd = new StringBuilder();
 	        if ((selection!=null) && (selection.length!=0))
 	        {
-	            for (int i=1;i<=selection.length;i++)
+	            for (int i=0;i<selection.length;i++)
 	            {
 	            	cmd.append(selection[i]);
 	            	cmd.append(", ");
 	            }
-	            cmd.substring(0, cmd.length()-2);
+	            cmd.delete(cmd.length()-2, cmd.length());
 	        }
 	        else {
 	            cmd.append("*");
 	        }
                 
             PreparedStatement statement = connection.prepareStatement("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query);
+            System.out.println("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query);
 	        for (int i=0;i<params.length;++i)
 	        {
 	        	if ("string".equals(params_type[i]))
@@ -198,13 +202,10 @@ public abstract class DBSimpleRecord
 	        	}
 	        	else if ("integer".equals(params_type[i]))
 	        	{
-	        		System.out.println("--------------------------------------------------------------");
-	        		System.out.println("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query);
-	        		System.out.println("--------------------------------------------------------------");
 	        		statement.setInt(i+1, (Integer)params[i]);
 	        	}
 	        }
-            ResultSet rs = statement.executeQuery() ;
+	        ResultSet rs = statement.executeQuery() ;
             
             ResultSetMetaData meta_data = rs.getMetaData();
             int column_count = meta_data.getColumnCount();
@@ -219,7 +220,7 @@ public abstract class DBSimpleRecord
             	result.add(row);
             }
             
-            return (DBSimpleRecord[])result.toArray();
+            return result.toArray(new DBSimpleRecord[result.size()]);
         } catch (ClassNotFoundException e1) {
 		e1.printStackTrace();
         } catch (InstantiationException e) {

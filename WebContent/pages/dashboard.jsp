@@ -48,7 +48,7 @@
 	Task[] todo = MainApp.currentUser(session).getTasks(0, cat);
 	Task[] done = MainApp.currentUser(session).getTasks(1, cat);
 
-	Category[] categories = ((User)session.getAttribute("currentUser")).getCategories();
+	Category[] categories = MainApp.currentUser(session).getCategories();
 
 	// Presentation Logic Here
 	
@@ -110,7 +110,7 @@ foreach ($done as $task) { include dirname(__FILE__) . '/../template/task.php'; 
 							<h3>Categories</h3>
 						</header>
 						<ul id="categoryList">
-							<li id="categoryLi0" <% if (currentCat.getId_kategori()==0) out.print("class=\"active\""); %>>
+							<li id="categoryLi0" <% if (currentCat==null) out.print("class=\"active\""); %>>
 								<a href="dashboard.php" data-category-id="0">
 									All Tasks
 								</a>
@@ -119,7 +119,7 @@ foreach ($done as $task) { include dirname(__FILE__) . '/../template/task.php'; 
 								for (Category cate : categories)
 								{
 							%>
-									<li data-deletable="<%= (cate.getId_user()==MainApp.currentUserId(session)) ? "true" : "false" %>" id="categoryLi<%= cate.getId_kategori() %>"<%= (currentCat.getId_kategori() == cate.getId_kategori())? "class=\"active\"" : "" %>>
+									<li data-deletable="<%= (cate.getId_user()==MainApp.currentUserId(session)) ? "true" : "false" %>" id="categoryLi<%= cate.getId_kategori() %>"<%= ((currentCat!=null) && (currentCat.getId_kategori() == cate.getId_kategori()))? "class=\"active\"" : "" %>>
 										<a href="dashboard.php?cat=<%= cate.getId_kategori() %>" data-category-id="<%= cate.getId_kategori() %>">
 											<%= cate.getNama_kategori() %>
 										</a>
@@ -168,4 +168,4 @@ foreach ($done as $task) { include dirname(__FILE__) . '/../template/task.php'; 
 				</form>
 			</div>
 		</div>
-<?php $this->footer() ?>
+<%@ include file="../template/footer.jsp" %>

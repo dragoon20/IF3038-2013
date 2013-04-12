@@ -5,7 +5,9 @@
 package models;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,10 +56,16 @@ public class Category extends DBSimpleRecord{
             try {
                 // new category
                 PreparedStatement statement = connection.prepareStatement
-                ("INSERT INTO `"+ Category.getModel().GetTableName()+"` (nama_kategori, id_user) VALUES (?, ?)");
+                ("INSERT INTO `"+ Category.getModel().GetTableName()+"` (nama_kategori, id_user) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
                 // Parameters start with 1
                 statement.setString(1, getNama_kategori());
                 statement.setInt(2, getId_user());
+                
+                statement.executeUpdate();
+
+                ResultSet gen = statement.getGeneratedKeys();
+                gen.next();
+                setId_kategori(gen.getInt(1));
             } catch (SQLException ex) {
                 Logger.getLogger(Category.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -87,7 +95,7 @@ public class Category extends DBSimpleRecord{
     }
     
     public int getId_kategori() {
-        return (Integer)data.get("iid_kategori");
+        return (Integer)data.get("id_kategori");
     }
 
     /**

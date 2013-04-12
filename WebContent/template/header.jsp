@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
+<%@page import="java.util.ArrayList"%>
 <%@page import="models.User"%>
-<%@page import="java.util.HashMap"%>
 <%@page import="controllers.MainApp"%>
 <html>
 	<head>
@@ -25,26 +25,32 @@
 					<nav>
 						<ul class="main-links">
 							<% 
-								HashMap<String, String> pages = new HashMap<String, String>();
-								pages.put("dashboard", "Dashboard");
-								pages.put("profile", ((User)session.getAttribute("currentUser")).getFullname());
-								pages.put("logout", "Logout");
+								ArrayList<String> keys = new ArrayList<String>();
+								ArrayList<String> values = new ArrayList<String>();
+								keys.add("dashboard");
+								keys.add("profile");
+								keys.add("logout");
+								values.add("Dashboard");
+								values.add(MainApp.currentUser(session).getFullname());
+								values.add("Logout");
 
-								for (String key: pages.keySet())
+								int x = 0;
+								for (String key: keys)
 								{
-									String label = pages.get(key);
+									String label = values.get(x);
+									x++;
 									boolean active = (key.equals(request.getAttribute("currentPage")));
 							%>	
-									<li class="<%//= page %> -link<%// if (active) out.print("active"); %>" id="<%//= page %> Li">
+									<li class="<%= key %> -link<% if (active) out.print("active"); %>" id="<%= key %> Li">
 									<%
 										if ("profile".equals(key)) 
 										{
 									%>
-											<img src="upload/user_profile_pict/<%= ((User)session.getAttribute("currentUser")).getAvatar() %>" alt="">
+											<img src="upload/user_profile_pict/<%= MainApp.currentUser(session).getAvatar() %>" alt="">
 									<%
 										}
 									%>
-									<a href="<%= key %>>" id="<%= key %>>Link"><%= label %></a></li>
+									<a href="<%= key %>" id="<%= key %>>Link"><%= label %></a></li>
 							<%
 								}
 							%>
@@ -63,15 +69,22 @@
 							<form action="search" method="get" id="searchForm">
 								<select name="type" id="searchType">
 								<%
-									HashMap<String, String> types = new HashMap<String, String>();
-									types.put("all", "All");
-									types.put("task", "Tasks");
-									types.put("user", "Users");
-									types.put("category", "Categories");
+									ArrayList<String> types = new ArrayList<String>();
+									ArrayList<String> type_values = new ArrayList<String>();
+									types.add("all");
+									types.add("task");
+									types.add("user");
+									types.add("category");
+									type_values.add("All");
+									type_values.add("Tasks");
+									type_values.add("Users");
+									type_values.add("Categories");
 									
-									for (String k: types.keySet())
+									int y=0;
+									for (String k: types)
 									{
-										String v = types.get(k);
+										String v = type_values.get(y);
+										y++;
 										String selected = (k.equals(type)) ? " selected" : "";
 										out.println("<option value=\""+k+selected+"\">"+v+"</option>");
 									}

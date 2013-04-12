@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -166,20 +168,18 @@ public class RestApi extends HttpServlet
 			StringBuilder not_query = new StringBuilder();
 			List<Object> param = new ArrayList<Object>();
 			List<String> paramTypes = new ArrayList<String>();
-			param.add(tags[tags.length-1]);
+			param.add(tags[tags.length-1]+"%");
 			paramTypes.add("string");
 			for (int i=0;i<tags.length-1;++i)
 			{
+				not_query.append(" AND ");
 				not_query.append(" tag_name <> ? ");
-				if (i!=tags.length-2)
-				{
-					not_query.append(" AND ");
-				}
 				param.add(tags[i]);
 				paramTypes.add("string");
 			}
 			
-			Tag[] ret = (Tag[])Tag.getModel().findAll(" tag_name LIKE '?%' "+not_query+" LIMIT 10", param.toArray(), (String[])paramTypes.toArray(), null);
+			List<DBSimpleRecord> list = Arrays.asList(Tag.getModel().findAll(" tag_name LIKE ? "+not_query+" LIMIT 10", param.toArray(), paramTypes.toArray(new String[paramTypes.size()]), null));
+			Tag[] ret = list.toArray(new Tag[list.size()]);
 			
 			JSONObject res = new JSONObject();
 			for (int i=0;i<ret.length;++i)
@@ -259,7 +259,7 @@ public class RestApi extends HttpServlet
 			{
 				// TODO check if user session is in some category
 				// retrieve based on category
-				Category cat = (Category)Category.getModel().find("id_kategori = ?", new Object[]{request.getParameter("category_id")}, new String[]{"integer"}, null);
+				Category cat = (Category)Category.getModel().find("id_kategori = ?", new Object[]{Integer.parseInt(request.getParameter("category_id"))}, new String[]{"integer"}, null);
 	
 				if (!cat.isEmpty()) 
 				{
@@ -274,18 +274,19 @@ public class RestApi extends HttpServlet
 					ret.put("canDeleteCategory", canDeleteCategory);
 					ret.put("canEditCategory", canEditCategory);
 					
-					Task[] tasks = (Task[])Task.getModel().findAll("id_kategori = ?", new Object[]{request.getParameter("category_id")}, new String[]{"string"}, null);
+					List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("id_kategori = ?", new Object[]{request.getParameter("category_id")}, new String[]{"string"}, null));
+					Task[] tasks = list.toArray(new Task[list.size()]);
 					
-					SimpleDateFormat sdf = new SimpleDateFormat("j F Y");
-					Map<String, Object>[] maps = new HashMap[tasks.length];
+					SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM YYYY");
+					List<Map<String, Object>> maps = new LinkedList<Map<String, Object>>();
 					for (int i=0;i<tasks.length;++i)
 					{
-						maps[i] = new HashMap<String, Object>();
-						maps[i].put("name", tasks[i].getNama_task());
-						maps[i].put("id", tasks[i].getId_task());
-						maps[i].put("done", tasks[i].isStatus());
-						maps[i].put("deadline", sdf.format(tasks[i].getDeadline()));
-						maps[i].put("deletable", tasks[i].getDeletable(MainApp.currentUserId(session)));
+						Map<String, Object> map = new LinkedHashMap<String, Object>();
+						map.put("name", tasks[i].getNama_task());
+						map.put("id", tasks[i].getId_task());
+						map.put("done", tasks[i].isStatus());
+						map.put("deadline", sdf.format(tasks[i].getDeadline()));
+						map.put("deletable", tasks[i].getDeletable(MainApp.currentUserId(session)));
 						
 						Tag[] tags = tasks[i].getTags();
 						List<String> str_tags = new ArrayList<String>();
@@ -293,7 +294,9 @@ public class RestApi extends HttpServlet
 						{
 							str_tags.add(t.getTag_name());
 						}
-						maps[i].put("tags", str_tags);
+						map.put("tags", str_tags);
+						
+						maps.add(map);
 					}
 					ret.put("tasks", maps);
 					
@@ -310,22 +313,23 @@ public class RestApi extends HttpServlet
 			{
 				ret.put("success", true);
 				int id = MainApp.currentUserId(session);
-				Task[] tasks = (Task[])Task.getModel().findAll("id_kategori IN (SELECT id_kategori FROM "+Category.getTableName()+" WHERE id_user = ? "+
-																"OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user = ?) "+
-																"OR id_kategori IN (SELECT id_kategori FROM "+Task.getTableName()+" AS t LEFT OUTER JOIN assign AS a "+
-																"OR t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ?))", 
-																new Object[]{id, id, id, id}, new String[]{"integer", "integer", "integer", "integer"}, null);
+				List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("id_kategori IN (SELECT id_kategori FROM "+Category.getTableName()+" WHERE id_user = ? "+
+						"OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user = ?) "+
+						"OR id_kategori IN (SELECT id_kategori FROM "+Task.getTableName()+" AS t LEFT OUTER JOIN assign AS a "+
+						"ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ?))", 
+						new Object[]{id, id, id, id}, new String[]{"integer", "integer", "integer", "integer"}, null));
+				Task[] tasks = list.toArray(new Task[list.size()]);
 				
-				SimpleDateFormat sdf = new SimpleDateFormat("j F Y");
-				Map<String, Object>[] maps = new HashMap[tasks.length];
+				SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM YYYY");
+				List<Map<String, Object>> maps = new ArrayList<Map<String,Object>>();
 				for (int i=0;i<tasks.length;++i)
 				{
-					maps[i] = new HashMap<String, Object>();
-					maps[i].put("name", tasks[i].getNama_task());
-					maps[i].put("id", tasks[i].getId_task());
-					maps[i].put("done", tasks[i].isStatus());
-					maps[i].put("deadline", sdf.format(tasks[i].getDeadline()));
-					maps[i].put("deletable", tasks[i].getDeletable(MainApp.currentUserId(session)));
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("name", tasks[i].getNama_task());
+					map.put("id", tasks[i].getId_task());
+					map.put("done", tasks[i].isStatus());
+					map.put("deadline", sdf.format(tasks[i].getDeadline()));
+					map.put("deletable", tasks[i].getDeletable(MainApp.currentUserId(session)));
 					
 					Tag[] tags = tasks[i].getTags();
 					List<String> str_tags = new ArrayList<String>();
@@ -333,7 +337,9 @@ public class RestApi extends HttpServlet
 					{
 						str_tags.add(t.getTag_name());
 					}
-					maps[i].put("tags", str_tags);
+					map.put("tags", str_tags);
+					
+					maps.add(map);
 				}
 				ret.put("tasks", maps);
 				pw.println(ret.toJSONString());
@@ -346,7 +352,7 @@ public class RestApi extends HttpServlet
 		if ((MainApp.LoggedIn(session)) && (request.getParameter("id_task")!=null))
 		{
 			// todo use prepared statement
-			String id_task = request.getParameter("id_task");
+			int id_task = Integer.parseInt(request.getParameter("id_task"));
 			//$task = array();
 			Task task = (Task)Task.getModel().find("id_task = ? ", new Object[]{id_task}, new String[]{"integer"}, new String[]{"id_task", "nama_task", "status", "deadline"});
 	
@@ -681,20 +687,18 @@ public class RestApi extends HttpServlet
 			
 			List<Object> param = new ArrayList<Object>();
 			List<String> paramTypes = new ArrayList<String>();
-			param.add(users[users.length-1]);
+			param.add(users[users.length-1]+"%");
 			paramTypes.add("string");
 			for (int i=0;i<users.length-1;++i)
 			{
+				not_query.append(" AND ");
 				not_query.append(" username <> ? ");
-				if (i!=users.length-2)
-				{
-					not_query.append(" AND ");
-				}
-				
 				param.add(users[i]);
 				paramTypes.add("string");
 			}
-			User[] ret = (User[])User.getModel().findAll(" username LIKE '?%' "+not_query+" LIMIT 10", param.toArray(), (String[])paramTypes.toArray(), null);
+			
+			List<DBSimpleRecord> list = Arrays.asList(User.getModel().findAll(" username LIKE ? "+not_query+" LIMIT 10", param.toArray(), paramTypes.toArray(new String[paramTypes.size()]), null));
+			User[] ret = list.toArray(new User[list.size()]);
 			JSONObject res = new JSONObject();
 			for (int i=0;i<ret.length;++i)
 			{
@@ -728,6 +732,8 @@ public class RestApi extends HttpServlet
 				u.setFullname(user.getFullname());
 				u.setUsername(user.getUsername());
 				u.setEmail(user.getEmail());
+				u.setAvatar(user.getAvatar());
+				
 				session.setAttribute("current_user", u);
 				
 				ret.put("status", "success");

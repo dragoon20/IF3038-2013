@@ -9,7 +9,7 @@
 		response.sendRedirect("index");
 	}
 
-	int id = (int)session.getAttribute("user_id");
+	int id = MainApp.currentUserId(session);
 	if (request.getParameter("id")!=null)
 	{
 		try
@@ -20,21 +20,21 @@
 		{
 		}
 	}
-	User user = (User)User.getModel().find("id_user = '?'", new Object[]{id}, new String[]{"integer"}, new String[]{"id_user", "username", "email", "fullname", "avatar", "birthdate"});
+	User user = (User)User.getModel().find("id_user = ?", new Object[]{id}, new String[]{"integer"}, new String[]{"id_user", "username", "email", "fullname", "avatar", "birthdate"});
 	Task[] tasks = user.getAssignedTasks();
 
 	request.setAttribute("title", "MOA - Profile");
 	request.setAttribute("currentPage", (request.getParameter("id")!=null) ? "" : "profile");
 	
-	SimpleDateFormat date_format = new SimpleDateFormat("j F Y");
+	SimpleDateFormat date_format = new SimpleDateFormat("dd MMMM YYYY");
 %>	
 <%@ include file="../template/header.jsp" %>
 	<div class="content">
 		<div class="profile">
 			<header>
-				<h1><?php echo $user->fullname; ?></h1>
+				<h1><%= user.getFullname() %></h1>
 				<%
-					if (id == (int)session.getAttribute("user_id"))
+					if (id == MainApp.currentUserId(session))
 					{
 				%>
 						<ul>
@@ -167,4 +167,8 @@
 			</section>
 		</div>
 	</div>
+<%
+	ArrayList<String> javascripts = new ArrayList<String>();
+	request.setAttribute("javascripts", javascripts);
+%>
 <%@ include file="../template/footer.jsp" %>

@@ -96,39 +96,42 @@ public class Task extends DBSimpleRecord {
     
     public Tag[] getTags() 
 	{
-    	return (Tag[])Tag.getModel().findAll("id_tag IN (SELECT id_tag FROM have_tags WHERE id_task = '?')", new Object[]{getId_task()}, new String[]{"integer"}, null);
+    	List<DBSimpleRecord> list = Arrays.asList(Tag.getModel().findAll("id_tag IN (SELECT id_tag FROM have_tags WHERE id_task = ?)", new Object[]{getId_task()}, new String[]{"integer"}, null));
+    	return list.toArray(new Tag[list.size()]);
 	}
 	
 	public Category getCategory()
 	{
-		return (Category)Category.getModel().find("id_kategori = '?'", new Object[]{getId_kategori()}, new String[]{"integer"}, null);
+		return (Category)Category.getModel().find("id_kategori = ?", new Object[]{getId_kategori()}, new String[]{"integer"}, null);
 	}
 	
 	public Attachment[] getAttachment()
 	{
-		return (Attachment[])Attachment.getModel().findAll("id_task = '?'", new Object[]{getId_task()}, new String[]{"integer"}, null);
+		List<DBSimpleRecord> list = Arrays.asList(Attachment.getModel().findAll("id_task = ?", new Object[]{getId_task()}, new String[]{"integer"}, null));
+		return list.toArray(new Attachment[list.size()]);
 	}
 	
 	public User[] getAssignee()
 	{
-		return (User[])User.getModel().findAll("id_user IN (SELECT id_user FROM assign WHERE id_task = '?')", new Object[]{getId_task()}, new String[]{"integer"}, new String[]{"id_user", "username"});
+		List<DBSimpleRecord> list = Arrays.asList(User.getModel().findAll("id_user IN (SELECT id_user FROM assign WHERE id_task = ?)", new Object[]{getId_task()}, new String[]{"integer"}, new String[]{"id_user", "username"}));
+		return list.toArray(new User[list.size()]);
 	}
 	
 	public Comment[] getComment()
 	{
-		List<DBSimpleRecord> list = Arrays.asList(Comment.getModel().findAll("id_task = '?' ORDER BY timestamp DESC LIMIT 10", new Object[]{getId_task()}, new String[]{"integer"}, null));
+		List<DBSimpleRecord> list = Arrays.asList(Comment.getModel().findAll("id_task = ? ORDER BY timestamp DESC LIMIT 10", new Object[]{getId_task()}, new String[]{"integer"}, null));
 		Collections.reverse(list);
-		return (Comment[])list.toArray();
+		return list.toArray(new Comment[list.size()]);
 	}
 	
 	public int getTotalComment()
 	{
-		return Comment.getModel().findAll("id_task = '?'", new Object[]{getId_task()}, new String[]{"integer"}, null).length;
+		return Comment.getModel().findAll("id_task = ?", new Object[]{getId_task()}, new String[]{"integer"}, null).length;
 	}
 
 	public boolean getEditable(int id_user)
 	{
-		return !User.getModel().find("id_user IN (SELECT id_user FROM assign WHERE id_task='?' AND id_user='?')", new Object[]{getId_task(), id_user}, new String[]{"integer", "integer"}, null).isEmpty();
+		return !User.getModel().find("id_user IN (SELECT id_user FROM assign WHERE id_task=? AND id_user=?)", new Object[]{getId_task(), id_user}, new String[]{"integer", "integer"}, null).isEmpty();
 	}
 	
 	public boolean getDeletable(int id_user)
