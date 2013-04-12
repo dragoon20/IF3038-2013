@@ -56,17 +56,15 @@ public class User extends DBSimpleRecord
             {
                 try {
                     PreparedStatement statement = connection.prepareStatement
-                            (
-                                "INSERT INTO `"+ User.getModel().GetTableName()+"` (username, email, fullname, avatar, birthdate, password) VALUES ('" + 
-                                getUsername() + "','" +
-                                getEmail() + "','" +
-                                getFullname() + "','" +
-                                getAvatar() + "','" +
-                                getBirthdate() + "','" +
-                                getPassword() + "')"
-                            );
+                    ("INSERT INTO `"+ User.getModel().GetTableName()+"` (username, email, fullname, avatar, birthdate, password) VALUES (?, ?, ?, ?, ?, ?)");
+                    // Parameters start with 1
+                    statement.setString(1, getUsername());
+                    statement.setString(2, getEmail());
+                    statement.setString(3, getFullname());
+                    statement.setString(4, getAvatar());
+                    statement.setString(5, getBirthdate());
+                    statement.setString(6, getPassword());
                     statement.executeUpdate();
-                    //INSERT INTO `progin_439_13510007`.`user` (`id_user`, `username`, `email`, `fullname`, `avatar`, `birthdate`, `password`) VALUES ('1', 'a', '2', 'a', 'a', '2013-04-02', '1');
                 } catch (SQLException ex) {
                 	System.out.println("----------------------------------------------------------");
                 	System.out.println("INSERT INTO `"+ User.getModel().GetTableName()+"` (username, email, fullname, avatar, birthdate, password) VALUES ('" + 
