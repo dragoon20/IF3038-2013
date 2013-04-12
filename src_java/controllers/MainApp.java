@@ -192,7 +192,7 @@ public class MainApp extends HttpServlet
 	
 	public void new_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if (MainApp.LoggedIn(request.getSession()))
+		if (!MainApp.LoggedIn(request.getSession()))
 		{
 			response.sendRedirect("index");
 		}
@@ -253,7 +253,7 @@ public class MainApp extends HttpServlet
 	
 	public void edit_tugas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if (MainApp.LoggedIn(request.getSession()))
+		if (!MainApp.LoggedIn(request.getSession()))
 		{
 			response.sendRedirect("index");
 		}
@@ -317,8 +317,7 @@ public class MainApp extends HttpServlet
 	
 	public void change_profile_data(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		// TODO change_profile_data logic
-		if (MainApp.LoggedIn(request.getSession()))
+		if (!MainApp.LoggedIn(request.getSession()))
 		{
 			response.sendRedirect("index");
 		}
@@ -369,7 +368,42 @@ public class MainApp extends HttpServlet
 	
 	public void change_user_password(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		// TODO change_user_password logic
+		if (!MainApp.LoggedIn(request.getSession()))
+		{
+			response.sendRedirect("index");
+		}
+
+		if ("POST".equals(request.getMethod().toUpperCase()))
+		{
+			User user = (User)User.getModel().find("id_user = ?", new Object[]{MainApp.currentUserId(request.getSession())}, new String[]{"integer"}, null);
+			
+			if (user.getPassword().equals(DBSimpleRecord.MD5((request.getParameter("current_password")!=null ? request.getParameter("current_password"): ""))))
+			{
+				user.setPassword(DBSimpleRecord.MD5(request.getParameter("new_password")));
+				user.putData("confirm_password", DBSimpleRecord.MD5(request.getParameter("confirm_password")));
+				
+				boolean temperror = user.checkValidity();
+				if (temperror)
+				{
+					// TODO print error screen
+				}
+				else
+				{
+					if (user.save())
+					{
+						response.sendRedirect("index");
+					}
+					else
+					{
+						// TODO print error page
+					}
+				}
+			}
+		}
+		else
+		{
+			// TODO print error page
+		}
 	}
 	
 	public void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
