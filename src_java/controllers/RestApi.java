@@ -110,16 +110,16 @@ public class RestApi extends HttpServlet
 				
 				if (request.getParameter("category_id")!=null)
 				{
-					Task[] ret = Task.getModel().findAll("task_id > ? AND EXISTS (SELECT * FROM "+Category.getTableName()+
+					Task[] ret = (Task[])Task.getModel().findAll("task_id > ? AND EXISTS (SELECT * FROM "+Category.getTableName()+
 										"WHERE category_id = ? AND task_id = task.id)", 
 										new Object[]{request.getParameter("task_id"), request.getParameter("task_id")}, 
-										new String[]{"integer", "integer"});
+										new String[]{"integer", "integer"}, null);
 					res.put("", Arrays.asList(ret));
 				}
 				else
 				{
 					// retrieve all
-					Task[] ret = Task.getModel().findAll("task_id > ?", new Object[]{request.getParameter("task_id")}, new String[]{"integer"}, null);
+					Task[] ret = (Task[])Task.getModel().findAll("task_id > ?", new Object[]{request.getParameter("task_id")}, new String[]{"integer"}, null);
 					res.put("", Arrays.asList(ret));
 				}
 				pw.println(res.toJSONString());
@@ -166,6 +166,8 @@ public class RestApi extends HttpServlet
 			StringBuilder not_query = new StringBuilder();
 			List<Object> param = new ArrayList<Object>();
 			List<String> paramTypes = new ArrayList<String>();
+			param.add(tags[tags.length-1]);
+			paramTypes.add("string");
 			for (int i=0;i<tags.length-1;++i)
 			{
 				not_query.append(" tag_name <> ? ");
@@ -177,7 +179,7 @@ public class RestApi extends HttpServlet
 				paramTypes.add("string");
 			}
 			
-			Tag[] ret = Tag.getModel().findAll(" tag_name LIKE '?%' "+not_query+" LIMIT 10");
+			Tag[] ret = (Tag[])Tag.getModel().findAll(" tag_name LIKE '?%' "+not_query+" LIMIT 10", param.toArray(), (String[])paramTypes.toArray(), null);
 			
 			JSONObject res = new JSONObject();
 			for (int i=0;i<ret.length;++i)
@@ -275,7 +277,7 @@ public class RestApi extends HttpServlet
 					Task[] tasks = (Task[])Task.getModel().findAll("id_kategori = ?", new Object[]{request.getParameter("category_id")}, new String[]{"string"}, null);
 					
 					SimpleDateFormat sdf = new SimpleDateFormat("j F Y");
-					Map<String, Object>[] maps = new HashMap<String, Object>[tasks.length];
+					Map<String, Object>[] maps = new HashMap[tasks.length];
 					for (int i=0;i<tasks.length;++i)
 					{
 						maps[i] = new HashMap<String, Object>();
@@ -315,7 +317,7 @@ public class RestApi extends HttpServlet
 																new Object[]{id, id, id, id}, new String[]{"integer", "integer", "integer", "integer"}, null);
 				
 				SimpleDateFormat sdf = new SimpleDateFormat("j F Y");
-				Map<String, Object>[] maps = new HashMap<String, Object>[tasks.length];
+				Map<String, Object>[] maps = new HashMap[tasks.length];
 				for (int i=0;i<tasks.length;++i)
 				{
 					maps[i] = new HashMap<String, Object>();
@@ -346,7 +348,7 @@ public class RestApi extends HttpServlet
 			// todo use prepared statement
 			String id_task = request.getParameter("id_task");
 			//$task = array();
-			Task task = Task.getModel().find("id_task = ? ", new Object[]{id_task}, new String[]{"integer"}, new String[]{"id_task", "nama_task", "status", "deadline"});
+			Task task = (Task)Task.getModel().find("id_task = ? ", new Object[]{id_task}, new String[]{"integer"}, new String[]{"id_task", "nama_task", "status", "deadline"});
 	
 			User[] users = task.getAssignee();
 			List<Map<String, Object>> temp = new ArrayList<Map<String,Object>>();
@@ -502,7 +504,7 @@ public class RestApi extends HttpServlet
 					}
 					query.append(")");
 					
-					User[] users = (User[])User.getModel().findAll(query, usernames, paramType, null);
+					User[] users = (User[])User.getModel().findAll(query.toString(), usernames, paramType, null);
 					Connection conn = DBConnection.getConnection();
 					for (User user : users)
 					{
@@ -686,8 +688,7 @@ public class RestApi extends HttpServlet
 				param.add(users[i]);
 				paramTypes.add("string");
 			}
-			User[] ret = (User[])User.getModel().findAll(" username LIKE '?%' "+not_query+" LIMIT 10", param, paramTypes, new String[]{"id_user", "username"});
-			
+			User[] ret = (User[])User.getModel().findAll(" username LIKE '?%' "+not_query+" LIMIT 10", param.toArray(), (String[])paramTypes.toArray(), null);
 			JSONObject res = new JSONObject();
 			for (int i=0;i<ret.length;++i)
 			{

@@ -295,6 +295,7 @@ public class MainApp extends HttpServlet
 				}
 			}
 			task.putData("attachments", attachments);
+			task.putData("id_user", MainApp.currentUserId(request.getSession()));
 			
 			boolean temperror = task.checkValidity();
 			if (temperror)

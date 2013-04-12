@@ -70,6 +70,7 @@ public class Task extends DBSimpleRecord {
             }
             return true;
         }
+        return false;
     }
     
     public boolean checkValidity() {

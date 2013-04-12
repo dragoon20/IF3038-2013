@@ -14,12 +14,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -165,11 +165,11 @@ public abstract class DBSimpleRecord
     	return null;
     }
     
-    public DBSimpleRecord findAll(String query, Object[] params, String[] params_type , String[] selection)
+    public DBSimpleRecord[] findAll(String query, Object[] params, String[] params_type , String[] selection)
     {
         try {
             Class<?> c = Class.forName(GetClassName());
-            DBSimpleRecord result = (DBSimpleRecord)c.newInstance();
+            List<DBSimpleRecord> result = new ArrayList<DBSimpleRecord>();
             if (query != "")
 	        {
 	            query = " WHERE "+query;
@@ -188,7 +188,7 @@ public abstract class DBSimpleRecord
 	            cmd.append("*");
 	        }
                 
-                PreparedStatement statement = connection.prepareStatement("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query);
+            PreparedStatement statement = connection.prepareStatement("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query);
 	        for (int i=0;i<params.length;++i)
 	        {
 	        	if ("string".equals(params_type[i]))
@@ -206,14 +206,16 @@ public abstract class DBSimpleRecord
             int column_count = meta_data.getColumnCount();
             while (rs.next())
             {
+            	DBSimpleRecord row = (DBSimpleRecord)c.newInstance();
             	for (int i=1;i<=column_count;++i)
             	{
             		String label = meta_data.getColumnLabel(i);
-            		result.putData(label, rs.getObject(i));
+            		row.putData(label, rs.getObject(i));
             	}
+            	result.add(row);
             }
             
-            
+            return (DBSimpleRecord[])result.toArray();
         } catch (ClassNotFoundException e1) {
 		e1.printStackTrace();
         } catch (InstantiationException e) {
