@@ -1,3 +1,5 @@
+<%@page import="sun.org.mozilla.javascript.json.JsonParser"%>
+<%@page import="models.Task"%>
 <%@page import="models.Category"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="controllers.MainApp"%>
@@ -25,39 +27,42 @@
 	String todoQ = "status=0";
 	String doneQ = "status=1";
 	String narrowQ = "";
+	boolean canDelete;
 
 	Category currentCat;
 	if (cat != 0) 
 	{
-		//$currentCat = Category::model()->findAll('id_kategori=' . $cat);
-		/*if ($currentCat) {
-			$currentCat = $currentCat[0];
-			$narrowQ = ' AND id_kategori=' . $cat;
-			$canDelete = $currentCat->id_user == $this->currentUserId;
+		currentCat = Category.getModel().find("id_kategori="+cat);
+		if (currentCat!=null)
+		{
+			narrowQ = "AND id_kategori=" + cat;
+			canDelete = (currentCat.getId_user()==MainApp.currentUserId(session));
 		}
+		/*
 		else {
 			unset($currentCat);
 			unset($cat);
 		}*/
 	}
 
-	//$tasks = $this->currentUser->getTasks();
-	//$todo = $this->currentUser->getTasks($todoQ . $narrowQ);
-	//$done = $this->currentUser->getTasks($doneQ . $narrowQ);
+	Task[] tasks = MainApp.currentUser(session).getTasks("");
+	Task[] todo = MainApp.currentUser(session).getTasks(todoQ . narrowQ);
+	Task[] done = MainApp.currentUser(session).getTasks(doneQ . narrowQ);
 
-	//$categories = $this->currentUser->getCategories();
+	Category[] categories = ((User)session.getAttribute("currentUser")).getCategories();
 
 	// Presentation Logic Here
-
-	/*if ($cat) {
-		$pageTitle = $currentCat->nama_kategori;
-	}
-	else {
-		$pageTitle = 'All Tasks';
-	}*/
 	
 	String pageTitle = "";
-
+	if (cat!=0) 
+	{
+		pageTitle = currentCat.getNama_kategori();
+	}
+	else 
+	{
+		pageTitle = "All Tasks";
+	}
+	
 	ArrayList<String> javascripts = new ArrayList<String>();
 	javascripts.add("checker");
 	javascripts.add("dashboard");
@@ -106,10 +111,23 @@ foreach ($done as $task) { include dirname(__FILE__) . '/../template/task.php'; 
 							<h3>Categories</h3>
 						</header>
 						<ul id="categoryList">
-							<li id="categoryLi0" <% if (currentCat.getId_kategori()==0) out.print("class=\"active\""); %>><a href="dashboard.php" data-category-id="0">All Tasks</a></li>
-							<?php foreach ($categories as $cat): ?>
-							<li data-deletable="<?php echo $cat->id_user == $this->currentUserId ? 'true' : 'false' ?>" id="categoryLi<?php echo $cat->id_kategori ?>"<?php if ($currentCat->id_kategori == $cat->id_kategori) echo ' class="active"' ?>><a href="dashboard.php?cat=<?php echo $cat->id_kategori ?>" data-category-id="<?php echo $cat->id_kategori ?>"><?php echo $cat->nama_kategori ?></a></li>
-							<?php endforeach; ?>
+							<li id="categoryLi0" <% if (currentCat.getId_kategori()==0) out.print("class=\"active\""); %>>
+								<a href="dashboard.php" data-category-id="0">
+									All Tasks
+								</a>
+							</li>
+							<% 
+								for (Category cate : categories)
+								{
+							%>
+									<li data-deletable="<%= (cate.getId_user()==MainApp.currentUserId(session)) ? "true" : "false" %>" id="categoryLi<%= cate.getId_kategori() %>"<%= (currentCat.getId_kategori() == cate.getId_kategori())? "class=\"active\"" : "" %>>
+										<a href="dashboard.php?cat=<%= cate.getId_kategori() %>" data-category-id="<%= cate.getId_kategori() %>">
+											<%= cate.getNama_kategori() %>
+										</a>
+									</li>
+							<%
+								}
+							%>
 						</ul>
 						<button type="button" id="addCategoryButton">Tambah Kategori</button>
 					</section>
@@ -119,15 +137,15 @@ foreach ($done as $task) { include dirname(__FILE__) . '/../template/task.php'; 
 
 		</div>
 		<% 
-			//if ($currentCat):
-			//{
+			if (currentCat!=null)
+			{
 		%>
 		<script>
-			//var currentCat = <?php echo $currentCat->id_kategori ?>;
-			//var canDelete = <?php echo json_encode($canDelete) ?>;
+			var currentCat = <%= currentCat.getId_kategori() %>;
+			var canDelete = <%= (canDelete) ? "true" : "false" %>;
 		</script>
 		<%
-			//}
+			}
 		%>
 		<div class="modal-overlay" id="modalOverlay">
 			<div class="modal-dialog">
