@@ -18,9 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-
-
-import net.sf.json.JSONObject;
+import org.json.simple.JSONObject;
 
 import models.Category;
 import models.Comment;
@@ -670,13 +668,13 @@ public class RestApi extends HttpServlet
 				errors.add("Data-data yang dimasukkan tidak valid.");
 			}
 			
-			if (User.getModel().find("username = ? OR email = ? ", new Object[]{request.getParameter("username"), request.getParameter("email")}, new String[]{"string", "string"}, null).isEmpty())
+			if (!User.getModel().find("username = ? OR email = ? ", new Object[]{request.getParameter("username"), request.getParameter("email")}, new String[]{"string", "string"}, null).isEmpty())
 			{
 				status = "fail";
 				errors.add("Username/email sudah digunakan.");
 			}
 			ret.put("status", status);
-			ret.put("errors", errors.toArray());
+			ret.put("errors", errors);
 		}
 		else
 		{
@@ -684,7 +682,7 @@ public class RestApi extends HttpServlet
 		}
 
 		PrintWriter pw = response.getWriter();
-		pw.println(ret.toString());
+		pw.println(ret.toJSONString());
 	}
 
 	/*** ----- END OF USER MODULE -----***/	
