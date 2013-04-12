@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +25,7 @@ import org.json.simple.JSONObject;
 
 import models.Category;
 import models.Comment;
+import models.DBConnection;
 import models.DBSimpleRecord;
 import models.Tag;
 import models.Task;
@@ -101,43 +105,51 @@ public class RestApi extends HttpServlet
 		{
 			if (request.getParameter("task_id")!=null)
 			{
+				PrintWriter pw = response.getWriter();
+				JSONObject res = new JSONObject();
+				
 				if (request.getParameter("category_id")!=null)
 				{
-					// TODO check session current user
-					// retrieve based on category
-					//$ret = Task::model()->findAll("task_id > ".$params['task_id']." AND EXISTS (SELECT * FROM ".Categoory::tableName().
-					//	" WHERE category_id = " . $params['category_id']." AND task_id = task.id)");
+					Task[] ret = Task.getModel().findAll("task_id > ? AND EXISTS (SELECT * FROM "+Category.getTableName()+
+										"WHERE category_id = ? AND task_id = task.id)", 
+										new Object[]{request.getParameter("task_id"), request.getParameter("task_id")}, 
+										new String[]{"integer", "integer"});
+					res.put("", Arrays.asList(ret));
 				}
 				else
 				{
 					// retrieve all
-					//$ret = Task::model()->findAll("task_id > ".$params['task_id']);
+					Task[] ret = Task.getModel().findAll("task_id > ?", new Object[]{request.getParameter("task_id")}, new String[]{"integer"}, null);
+					res.put("", Arrays.asList(ret));
 				}
+				pw.println(res.toJSONString());
 			}
-			// print result
-			//return $ret;
 		}
 	}
 	
 	public void retrieve_tags(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if (request.getParameter("tags")!=null)
+		if (MainApp.LoggedIn(session))
 		{
-			// retrieve based on existing tags
-			/*$condition = "";
-			foreach($params['tags'] as $tag)
+			if (request.getParameter("tags")!=null)
 			{
-				$condition .= "tag_name != ".$tag." ";
+				// retrieve based on existing tags
+				StringBuilder condition = new StringBuilder();
+				/*$condition = "";
+				foreach($params['tags'] as $tag)
+				{
+					$condition .= "tag_name != ".$tag." ";
+				}
+				$ret = Tag::model()->findAll($condition);*/
 			}
-			$ret = Tag::model()->findAll($condition);*/
+			else
+			{
+				// retrieve all
+				//$ret = Tag::model()->findAll();
+			}
+			// print result
+			//return $ret;
 		}
-		else
-		{
-			// retrieve all
-			//$ret = Tag::model()->findAll();
-		}
-		// print result
-		//return $ret;
 	}
 	
 	/**
@@ -148,19 +160,32 @@ public class RestApi extends HttpServlet
 	{
 		if ((request.getParameter("tag")!=null) && (MainApp.LoggedIn(session)))
 		{	
+			PrintWriter pw = response.getWriter();
+			
 			String[] tags = request.getParameter("tag").split(",");
-			/*$not_query = array();
-			for ($i=0;$i<count($tags)-1;++$i)
+			StringBuilder not_query = new StringBuilder();
+			List<Object> param = new ArrayList<Object>();
+			List<String> paramTypes = new ArrayList<String>();
+			for (int i=0;i<tags.length-1;++i)
 			{
-				$not_query [] = " tag_name <> '".addslashes($tags[$i])."' ";
+				not_query.append(" tag_name <> ? ");
+				if (i!=tags.length-2)
+				{
+					not_query.append(" AND ");
+				}
+				param.add(tags[i]);
+				paramTypes.add("string");
 			}
-			$tag = $tags[count($tags)-1];
-			$string = ($not_query) ? " AND ".implode("AND",$not_query) : "";
-			$return = Tag::model()->findAll(" tag_name LIKE '".addslashes($tag)."%' ".$string." LIMIT 10");*/
+			
+			Tag[] ret = Tag.getModel().findAll(" tag_name LIKE '?%' "+not_query+" LIMIT 10");
+			
+			JSONObject res = new JSONObject();
+			for (int i=0;i<ret.length;++i)
+			{
+				res.put(i, ret[i].getTag_name());
+			}
+			pw.println(res.toJSONString());
 		}
-		
-		// print result
-		//return $return;
 	}
 	
 	
@@ -332,6 +357,10 @@ public class RestApi extends HttpServlet
 				map.put("id_user", user.getId_user());
 				temp.add(map);
 			}
+			task.putData("asignee", temp);
+			
+			Tag[] tags = task.getTags();
+			
 			
 				/*$task = Task::model()->find("id_task=".$_GET['id_task'], array("id_task","nama_task","status","deadline"));
 	
@@ -360,21 +389,44 @@ public class RestApi extends HttpServlet
 
 	public void mark_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		/*$start = microtime();
-		$id_task = addslashes($_POST['taskID']);
-		$completed = $_POST['completed'] == 'true' ? 1 : 0;
-
-		// TODO permissions
-
-		$update = "UPDATE task SET status=$completed WHERE id_task='$id_task'";
-
-		$q = DBConnection::DBquery($update);
-		if (DBConnection::affectedRows()) {
-			return array('success' => true, 'taskId' => $id_task, 'done' => $completed);
+		if ((MainApp.LoggedIn(session)) && (request.getParameter("taskID")!=null) && (request.getParameter("completed")!=null))
+		{
+			try 
+			{
+				PrintWriter pw = response.getWriter();
+				JSONObject ret = new JSONObject();
+				
+				long start = System.nanoTime();
+				int id_task = Integer.parseInt(request.getParameter("taskID"));
+				int completed = ("true".equals(request.getParameter("completed"))) ? 1 : 0;
+				
+				String update = "UPDATE "+Task.getTableName()+" SET status = ? WHERE id_task = ?";
+				Connection conn = DBConnection.getConnection();
+				PreparedStatement statement;
+				
+				statement = conn.prepareStatement(update);
+				statement.setInt(1, completed);
+				statement.setInt(2, id_task);
+				int affectedrows = statement.executeUpdate();
+				
+				if (affectedrows > 1)
+				{
+					ret.put("success", true);
+					ret.put("taskId", id_task);
+					ret.put("done", completed);
+				}
+				else
+				{
+					ret.put("success", false);
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NumberFormatException e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
 		}
-		else {
-			return array('success' => false, $update);
-		}*/
 	}
 	
 	/*** ----- END OF TASK MODULE -----***/
@@ -387,25 +439,26 @@ public class RestApi extends HttpServlet
 	 */
 	public void retrieve_categories(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		// TODO use categories by user
-		//$cats = array();
 		if (MainApp.LoggedIn(session))
 		{
-			/*$raw = $this->app->currentUser->getCategories();
-
-			foreach ($raw as $cat) {
-				$dummy = new StdClass;
-				$dummy->name = $cat->nama_kategori;
-				$dummy->id = $cat->id_kategori;
-				$dummy->canDeleteCategory = $cat->getDeletable($this->app->currentUserId);
-				$dummy->canEditCategory = $cat->getEditable($this->app->currentUserId);
-
-				$cats[] = $dummy;
-			}*/
+			PrintWriter pw = response.getWriter();
+			JSONObject res = new JSONObject();
+			
+			Category[] raw = MainApp.currentUser(session).getCategories();
+			
+			List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
+			for (Category cat : raw)
+			{
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("nama_kategori", cat.getNama_kategori());
+				map.put("id", cat.getId_kategori());
+				map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
+				map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
+				
+				result.add(map);
+			}
+			res.put("", result);
 		}
-
-		// print result
-		//return $cats;
 	}
 	
 	/**
@@ -416,48 +469,71 @@ public class RestApi extends HttpServlet
 	{
 		if (MainApp.LoggedIn(session))
 		{
-			if ("POST".equals(request.getMethod().toUpperCase()))
+			if (("POST".equals(request.getMethod().toUpperCase())) && (request.getParameter("nama_kategori")!=null) && (request.getParameter("usernames_list")!=null))
 			{
+				PrintWriter pw = response.getWriter();
+				JSONObject res = new JSONObject();
+				
 				String nama_kategori = request.getParameter("nama_kategori");
-				/*id_user = $this->app->currentUserId; // the creator of the category
-	
-				$category = Category::model();
-				$category->nama_kategori = $nama_kategori;
-				$category->id_user = $id_user;
-				$category->save();
-	
-				$usernames = $_POST['usernames']; // an array of usernames, if using facebook-style
-				$usernames_list = $_POST['usernames_list'];
-				if (!$usernames && $usernames_list) {
-					$usernames = explode(';', $usernames_list);
+				int id_user = MainApp.currentUserId(session);
+				
+				Category category = new Category();
+				category.setNama_kategori(nama_kategori);
+				category.setId_user(id_user);
+				category.save();
+				
+				String[] usernames = request.getParameter("usernames_list").split(";");
+				String[] paramType = new String[usernames.length];
+				for (int i=0;i<usernames.length;++i)
+				{
+					usernames[i] = usernames[i].trim();
 				}
-				foreach ($usernames as $k => $v) {
-					$usernames[$k] = trim($v);
+				if (usernames.length > 1)
+				{
+					StringBuilder query = new StringBuilder("username IN (");
+					for (int i=0;i<usernames.length;++i)
+					{
+						query.append("?");
+						if (i!=usernames.length-1)
+						{
+							query.append(",");
+						}
+						paramType[i] = "string";
+					}
+					query.append(")");
+					
+					User[] users = (User[])User.getModel().findAll(query, usernames, paramType, null);
+					Connection conn = DBConnection.getConnection();
+					for (User user : users)
+					{
+						PreparedStatement prep = conn.prepareStatement("INSERT INTO edit_kategori (id_user, id_katego) VALUES (?, ?)");
+						prep.setInt(1, user.getId_user());
+						prep.setInt(2, category.getId_kategori());
+					}
 				}
-				if ($usernames) {
-					// Find the IDs of the users
-					$escapedUsernames = array();
-					foreach ($usernames as $k => $v) {
-						$escapedUsernames[] = "'" . addslashes($v) . "'";
-					}
-					$escapedUsernames = implode(',', $escapedUsernames);
-					$escapedUsernames = '(' . $escapedUsernames . ')';
-	
-					$q = "username IN $escapedUsernames";
-					$users = User::model()->findAll($q);
-	
-					// Insert into relationship table
-					foreach ($users as $user) {
-						$insert = "INSERT INTO edit_kategori (id_user, id_katego) VALUES ({$user->id_user}, {$category->id_kategori})";
-						DBConnection::DBQuery($insert);
-					}
-				}*/
-	
-				// print result
-				//return array('categoryID' => $category->id_kategori, 'categoryName' => $category->nama_kategori, 'categories' => $this->retrieve_categories());
+			
+				res.put("categoryID", category.getId_kategori());
+				res.put("categoryName", category.getNama_kategori());
+				
+				
+				Category[] raw = MainApp.currentUser(session).getCategories();
+				
+				List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
+				for (Category cat : raw)
+				{
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("nama_kategori", cat.getNama_kategori());
+					map.put("id", cat.getId_kategori());
+					map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
+					map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
+					
+					result.add(map);
+				}
+				res.put("categories", result);
+				
+				pw.println(res.toJSONString());
 			}
 		}
-		//return array();
 	}
 
 	/**
@@ -466,25 +542,28 @@ public class RestApi extends HttpServlet
 	 */
 	public void delete_category(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		/*$id_kategori = addslashes($_POST['category_id']);
-		$success = false;
-
-		if ((Category::model()->find("id_kategori=".$id_kategori)->getDeletable($this->app->currentUserId))&& ($this->app->loggedIn))
+		if (MainApp.LoggedIn(session))
 		{
-			if (Category::model()->delete("id_kategori=".$id_kategori)==1)
+			if (("POST".equals(request.getMethod().toUpperCase())) && (request.getParameter("category_id")!=null))
 			{
-				// delete was success
-				$success = true;
-			}
-			else {
-				$success = false;
+				PrintWriter pw = response.getWriter();
+				JSONObject res = new JSONObject();
+				
+				int id_kategori = Integer.parseInt(request.getParameter("category_id"));
+				boolean success = false;
+				
+				if (Category.getModel().find("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"}, null).getDeletable(MainApp.currentUserId(session)))
+				{
+					if (Category.getModel().delete("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"})==1)
+					{
+						success = true;
+					}
+				}
+				
+				res.put("success", success);
+				pw.println(res.toJSONString());
 			}
 		}
-
-		return array(
-			'success' => $success,
-			'categoryID' => $id_kategori
-		);*/
 	}
 
 	/*** ----- END OF CATEGORY MODULE -----***/
@@ -599,7 +678,7 @@ public class RestApi extends HttpServlet
 			for (int i=0;i<users.length-1;++i)
 			{
 				not_query.append(" username <> ? ");
-				if (i!=users.length-1)
+				if (i!=users.length-2)
 				{
 					not_query.append(" AND ");
 				}
