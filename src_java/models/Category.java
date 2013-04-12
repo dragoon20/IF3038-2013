@@ -4,6 +4,11 @@
  */
 package models;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Abraham Krisnanda
@@ -42,12 +47,32 @@ public class Category extends DBSimpleRecord{
     	return "kategori";
     }
     
-    public void save() {
-        
+    public boolean save() 
+    {
+        if(!this.data.containsKey("id_kategori"))
+        {
+            try {
+                // new category
+                PreparedStatement statement = connection.prepareStatement
+                ("INSERT INTO `"+ Category.getModel().GetTableName()+"` (nama_kategori, id_user) VALUES (?, ?)");
+                // Parameters start with 1
+                statement.setString(1, getNama_kategori());
+                statement.setInt(2, getId_user());
+            } catch (SQLException ex) {
+                Logger.getLogger(Category.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return true;
+        }
+        else 
+        {
+            // username and email already used
+            return false;
+        }
     }
     
-    public void checkValidity() {
-        
+    public boolean checkValidity() 
+    {
+        return false;
     }
     
     public int getId_kategori() {

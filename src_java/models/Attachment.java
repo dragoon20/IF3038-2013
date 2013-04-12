@@ -4,6 +4,11 @@
  */
 package models;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Abraham Krisnanda
@@ -23,6 +28,17 @@ public class Attachment extends DBSimpleRecord {
     
     public boolean save() 
     {
+        // check same id_task and attachment
+        try {
+            PreparedStatement statement = connection.prepareStatement
+            ("INSERT INTO `"+ User.getModel().GetTableName()+"` (id_task, attachment) VALUES (?, ?)");
+            // Parameters start with 1
+            statement.setInt(1, getId_task());
+            statement.setString(2, getAttachment());
+            statement.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return true;
     }
     

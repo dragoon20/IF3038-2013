@@ -4,7 +4,12 @@
  */
 package models;
 
+import controllers.MainApp;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,8 +22,8 @@ public class Task extends DBSimpleRecord {
     private Timestamp deadline;
     private int id_kategori;
     private int id_user;*/
-    public Task model;
-    public Task getModel() 
+    public static Task model;
+    public static Task getModel() 
     {
         if(model==null)
         {
@@ -44,12 +49,31 @@ public class Task extends DBSimpleRecord {
     	return "task";
     }
     
-    public void save() {
-        
+    public boolean save() 
+    {
+        // TIDAK MENGGUNAKAN USER ID, USER ID HARUS DITANGANI DI LUAR
+        // check task name
+        if (!this.data.containsKey(this))
+        {
+            try {
+                PreparedStatement statement = connection.prepareStatement
+                ("INSERT INTO `"+ Task.getModel().GetTableName()+"` (id_task, nama_task, status, deadline, id_kategori) VALUES (?, ?, ?, ?, ?)");
+                // Parameters start with 1
+                statement.setInt(1, getId_task());
+                statement.setString(2, getNama_task());
+                statement.setBoolean(3, isStatus());
+                statement.setDate(4, getDeadline());
+                statement.setInt(5, getId_kategori());
+                statement.executeUpdate();
+            } catch (SQLException ex) {
+                Logger.getLogger(Task.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return true;
+        }
     }
     
-    public void checkValidity() {
-        
+    public boolean checkValidity() {
+        return true;
     }
     /**
      * @return the id_task

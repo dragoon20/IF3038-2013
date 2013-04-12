@@ -4,6 +4,11 @@
  */
 package models;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Abraham Krisnanda
@@ -35,6 +40,21 @@ public class Tag extends DBSimpleRecord{
     
     public boolean save() 
     {
+        // check same tag_name
+        if (!this.data.containsKey("tag_name"))
+        {
+            // new tag
+            try {
+                PreparedStatement statement = connection.prepareStatement
+                ("INSERT INTO `"+ User.getModel().GetTableName()+"` (id_tag,tag_name) VALUES (?, ?)"); 
+                // Parameters start with 1
+                statement.setInt(1, getId_tag());
+                statement.setString(2, getTag_name());
+                statement.executeUpdate();
+            } catch (SQLException ex) {
+                Logger.getLogger(Tag.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         return true;
     }
     

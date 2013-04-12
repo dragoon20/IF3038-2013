@@ -5,6 +5,10 @@
 package models;
 
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -41,6 +45,18 @@ public class Comment extends DBSimpleRecord{
     
     public boolean save() 
     {
+        try {
+            PreparedStatement statement = connection.prepareStatement
+            ("INSERT INTO `"+ User.getModel().GetTableName()+"` (id_komentar, komentar, id_user, id_task) VALUES (?, ?, ?)");
+            // Parameters start with 1
+            statement.setInt(1, getId_komentar());
+            statement.setString(2, getKomentar());
+            statement.setInt(3, getId_user());
+            statement.setInt(4, getId_task());
+            statement.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(Comment.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return true;
     }
     
