@@ -4,7 +4,12 @@
  */
 package models;
 
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -43,6 +48,38 @@ public class User extends DBSimpleRecord
     
     public boolean save() 
     {
+        // check same username or email
+        if (this.data.containsKey("id_user"))
+        {
+            // new user
+            if ((User.getModel().find("username = ?",new Object[] {this.data.containsKey("username")}, new String[]{"integer"}, null)).isEmpty())
+            {
+                try {
+                    PreparedStatement statement = connection.prepareStatement
+                            (
+                                "INSERT INTO `"+ User.getModel().GetTableName()+"` (username, email, fullname, avatar, birthdate, password) VALUES ('" + 
+                                this.data.containsKey("username") + "','" +
+                                this.data.containsKey("email") + "','" +
+                                this.data.containsKey("fullname") + "','" +
+                                this.data.containsKey("avatar") + "','" +
+                                this.data.containsKey("birthdate") + "','" +
+                                this.data.containsKey("password") + "'"
+                            );
+                    statement.executeUpdate();
+                    //INSERT INTO `progin_439_13510007`.`user` (`id_user`, `username`, `email`, `fullname`, `avatar`, `birthdate`, `password`) VALUES ('1', 'a', '2', 'a', 'a', '2013-04-02', '1');
+                } catch (SQLException ex) {
+                    Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return true;
+            }
+            else
+            {   
+                // username and email already used
+                return false;
+            }
+            
+            //if(User.find("username = ?",new Object[]{this.data.containsKey("username")}, new String[]{"integer"}, null)
+        }
         return true;
     }
     

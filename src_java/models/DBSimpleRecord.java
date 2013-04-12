@@ -25,7 +25,7 @@ import java.util.Map.Entry;
  */
 public abstract class DBSimpleRecord 
 {
-    private Connection connection;
+    protected Connection connection;
     protected HashMap<String, Object> data;
     
     public DBSimpleRecord() 
@@ -95,10 +95,11 @@ public abstract class DBSimpleRecord
     {
     	try
     	{
-			Class<?> c = Class.forName(GetClassName());
-			DBSimpleRecord result = (DBSimpleRecord)c.newInstance();
 
-			if (query != "")
+                Class<?> c = Class.forName(GetClassName());
+		DBSimpleRecord result = (DBSimpleRecord)c.newInstance();
+
+		if (query != "")
 	        {
 	            query = " WHERE "+query;
 	        }
