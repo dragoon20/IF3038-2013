@@ -42,6 +42,7 @@ public class App implements Filter {
 		
 		if (sess.getAttribute("base_url")==null)
 		{
+			sess.setMaxInactiveInterval(30*24*3600);
 			sess.setAttribute("base_url", req.getRequestURL().substring(0, req.getRequestURL().lastIndexOf("/")+1));
 			sess.setAttribute("full_path", request.getServletContext().getRealPath("/"));
 		}

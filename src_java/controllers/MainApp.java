@@ -408,7 +408,8 @@ public class MainApp extends HttpServlet
 	
 	public void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		// TODO logout logic
+		HttpSession session = request.getSession();
+		session.removeAttribute("user_id");
 	}
 	
 	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
