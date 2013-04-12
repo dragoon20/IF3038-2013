@@ -197,28 +197,25 @@ public class RestApi extends HttpServlet
 	{
 		if ("POST".equals(request.getMethod().toUpperCase()))
 		{
-			// todo use prepared statement
+			PrintWriter pw = response.getWriter();
+			JSONObject ret = new JSONObject();
+			
 			String id_task = request.getParameter("task_id");
 			boolean success = false;
-	
-			/*if ((Task::model()->find("id_task=".$id_task)->getDeletable($this->app->currentUserId))&& ($this->app->loggedIn))
+			if ((Task.getModel().find("id_task = ?", new Object[]{id_task}, new String[]{"string"}, null)).getDeletable(MainApp.currentUserId(session)) && (MainApp.LoggedIn(session)))
 			{
-				if (Task::model()->delete("id_task=".$id_task)==1)
+				if (Task.getModel().delete("id_task = ?", new Object[]{id_task}, new String[]{"string"})==1)
 				{
-					// delete was success
-					success = true;
+					ret.put("success", true);
 				}
-				else {
-					success = false;
+				else
+				{
+					ret.put("success", false);
 				}
-			}*/
+			}
+			ret.put("taskID", id_task);
+			pw.println(ret.toString());
 		}
-
-		// print result
-		/*return array(
-			'success' => $success,
-			'taskID' => $id_task
-		);*/
 	}
 	
 	/**
