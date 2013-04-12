@@ -121,13 +121,22 @@ public class User extends DBSimpleRecord
     
     public Task[] getTasks()
     {
-    	// TODO Add this
     	return (Task[])Task.getModel().findAll("(id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+
     			" WHERE id_user='?' OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user='?') "+
     			"OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
     			"ON t.id_task=a.id_task WHERE t.id_user = '?' OR a.id_user = '?' )))", 
     			new Object[]{getId_user(), getId_user(), getId_user(), getId_user()}, 
     			new String[]{"integer", "integer", "integer", "integer"}, null);
+    }
+    
+    public Task[] getTasks(int status, int category_id)
+    {
+    	return (Task[])Task.getModel().findAll("(id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+
+    			" WHERE id_user='?' OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user='?') "+
+    			"OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
+    			"ON t.id_task=a.id_task WHERE t.id_user = '?' OR a.id_user = '?' ))) AND status = '?' AND (id_kategori = '?' OR 0='?')", 
+    			new Object[]{getId_user(), getId_user(), getId_user(), getId_user(), status, category_id, category_id}, 
+    			new String[]{"integer", "integer", "integer", "integer", "integer", "integer", "integer"}, null);
     }
     
     public Task[] getTasksLike(String q)

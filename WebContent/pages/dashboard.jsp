@@ -27,15 +27,14 @@
 	String todoQ = "status=0";
 	String doneQ = "status=1";
 	String narrowQ = "";
-	boolean canDelete;
+	boolean canDelete = false;
 
-	Category currentCat;
+	Category currentCat = null;
 	if (cat != 0) 
 	{
 		currentCat = (Category)Category.getModel().find("id_kategori = ?", new Object[]{cat}, new String[]{"integer"}, null);
 		if (currentCat!=null)
 		{
-			narrowQ = "AND id_kategori=" + cat;
 			canDelete = (currentCat.getId_user()==MainApp.currentUserId(session));
 		}
 		/*
@@ -46,8 +45,8 @@
 	}
 
 	Task[] tasks = MainApp.currentUser(session).getTasks();
-	Task[] todo = MainApp.currentUser(session).getTasks(todoQ + narrowQ);
-	Task[] done = MainApp.currentUser(session).getTasks(doneQ + narrowQ);
+	Task[] todo = MainApp.currentUser(session).getTasks(0, cat);
+	Task[] done = MainApp.currentUser(session).getTasks(1, cat);
 
 	Category[] categories = ((User)session.getAttribute("currentUser")).getCategories();
 

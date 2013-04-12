@@ -198,6 +198,9 @@ public abstract class DBSimpleRecord
 	        	}
 	        	else if ("integer".equals(params_type[i]))
 	        	{
+	        		System.out.println("--------------------------------------------------------------");
+	        		System.out.println("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query);
+	        		System.out.println("--------------------------------------------------------------");
 	        		statement.setInt(i+1, (Integer)params[i]);
 	        	}
 	        }
@@ -231,7 +234,73 @@ public abstract class DBSimpleRecord
         }
         return null;
     }
-        
+    
+    public DBSimpleRecord[] findAllLimit(String query, Object[] params, String[] params_type , String[] selection, int limitStart, int limitEnd)
+    {
+    	try {
+            Class<?> c = Class.forName(GetClassName());
+            List<DBSimpleRecord> result = new ArrayList<DBSimpleRecord>();
+            if (query != "")
+	        {
+	            query = " WHERE "+query;
+	        }
+	        StringBuilder cmd = new StringBuilder();
+	        if ((selection!=null) && (selection.length!=0))
+	        {
+	            for (int i=1;i<=selection.length;i++)
+	            {
+	            	cmd.append(selection[i]);
+	            	cmd.append(", ");
+	            }
+	            cmd.substring(0, cmd.length()-2);
+	        }
+	        else {
+	            cmd.append("*");
+	        }
+                
+            PreparedStatement statement = connection.prepareStatement("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query + " LIMIT "+ limitStart + ", " + limitEnd);
+	        for (int i=0;i<params.length;++i)
+	        {
+	        	if ("string".equals(params_type[i]))
+	        	{
+	        		statement.setNString(i+1, (String)params[i]);
+	        	}
+	        	else if ("integer".equals(params_type[i]))
+	        	{
+	        		statement.setInt(i+1, (Integer)params[i]);
+	        	}
+	        }
+            ResultSet rs = statement.executeQuery() ;
+            
+            ResultSetMetaData meta_data = rs.getMetaData();
+            int column_count = meta_data.getColumnCount();
+            while (rs.next())
+            {
+            	DBSimpleRecord row = (DBSimpleRecord)c.newInstance();
+            	for (int i=1;i<=column_count;++i)
+            	{
+            		String label = meta_data.getColumnLabel(i);
+            		row.putData(label, rs.getObject(i));
+            	}
+            	result.add(row);
+            }
+            
+            return (DBSimpleRecord[])result.toArray();
+        } catch (ClassNotFoundException e1) {
+		e1.printStackTrace();
+        } catch (InstantiationException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+        } catch (IllegalAccessException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+        } catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+        }
+        return null;
+	}
+    
     public int delete(String query, Object[] params, String[] params_type)
     {
         int affected_row=0;

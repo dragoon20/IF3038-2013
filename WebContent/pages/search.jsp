@@ -7,30 +7,30 @@
 		response.sendRedirect("index");
 	}
 	
-	String q = "";
+	String query = "";
 	if (request.getParameter("q")!=null)
 	{
-		q = request.getParameter("q");
+		query = request.getParameter("q");
 	}
 	
-	String terms = "%"+q.replace(" ", "%")+"%";
+	String terms = "%"+query.replace(" ", "%")+"%";
 	
 	String catf = "nama_kategori";
 	String taskf = "nama_task";
 	String userf = "nama_user";
 	
-	String type = "all";
+	String query_type = "all";
 	if (request.getParameter("type")!=null)
 	{
-		type = request.getParameter("type");
+		query_type = request.getParameter("type");
 	}
-	boolean all = ("all".equals(type.toLowerCase()));
+	boolean all = ("all".equals(query_type.toLowerCase()));
 	
 	int id = MainApp.currentUserId(session);
-	String baseTaskQ = "id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+" WHERE id_user='"+id+"' "+
-			 "OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user='"+id+"') "+
+	String baseTaskQ = "id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+" WHERE id_user='?' "+
+			 "OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user='?') "+
 			 "OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
-			 "ON t.id_task=a.id_task WHERE t.id_user = '"+id+"' OR a.id_user = '"+id+"' ))";
+			 "ON t.id_task=a.id_task WHERE t.id_user = '?' OR a.id_user = '?' ))";
 	
 	request.setAttribute("title", "MOA - Search");
 	request.setAttribute("currentPage", (request.getParameter("id")!=null) ? "" : "search");
@@ -51,9 +51,9 @@
 		</header>
 		<div class="search-results<?php if ($all) echo ' all' ?>">
 		<%
-			if (("task".equals(type.toLowerCase())) || (all))
+			if (("task".equals(query_type.toLowerCase())) || (all))
 			{
-				tasks = Task.getModel().findAllLimit(baseTaskQ+" AND nama_task LIKE '"+ terms + "'", 0, 10);
+				tasks = (Task[])Task.getModel().findAllLimit(baseTaskQ+" AND nama_task LIKE '?'", new Object[]{id, id, id, id, terms}, new String[]{"integer", "integer", "integer", "integer", "string"}, null, 0, 10);
 		%>
 				<div class="result-set">
 					<section class="tasks">
@@ -63,7 +63,7 @@
 						<!-- Tasks -->
 						<div id="taskList">
 							<%
-								if (task!=null)
+								if (tasks!=null)
 								{
 									for (Task task : tasks)
 									{
@@ -83,9 +83,9 @@
 				</div>
 		<%
 			}
-			if (("user".equals(type.toLowerCase())) || (all))
+			if (("user".equals(query_type.toLowerCase())) || (all))
 			{
-				users = User.getModel().findAllLimit("username LIKE '"+terms+"' OR fullname LIKE '"+terms+"' OR email LIKE '"+terms+"' OR birthdate LIKE '"+terms+"'", 0, 10);
+				users = (User[])User.getModel().findAllLimit("username LIKE '?' OR fullname LIKE '?' OR email LIKE '?' OR birthdate LIKE '?'", new Object[]{terms, terms, terms, terms}, new String[]{"string", "string", "string", "string"}, new String[]{"id_user", "username", "avatar", "fullname"}, 0, 10);
 		%>
 				<div class="result-set">
 					<section class="users">
@@ -114,9 +114,9 @@
 				</div>
 		<%
 			}
-			if (("category".equals(type.toLowerCase())) || (all))
+			if (("category".equals(query_type.toLowerCase())) || (all))
 			{
-				categories = Category.getModel().findAllLimit("nama_kategori LIKE '"+terms+"'", 0, 10);
+				categories = (Category[])Category.getModel().findAllLimit("nama_kategori LIKE '?'", new Object[]{terms}, new String[]{"string"}, null, 0, 10);
 		%>
 		<div class="result-set">
 			<section class="categories">
@@ -155,7 +155,7 @@
 	</div>
 <script>
 	var isAll = <%= (all) ? "true" : "false" %>;
-	var q = "<%= q %>";
-	var currentType = "<%= type %>";
+	var q = "<%= query %>";
+	var currentType = "<%= query_type %>";
 </script>
 <%@ include file="../template/footer.jsp" %>
