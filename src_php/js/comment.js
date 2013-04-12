@@ -130,7 +130,7 @@ Rp(function()
 					Rp('#commentForm').removeClass('loading');
 					try {
 						response = Rp.parseJSON(req.responseText);
-						if (response == "success")
+						if (response.status == "success")
 						{
 							document.getElementById("commentBody").value = "";
 							retrievecomment();
@@ -169,7 +169,7 @@ function delete_comment(id)
 				Rp('#commentForm').removeClass('loading');
 				try {
 					response = Rp.parseJSON(req.responseText);
-					if (response == "success")
+					if (response.status == "success")
 					{
 						var element = document.getElementById("comment_"+id);
 						element.parentNode.removeChild(element);

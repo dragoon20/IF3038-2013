@@ -63,8 +63,8 @@ asignee.onkeyup = function()
 					{
 						temp++;
 						var newLi = document.createElement("li");
-						newLi.innerHTML = "<a href='javascript:choose_assignee(\""+response[i].data.username+"\")'>"+
-											response[i].data.username+"</a>";
+						newLi.innerHTML = "<a href='javascript:choose_assignee(\""+response[i].username+"\")'>"+
+											response[i].username+"</a>";
 						inflate.insertBefore(newLi, inflate.firstChild);
 					}
 					

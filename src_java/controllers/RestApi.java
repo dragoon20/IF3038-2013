@@ -214,7 +214,7 @@ public class RestApi extends HttpServlet
 				}
 			}
 			ret.put("taskID", id_task);
-			pw.println(ret.toString());
+			pw.println(ret.toJSONString());
 		}
 	}
 	
@@ -270,13 +270,13 @@ public class RestApi extends HttpServlet
 					}
 					ret.put("tasks", maps);
 					
-					pw.println(ret.toString());
+					pw.println(ret.toJSONString());
 				}
 				else 
 				{
 					// not found
 					ret.put("success", false);
-					pw.println(ret.toString());
+					pw.println(ret.toJSONString());
 				}
 			}
 			else 
@@ -309,7 +309,7 @@ public class RestApi extends HttpServlet
 					maps[i].put("tags", str_tags);
 				}
 				ret.put("tasks", maps);
-				pw.println(ret.toString());
+				pw.println(ret.toJSONString());
 			}
 		}
 	}
@@ -513,11 +513,19 @@ public class RestApi extends HttpServlet
 	{
 		if ((request.getParameter("id_task")!=null) && (request.getParameter("timestamp")!=null) && (MainApp.LoggedIn(session)))
 		{
-			//$return = Comment::getLatest($params['id_task'], $params['timestamp']);
+			PrintWriter pw = response.getWriter();
+			JSONObject ret = new JSONObject();
+			
+			Comment[] comments = Comment.getLatest(request.getParameter("id_task"), request.getParameter("timestamp"));
+			
+			int i = 0;
+			for (Comment c : comments)
+			{
+				ret.put(i, c.getData());
+				i++;
+			}
+			pw.println(ret.toJSONString());
 		}
-		
-		// print result
-		//return $return;
 	}
 	
 	/**
@@ -526,20 +534,23 @@ public class RestApi extends HttpServlet
 	 */
 	public void comment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		//$return = "fail";
+		PrintWriter pw = response.getWriter();
+		JSONObject ret = new JSONObject();
 		if (("POST".equals(request.getMethod())) && (request.getParameter("komentar")!=null) && (MainApp.LoggedIn(session)))
 		{
-			Comment commment = new Comment();
-			/*$comment->data = $params;
-			$comment->id_user = $this->app->currentUserId;
-			if ($comment->save())
+			Comment comment = new Comment();
+			comment.addData(request.getParameterMap());
+			comment.setId_user(MainApp.currentUserId(session));
+			if (comment.save())
 			{
-				$return = "success";
-			}*/
+				ret.put("status", "success");
+			}
+			else
+			{
+				ret.put("status", "fail");
+			}
 		}
-		
-		// print result
-		//return $return;
+		pw.println(ret.toJSONString());
 	}
 	
 	/**
@@ -548,17 +559,20 @@ public class RestApi extends HttpServlet
 	 */
 	public void remove_comment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		//$return = "fail";
+		PrintWriter pw = response.getWriter();
+		JSONObject ret = new JSONObject();
 		if (("POST".equals(request.getMethod())) && (request.getParameter("id")!=null) && (MainApp.LoggedIn(session)))
 		{
-			/*if (Comment::model()->delete("id_komentar = ".addslashes($params['id'])." AND id_user = ".addslashes($this->app->currentUserId))==1)
+			if (Comment.getModel().delete("id_komentar = ? AND id_user = ? ", new Object[]{request.getParameter("id"), MainApp.currentUserId(session)}, new String[]{"integer", "integer"})==1)
 			{
-				$return = "success";
-			}*/
+				ret.put("status", "success");
+			}
+			else
+			{
+				ret.put("status", "fail");
+			}
 		}
-		
-		// print result
-		//return $return;
+		pw.println(ret.toJSONString());
 	}
 	
 	/*** ----- END OF COMMENT MODULE -----***/
@@ -573,6 +587,8 @@ public class RestApi extends HttpServlet
 	{
 		if ((request.getParameter("username")!=null) && (MainApp.LoggedIn(session))) 
 		{
+			PrintWriter pw = response.getWriter();
+			
 			String[] users = request.getParameter("username").split(",");
 			StringBuilder not_query = new StringBuilder();
 			
@@ -591,13 +607,14 @@ public class RestApi extends HttpServlet
 				param.add(users[i]);
 				paramTypes.add("string");
 			}
-			User[] ret = User.getModel().findAll(" username LIKE '?%' "+not_query+" LIMIT 10", param, paramTypes, new String[]{"id_user", "username"});
+			User[] ret = (User[])User.getModel().findAll(" username LIKE '?%' "+not_query+" LIMIT 10", param, paramTypes, new String[]{"id_user", "username"});
 			
 			JSONObject res = new JSONObject();
 			for (int i=0;i<ret.length;++i)
 			{
-				res.put(i, ret[i]);
+				res.put(i, ret[i].getUsername());
 			}
+			pw.println(res.toJSONString());
 		}
 	}
 	
@@ -640,7 +657,7 @@ public class RestApi extends HttpServlet
 		}
 		
 		PrintWriter pw = response.getWriter();
-		pw.println(ret.toString());
+		pw.println(ret.toJSONString());
 	}
 	
 	/**
@@ -690,48 +707,57 @@ public class RestApi extends HttpServlet
 	/*** ----- START OF SEARCH MODULE -----***/
 	public void search_suggestions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		/*
-		$type = $params['type'];
-		$q = $params['q'];
-
-		if (!$q)
-			return array();
-
-		$all = $type == 'all';
-
-		$suggestions = array();
-
-		if ($type == 'task' || $all) {
-			$tasks = $this->app->currentUser->getTasksLike($q);
-			foreach ($tasks as $task) {
-				if (!in_array($task->nama_task, $suggestions)) {
-					$suggestions[] = $task->nama_task;
+		if ((MainApp.LoggedIn(session)) && (request.getParameter("type")!=null) && (request.getParameter("q")!=null))
+		{
+			String type = request.getParameter("type");
+			String q = request.getParameter("q");
+			
+			if (!"".equals(q))
+			{
+				PrintWriter pw = response.getWriter();
+				JSONObject ret = new JSONObject();
+				
+				boolean all = ("all".equals(type));
+				
+				List<String> suggestion = new ArrayList<String>();
+				if (("task".equals(type)) || (all))
+				{
+					Tasks[] tasks  = MainApp.currentUser(session).getTasksLike(q);
+					for (Task task : tasks)
+					{
+						if (!suggestion.contains(task.getNama_task()))
+						{
+							suggestion.add(task.getNama_task());
+						}
+					}
 				}
+				
+				if (("category".equals(type)) || (all))
+				{
+					Category[] categories  = MainApp.currentUser(session).getCategoriesLike(q);
+					for (Category category : categories)
+					{
+						if (!suggestion.contains(category.getNama_kategori()))
+						{
+							suggestion.add(category.getNama_kategori());
+						}
+					}
+				}
+				
+				if (("user".equals(type)) || (all))
+				{
+					User[] users  = User.getModel().findAllLike(q);
+					for (User user : users)
+					{
+						if (!suggestion.contains(user.getUsername()))
+						{
+							suggestion.add(user.getUsername());
+						}
+					}
+				}
+				
+				ret.put("", suggestion);
 			}
 		}
-		if ($type == 'category' || $all) {
-			$cats = $this->app->currentUser->getCategoriesLike($q);
-			foreach ($cats as $cat) {
-				if (!in_array($cat->nama_kategori, $suggestions)) {
-					$suggestions[] = $cat->nama_kategori;
-				}
-			}
-		}
-		if ($type == 'user' || $all) {
-			$users = User::model()->findAllLike($q);
-			foreach ($users as $u) {
-				if (!in_array($u->username, $suggestions)) {
-					$suggestions[] = $u->username;
-				}
-			}
-		}
-
-		return $suggestions;*/
 	}
-        
-        public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-        {
-            PrintWriter pw = response.getWriter();
-            pw.println("tes");
-        }
 }

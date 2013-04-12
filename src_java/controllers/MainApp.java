@@ -180,7 +180,7 @@ public class MainApp extends HttpServlet
 	
 	public void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if ("POST".equals(request.getMethod().toUpperCase()))
+		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
 			User user = new User();
 			
@@ -238,7 +238,7 @@ public class MainApp extends HttpServlet
 						out.write(bytes, 0, read);
 					}
 					out.close();
-					//response.sendRedirect("dashboard");
+					response.sendRedirect("dashboard");
 				}
 				else
 				{
@@ -279,14 +279,18 @@ public class MainApp extends HttpServlet
 			{
 				e.printStackTrace();
 			}
-			for (int i=0;i<items.size();++i)
+			for (FileItem fi : items)
 			{
-				if (!items.get(i).isFormField())
+				if (fi.isFormField())
+				{
+					task.putData(fi.getFieldName(), fi.getString());
+				}
+				else
 				{
 					Map<String, Object> tempmap = new HashMap<String, Object>();
-					String extension = items.get(i).getName().split(".")[items.get(i).getName().split(".").length-1]; 
-					tempmap.put("attachment", DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+extension);
-					tempmap.put("temp", items.get(i).getInputStream());
+					String extension = fi.getName().split("\\.")[fi.getName().split("\\.").length-1]; 
+					tempmap.put("attachment", DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension);
+					tempmap.put("temp", fi.getInputStream());
 					attachments.add(tempmap);
 				}
 			}
@@ -329,48 +333,56 @@ public class MainApp extends HttpServlet
 			if ((!task.isEmpty()) && (task.getEditable(MainApp.currentUserId(request.getSession()))))
 			{
 				task.addData(request.getParameterMap());
-			}
-			
-			List<Map<String, Object>> attachments = new ArrayList<Map<String,Object>>();
-			FileItemFactory factory = new DiskFileItemFactory();
-			ServletFileUpload upload = new ServletFileUpload(factory);
-			List<FileItem> items = null;
-			try
-			{
-				items = upload.parseRequest(request);
-			}
-			catch (FileUploadException e)
-			{
-				e.printStackTrace();
-			}
-			for (int i=0;i<items.size();++i)
-			{
-				if (!items.get(i).isFormField())
+				
+				List<Map<String, Object>> attachments = new ArrayList<Map<String,Object>>();
+				FileItemFactory factory = new DiskFileItemFactory();
+				ServletFileUpload upload = new ServletFileUpload(factory);
+				List<FileItem> items = null;
+				try
 				{
-					Map<String, Object> tempmap = new HashMap<String, Object>();
-					String extension = items.get(i).getName().split(".")[items.get(i).getName().split(".").length-1]; 
-					tempmap.put("attachment", DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+extension);
-					tempmap.put("temp", items.get(i).getInputStream());
-					attachments.add(tempmap);
+					items = upload.parseRequest(request);
 				}
-			}
-			task.putData("attachments", attachments);
-			
-			boolean temperror = task.checkValidity();
-			if (temperror)
-			{
-				// TODO go to error page
-			}
-			else
-			{
-				if (task.save())
+				catch (FileUploadException e)
 				{
-					response.sendRedirect("tugas?id"+task.getId_task());
+					e.printStackTrace();
+				}
+				for (FileItem fi : items)
+				{
+					if (fi.isFormField())
+					{
+						task.putData(fi.getFieldName(), fi.getString());
+					}
+					else
+					{
+						Map<String, Object> tempmap = new HashMap<String, Object>();
+						String extension = fi.getName().split("\\.")[fi.getName().split("\\.").length-1]; 
+						tempmap.put("attachment", DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension);
+						tempmap.put("temp", fi.getInputStream());
+						attachments.add(tempmap);
+					}
+				}
+				task.putData("attachments", attachments);
+				
+				boolean temperror = task.checkValidity();
+				if (temperror)
+				{
+					// TODO go to error page
 				}
 				else
 				{
-					// TODO got to error page
+					if (task.save())
+					{
+						response.sendRedirect("tugas?id"+task.getId_task());
+					}
+					else
+					{
+						// TODO got to error page
+					}
 				}
+			}
+			else
+			{
+				// TODO go to error page
 			}
 		}
 		else
@@ -386,11 +398,40 @@ public class MainApp extends HttpServlet
 			response.sendRedirect("index");
 		}
 
-		if ("POST".equals(request.getMethod().toUpperCase()))
+		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
 			User user = (User)User.getModel().find("id_user = ?", new Object[]{MainApp.currentUserId(request.getSession())}, new String[]{"integer"}, null);
-			user.addData(request.getParameterMap());
 			user.putData("confirm_password", user.getPassword());
+			
+			FileItem avatar = null;
+			boolean check = false;
+			FileItemFactory factory = new DiskFileItemFactory();
+			ServletFileUpload upload = new ServletFileUpload(factory);
+			List<FileItem> items = null;
+			try
+			{
+				items = upload.parseRequest(request);
+			}
+			catch (FileUploadException e)
+			{
+				e.printStackTrace();
+			}
+			for (FileItem fi : items)
+			{
+				if (fi.isFormField())
+				{
+					user.putData(fi.getFieldName(), fi.getString());
+				}
+				else
+				{
+					if ("avatar".equals(fi.getFieldName()))
+					{
+						check = true;
+						user.setAvatar(fi.getName());
+						avatar = fi;
+					}
+				}
+			}
 			
 			boolean temperror = user.checkValidity();
 			
@@ -402,9 +443,8 @@ public class MainApp extends HttpServlet
 			{
 				if (user.save())
 				{
-					if (request.getPart("avatar")!=null)
+					if (check)
 					{
-						Part avatar = request.getPart("avatar");
 						InputStream in = avatar.getInputStream();
 						FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+user.getAvatar()));
 						
