@@ -147,7 +147,7 @@ public class MainApp extends HttpServlet
 	
 	public void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if ("POST".equals(request.getMethod().toUpperCase()))
+		if (("POST".equals(request.getMethod().toUpperCase())) && (request.getPart("avatar")!=null))
 		{
 			User user = new User();
 			user.addData(request.getParameterMap());
@@ -167,7 +167,7 @@ public class MainApp extends HttpServlet
 				if (user.save())
 				{
 					InputStream in = avatar.getInputStream();
-					FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())));
+					FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+new_filename));
 					
 					int read = 0;
 					byte[] bytes = new byte[1024];
@@ -245,6 +245,10 @@ public class MainApp extends HttpServlet
 				}
 			}
 		}
+		else
+		{
+			// TODO go to error page
+		}
 	}
 	
 	public void edit_tugas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -256,7 +260,7 @@ public class MainApp extends HttpServlet
 
 		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
-			Task task = Task.getModel().find("id_task = ?", new Object[]{(request.getParameter("id_task")!=null) ? request.getParameter("id_task") : 0 }, new String[]{"integer"}, null);
+			Task task = (Task)Task.getModel().find("id_task = ?", new Object[]{(request.getParameter("id_task")!=null) ? request.getParameter("id_task") : 0 }, new String[]{"integer"}, null);
 			
 			if ((!task.isEmpty()) && (task.getEditable(MainApp.currentUserId(request.getSession()))))
 			{
@@ -305,11 +309,62 @@ public class MainApp extends HttpServlet
 				}
 			}
 		}
+		else
+		{
+			// TODO go to error page
+		}
 	}
 	
 	public void change_profile_data(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		// TODO change_profile_data logic
+		if (MainApp.LoggedIn(request.getSession()))
+		{
+			response.sendRedirect("index");
+		}
+
+		if ("POST".equals(request.getMethod().toUpperCase()))
+		{
+			User user = (User)User.getModel().find("id_user = ?", new Object[]{MainApp.currentUserId(request.getSession())}, new String[]{"integer"}, null);
+			user.addData(request.getParameterMap());
+			user.putData("confirm_password", user.getPassword());
+			
+			boolean temperror = user.checkValidity();
+			
+			if (temperror)
+			{
+				// TODO go to error page
+			}
+			else
+			{
+				if (user.save())
+				{
+					if (request.getPart("avatar")!=null)
+					{
+						Part avatar = request.getPart("avatar");
+						InputStream in = avatar.getInputStream();
+						FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+user.getAvatar()));
+						
+						int read = 0;
+						byte[] bytes = new byte[1024];
+						while ((read = in.read(bytes)) != -1)
+						{
+							out.write(bytes, 0, read);
+						}
+						out.close();
+					}
+					response.sendRedirect("index");
+				}
+				else
+				{
+					// TODO go to error page
+				}
+			}
+		}
+		else
+		{
+			// TODO go to error page
+		}
 	}
 	
 	public void change_user_password(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
