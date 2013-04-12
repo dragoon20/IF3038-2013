@@ -75,6 +75,17 @@ public class Category extends DBSimpleRecord{
         return false;
     }
     
+    public boolean getEditable(int id_user)
+    {
+    	return (!User.getModel().find("id_user IN (SELECT id_user FROM edit_kategori WHERE id_kategori = ? AND id_user = ? )", 
+    						new Object[]{getId_kategori(), id_user}, new String[]{"integer", "integer"}, null).isEmpty());
+    }
+    
+    public boolean getDeletable(int id_user)
+    {
+    	return (getId_user() == id_user);
+    }
+    
     public int getId_kategori() {
         return (Integer)data.get("iid_kategori");
     }

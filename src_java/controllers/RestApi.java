@@ -44,9 +44,9 @@ public class RestApi extends HttpServlet
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public RestApi() {
+    public RestApi() 
+    {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
