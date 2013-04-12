@@ -99,7 +99,6 @@ public abstract class DBSimpleRecord
     {
     	try
     	{
-
                 Class<?> c = Class.forName(GetClassName());
 		DBSimpleRecord result = (DBSimpleRecord)c.newInstance();
 
@@ -227,5 +226,21 @@ public abstract class DBSimpleRecord
 		e.printStackTrace();
         }
         return null;
+    }
+        
+    public int delete(String query, Object[] params, String[] params_type)
+    {
+        int affected_row=0;
+        if (query != "")
+        {
+            query = " WHERE " + query;
+        }
+        try {
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM" + this.GetClassName() + query);
+            affected_row = statement.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(DBSimpleRecord.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return affected_row;
     }
 }
