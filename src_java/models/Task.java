@@ -4,125 +4,129 @@
  */
 package models;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 
 /**
  *
  * @author Abraham Krisnanda
  */
-public class Task extends DBSimpleRecord
-{
-    private int id_task;
+public class Task extends DBSimpleRecord {
+    /*private int id_task;
     private String nama_task;
     private boolean status;
     private Timestamp deadline;
     private int id_kategori;
-    private int id_user;
-
-
-	@Override
-	protected String GetClassName() 
-	{
-		return "models.Task";
-	}
-
-	@Override
-	protected String GetTableName() 
-	{
-		return "task";
-	}
+    private int id_user;*/
+    public Task model;
+    public Task getModel() 
+    {
+        if(model==null)
+        {
+            model = new Task();
+        }
+        return model;
+    }
     
+    @Override
+    protected  String GetClassName() 
+    {
+        return "models.Task";
+    }
+    
+    @Override
+    protected String GetTableName() 
+    {
+    	return "task";
+    }
+    
+    public void save() {
+        
+    }
+    
+    public void checkValidity() {
+        
+    }
     /**
      * @return the id_task
      */
     public int getId_task() {
-        return id_task;
+        return (Integer)data.get("id_task");
     }
 
     /**
      * @param id_task the id_task to set
      */
     public void setId_task(int id_task) {
-        this.id_task = id_task;
+        data.put ("id_task",id_task);
     }
 
     /**
      * @return the nama_task
      */
     public String getNama_task() {
-        return nama_task;
+        return (String)data.get("nama_task");
     }
 
     /**
      * @param nama_task the nama_task to set
      */
     public void setNama_task(String nama_task) {
-        this.nama_task = nama_task;
+        data.put ("nama_task",nama_task);
     }
 
     /**
      * @return the status
      */
     public boolean isStatus() {
-        return status;
+        return (Boolean)data.get("status");
     }
 
     /**
      * @param status the status to set
      */
     public void setStatus(boolean status) {
-        this.status = status;
+        data.put("status",status);
     }
 
     /**
      * @return the deadline
      */
-    public Timestamp getDeadline() {
-        return deadline;
+    public Date getDeadline() {
+        return (Date)data.get("deadline");
     }
 
     /**
      * @param deadline the deadline to set
      */
-    public void setDeadline(Timestamp deadline) {
-        this.deadline = deadline;
+    public void setDeadline(Date deadline) {
+        data.put("deadline",deadline);
     }
 
     /**
      * @return the id_kategori
      */
     public int getId_kategori() {
-        return id_kategori;
+        return (Integer)data.get("id_kategori");
     }
 
     /**
      * @param id_kategori the id_kategori to set
      */
     public void setId_kategori(int id_kategori) {
-        this.id_kategori = id_kategori;
+        data.put("id_kategori",id_kategori);
     }
 
     /**
      * @return the id_user
      */
     public int getId_user() {
-        return id_user;
+        return (Integer)data.get("id_user");
     }
 
     /**
      * @param id_user the id_user to set
      */
     public void setId_user(int id_user) {
-        this.id_user = id_user;
-    }
-    
-    private boolean save() 
-    {
-        return true;
-    }
-    
-    private boolean checkValidity() 
-    {
-        return true;
+        data.put("id_user",id_user);
     }
 }

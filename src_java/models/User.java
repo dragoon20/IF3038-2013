@@ -56,7 +56,7 @@ public class User extends DBSimpleRecord
      */
     public int getId_user() 
     {
-    	return (int)data.get("id_user");
+    	return (Integer)data.get("id_user");
     }
 
     /**

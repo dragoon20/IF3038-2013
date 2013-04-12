@@ -31,7 +31,7 @@ public abstract class DBSimpleRecord
     public DBSimpleRecord() 
     {
         connection = DBConnection.getConnection();
-        data = new HashMap<>();
+        data = new HashMap<String, Object>();
     }
     
     protected abstract String GetClassName();
