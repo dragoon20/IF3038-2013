@@ -10,7 +10,8 @@ import java.sql.Timestamp;
  *
  * @author Abraham Krisnanda
  */
-public class Task {
+public class Task extends DBSimpleRecord
+{
     private int id_task;
     private String nama_task;
     private boolean status;
@@ -18,6 +19,19 @@ public class Task {
     private int id_kategori;
     private int id_user;
 
+
+	@Override
+	protected String GetClassName() 
+	{
+		return "models.Task";
+	}
+
+	@Override
+	protected String GetTableName() 
+	{
+		return "task";
+	}
+    
     /**
      * @return the id_task
      */
@@ -102,11 +116,13 @@ public class Task {
         this.id_user = id_user;
     }
     
-    private void save() {
-        
+    private boolean save() 
+    {
+        return true;
     }
     
-    private void checkValidity() {
-        
+    private boolean checkValidity() 
+    {
+        return true;
     }
 }

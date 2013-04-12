@@ -7,6 +7,10 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.ServletException;
@@ -17,7 +21,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileItemFactory;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+
 import models.DBSimpleRecord;
+import models.Task;
 import models.User;
 
 /**
@@ -34,9 +45,9 @@ public class MainApp extends HttpServlet
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public MainApp() {
+    public MainApp() 
+    {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public static boolean LoggedIn(HttpSession session)
@@ -150,8 +161,8 @@ public class MainApp extends HttpServlet
 			}
 			else
 			{
-				String temp = avatar.getName().split(".")[avatar.getName().split(".").length-1];
-				String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+temp;
+				String extension = avatar.getName().split(".")[avatar.getName().split(".").length-1];
+				String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+extension;
 				user.setAvatar(new_filename);
 				if (user.save())
 				{
@@ -181,12 +192,119 @@ public class MainApp extends HttpServlet
 	
 	public void new_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		// TODO new_task logic
+		if (MainApp.LoggedIn(request.getSession()))
+		{
+			response.sendRedirect("index");
+		}
+
+		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
+		{
+			Task task = new Task();
+			task.addData(request.getParameterMap());
+			task.setId_user(MainApp.currentUserId(request.getSession()));
+			
+			List<Map<String, Object>> attachments = new ArrayList<Map<String,Object>>();
+			FileItemFactory factory = new DiskFileItemFactory();
+			ServletFileUpload upload = new ServletFileUpload(factory);
+			List<FileItem> items = null;
+			try
+			{
+				items = upload.parseRequest(request);
+			}
+			catch (FileUploadException e)
+			{
+				e.printStackTrace();
+			}
+			for (int i=0;i<items.size();++i)
+			{
+				if (!items.get(i).isFormField())
+				{
+					Map<String, Object> tempmap = new HashMap<String, Object>();
+					String extension = items.get(i).getName().split(".")[items.get(i).getName().split(".").length-1]; 
+					tempmap.put("attachment", DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+extension);
+					tempmap.put("temp", items.get(i).getInputStream());
+					attachments.add(tempmap);
+				}
+			}
+			task.putData("attachments", attachments);
+			
+			boolean temperror = task.checkValidity();
+			if (temperror)
+			{
+				// TODO go to error page
+			}
+			else
+			{
+				if (task.save())
+				{
+					response.sendRedirect("tugas?id"+task.getId_task());
+				}
+				else
+				{
+					// TODO got to error page
+				}
+			}
+		}
 	}
 	
 	public void edit_tugas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		// TODO edit_tugas logic
+		if (MainApp.LoggedIn(request.getSession()))
+		{
+			response.sendRedirect("index");
+		}
+
+		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
+		{
+			Task task = Task.getModel().find("id_task = ?", new Object[]{(request.getParameter("id_task")!=null) ? request.getParameter("id_task") : 0 }, new String[]{"integer"}, null);
+			
+			if ((!task.isEmpty()) && (task.getEditable(MainApp.currentUserId(request.getSession()))))
+			{
+				task.addData(request.getParameterMap());
+			}
+			
+			List<Map<String, Object>> attachments = new ArrayList<Map<String,Object>>();
+			FileItemFactory factory = new DiskFileItemFactory();
+			ServletFileUpload upload = new ServletFileUpload(factory);
+			List<FileItem> items = null;
+			try
+			{
+				items = upload.parseRequest(request);
+			}
+			catch (FileUploadException e)
+			{
+				e.printStackTrace();
+			}
+			for (int i=0;i<items.size();++i)
+			{
+				if (!items.get(i).isFormField())
+				{
+					Map<String, Object> tempmap = new HashMap<String, Object>();
+					String extension = items.get(i).getName().split(".")[items.get(i).getName().split(".").length-1]; 
+					tempmap.put("attachment", DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+extension);
+					tempmap.put("temp", items.get(i).getInputStream());
+					attachments.add(tempmap);
+				}
+			}
+			task.putData("attachments", attachments);
+			
+			boolean temperror = task.checkValidity();
+			if (temperror)
+			{
+				// TODO go to error page
+			}
+			else
+			{
+				if (task.save())
+				{
+					response.sendRedirect("tugas?id"+task.getId_task());
+				}
+				else
+				{
+					// TODO got to error page
+				}
+			}
+		}
 	}
 	
 	public void change_profile_data(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException

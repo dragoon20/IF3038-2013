@@ -118,6 +118,10 @@ public abstract class DBSimpleRecord
 	        	{
 	        		statement.setNString(i+1, (String)params[i]);
 	        	}
+	        	else if ("integer".equals(params_type[i]))
+	        	{
+	        		statement.setInt(i+1, (Integer)params[i]);
+	        	}
 	        }
             ResultSet rs = statement.executeQuery() ;
 
