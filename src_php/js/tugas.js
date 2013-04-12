@@ -63,8 +63,8 @@ asignee.onkeyup = function()
 					{
 						temp++;
 						var newLi = document.createElement("li");
-						newLi.innerHTML = "<a href='javascript:choose_assignee(\""+response[i].data.username+"\")'>"+
-											response[i].data.username+"</a>";
+						newLi.innerHTML = "<a href='javascript:choose_assignee(\""+response[i].username+"\")'>"+
+											response[i].username+"</a>";
 						inflate.insertBefore(newLi, inflate.firstChild);
 					}
 					
@@ -114,8 +114,8 @@ tag.onkeyup = function()
 					{
 						temp ++;
 						var newLi = document.createElement("li");
-						newLi.innerHTML = "<a href='javascript:choose_tag(\""+response[i].data.tag_name+"\")'>"+
-											response[i].data.tag_name+"</a>";
+						newLi.innerHTML = "<a href='javascript:choose_tag(\""+response[i].tag_name+"\")'>"+
+											response[i].tag_name+"</a>";
 						inflate.insertBefore(newLi, inflate.firstChild);
 					}
 					
