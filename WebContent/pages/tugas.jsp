@@ -39,7 +39,7 @@
 	SimpleDateFormat date_format = new SimpleDateFormat("dd MMMM YYYY");
 	SimpleDateFormat date_format2 = new SimpleDateFormat("YYYY-MM-dd");
 	SimpleDateFormat date_format3 = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
-	SimpleDateFormat date_format4 = new SimpleDateFormat("HH:mm – EEE/MMMM");
+	SimpleDateFormat date_format4 = new SimpleDateFormat("HH:mm - EEE/MMMM");
 %>
 <%@ include file="../template/header.jsp" %>
 		<div class="content">
@@ -231,14 +231,14 @@
 							{
 								User user = comment.getUser();
 								out.println("<article id=\"comment_"+comment.getId_komentar()+"\" class=\"comment\">");
-									out.println("<a href=\"profile?id="+user.getId_user()+"\"");
+									out.println("<a href=\"profile?id="+user.getId_user()+"\">");
 										out.println("<img src=\"upload/user_profile_pict/"+user.getAvatar()+"\" alt=\""+user.getFullname()+"\" class=\"icon_pict\" >");
 									out.println("</a>");
-									out.println("<div class=\"right\"");
+									out.println("<div class=\"right\">");
 										out.println(date_format4.format(comment.getTimestamp()));
 										if (user.getId_user()==MainApp.currentUserId(session))
 										{
-											out.println("<a href=\"javascript:delete_comment("+comment.getId_komentar()+")>DELETE</a>");
+											out.println("<a href=\"javascript:delete_comment("+comment.getId_komentar()+")\">DELETE</a>");
 										}
 									out.println("</div>");
 									out.println("<header>");
@@ -258,12 +258,12 @@
 					<div class="comment-form">
 						<h3>Add Comment</h3>
 						<%
-							out.println("<a href=\"profile\"");
+							out.println("<a href=\"profile\">");
 								out.println("<img src=\"upload/user_profile_pict/"+MainApp.currentUser(session).getAvatar()+"\" alt=\""+MainApp.currentUser(session).getFullname()+"\" class=\"icon_pict\" >");
 							out.println("</a>");
 						%>
 						<form id="commentForm" action="#" method="post">
-							<input type="hidden" name="id_task" value="<?php echo $task->id_task; ?>">
+							<input type="hidden" name="id_task" value="<%= task.getId_task() %>">
 							<textarea name="komentar" id="commentBody"></textarea>
 							<button type="submit">Send</button>
 						</form>

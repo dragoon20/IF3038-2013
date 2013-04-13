@@ -81,7 +81,7 @@
 							<header>
 								<h1>
 									<label>
-										<a href="tugas?id<%= task.getId_task() %>"><%= task.getNama_task() %></a>
+										<a href="tugas?id=<%= task.getId_task() %>"><%= task.getNama_task() %></a>
 									</label>
 								</h1>
 							</header>
@@ -132,7 +132,7 @@
 							<header>
 								<h1>
 									<label>
-										<a href="tugas?id<%= task.getId_task() %>"><%= task.getNama_task() %></a>
+										<a href="tugas?id=<%= task.getId_task() %>"><%= task.getNama_task() %></a>
 									</label>
 								</h1>
 							</header>

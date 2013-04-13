@@ -78,8 +78,6 @@ public class Task extends DBSimpleRecord {
                 statement.setInt(3, getId_kategori());
                 statement.setInt(4, getId_user());
                 
-                statement.executeUpdate();
-                
                 affected_row = statement.executeUpdate();
                 if (affected_row ==0) 
                 {
@@ -122,7 +120,7 @@ public class Task extends DBSimpleRecord {
 	                    statement.executeUpdate();
                 	}
                 	
-                	Map<String, Object>[] attachments = (Map<String, Object>[])data.get("attachments");
+                	List<Map<String, Object>> attachments = (List<Map<String, Object>>)data.get("attachments");
                 	for (Map<String, Object> entry : attachments)
                 	{
                 		String name = (String)entry.get("attachment");
@@ -171,80 +169,71 @@ public class Task extends DBSimpleRecord {
                 statement.setInt(3, getId_kategori());
                 statement.setInt(4, getId_user());
                 
-                statement.executeUpdate();
-                
                 affected_row = statement.executeUpdate();
                 if (affected_row ==0) 
                 {
                     throw new SQLException("Creating user failed, no rows affected");
                 }
-                
-                ResultSet generatedkeys = statement.getGeneratedKeys();
-                // get generated Id from last SQL Execution
-                if (generatedkeys.next()) 
-                {
-                	setId_task(generatedkeys.getInt(1));
-                	
-                	statement = connection.prepareStatement
-                    		("DELETE FROM `assign` WHERE id_task = ?");
-                	statement.setInt(1, getId_task());
-                	statement.executeUpdate();
-                	List<User> assignees = (List<User>) data.get("assignee");
-                	for (User u : assignees)
-                	{
-	                    statement = connection.prepareStatement
-	                    		("INSERT INTO `assign` (id_user, id_task) VALUES (?,?)");
-	                    statement.setInt(1, u.getId_user());
-	                    statement.setInt(2, getId_task());
-	                    
-	                    statement.executeUpdate();
-                	}
-                	
-                	statement = connection.prepareStatement
-                    		("DELETE FROM `have_tags` WHERE id_task = ?");
-                	statement.setInt(1, getId_task());
-                	statement.executeUpdate();
-                	List<Object> list = Arrays.asList((Object[])data.get("tag"));
-                	String[] tags = list.toArray(new String[list.size()]);
-                	for (String tag : tags)
-                	{
-                		Tag temptag = (Tag)Tag.getModel().find("tag_name = ?", new Object[]{tag}, new String[]{"string"}, null);
-                		if (temptag.isEmpty())
-                		{
-                			temptag.setTag_name(tag);
-                			temptag.save();
-                		}
-                		
-                		statement = connection.prepareStatement
-	                    		("INSERT INTO `have_tags` (id_task, id_tag) VALUES (?,?)");
-	                    statement.setInt(1, getId_task());
-	                    statement.setInt(2, temptag.getId_tag());
-	                    
-	                    statement.executeUpdate();
-                	}
-                	
-                	Map<String, Object>[] attachments = (Map<String, Object>[])data.get("attachments");
-                	for (Map<String, Object> entry : attachments)
-                	{
-                		String name = (String)entry.get("attachment");
-                		InputStream in = (InputStream)entry.get("temp");
+            	
+            	statement = connection.prepareStatement
+                		("DELETE FROM `assign` WHERE id_task = ?");
+            	statement.setInt(1, getId_task());
+            	statement.executeUpdate();
+            	List<User> assignees = (List<User>) data.get("assignee");
+            	for (User u : assignees)
+            	{
+                    statement = connection.prepareStatement
+                    		("INSERT INTO `assign` (id_user, id_task) VALUES (?,?)");
+                    statement.setInt(1, u.getId_user());
+                    statement.setInt(2, getId_task());
+                    
+                    statement.executeUpdate();
+            	}
+            	
+            	statement = connection.prepareStatement
+                		("DELETE FROM `have_tags` WHERE id_task = ?");
+            	statement.setInt(1, getId_task());
+            	statement.executeUpdate();
+            	List<Object> list = Arrays.asList((Object[])data.get("tag"));
+            	String[] tags = list.toArray(new String[list.size()]);
+            	for (String tag : tags)
+            	{
+            		Tag temptag = (Tag)Tag.getModel().find("tag_name = ?", new Object[]{tag}, new String[]{"string"}, null);
+            		if (temptag.isEmpty())
+            		{
+            			temptag.setTag_name(tag);
+            			temptag.save();
+            		}
+            		
+            		statement = connection.prepareStatement
+                    		("INSERT INTO `have_tags` (id_task, id_tag) VALUES (?,?)");
+                    statement.setInt(1, getId_task());
+                    statement.setInt(2, temptag.getId_tag());
+                    
+                    statement.executeUpdate();
+            	}
+            	
+            	List<Map<String, Object>> attachments = (List<Map<String, Object>>)data.get("attachments");
+            	for (Map<String, Object> entry : attachments)
+            	{
+            		String name = (String)entry.get("attachment");
+            		InputStream in = (InputStream)entry.get("temp");
 
-                		Attachment attachment = new Attachment();
-                		attachment.setId_task(getId_task());
-                		attachment.setAttachment(name);
-                		if (attachment.save())
-                		{
-                			FileOutputStream out = new FileOutputStream(new File((String)entry.get("location")));
-    						
-    						int read = 0;
-    						byte[] bytes = new byte[1024];
-    						while ((read = in.read(bytes)) != -1)
-    						{
-    							out.write(bytes, 0, read);
-    						}
-    						out.close();
-                		}
-                	}
+            		Attachment attachment = new Attachment();
+            		attachment.setId_task(getId_task());
+            		attachment.setAttachment(name);
+            		if (attachment.save())
+            		{
+            			FileOutputStream out = new FileOutputStream(new File((String)entry.get("location")));
+						
+						int read = 0;
+						byte[] bytes = new byte[1024];
+						while ((read = in.read(bytes)) != -1)
+						{
+							out.write(bytes, 0, read);
+						}
+						out.close();
+            		}
                 }
                 return true;
             } catch (SQLException ex) {
@@ -329,7 +318,7 @@ public class Task extends DBSimpleRecord {
 
 	public boolean getEditable(int id_user)
 	{
-		return !User.getModel().find("id_user IN (SELECT id_user FROM assign WHERE id_task=? AND id_user=?)", new Object[]{getId_task(), id_user}, new String[]{"integer", "integer"}, null).isEmpty();
+		return ((!User.getModel().find("id_user IN (SELECT id_user FROM assign WHERE id_task=? AND id_user=?)", new Object[]{getId_task(), id_user}, new String[]{"integer", "integer"}, null).isEmpty()) || (getDeletable(id_user)));
 	}
 	
 	public boolean getDeletable(int id_user)

@@ -88,6 +88,15 @@ public abstract class DBSimpleRecord
     	}
     }
     
+    public void replaceData(DBSimpleRecord new_data)
+    {
+    	Map<String, Object> map = new_data.getData();
+    	for (Entry<String, Object> entry : map.entrySet())
+    	{
+    		data.put(entry.getKey(), entry.getValue());
+    	}
+    }
+    
     public boolean isEmpty()
     {
     	return data.isEmpty();
@@ -193,7 +202,6 @@ public abstract class DBSimpleRecord
 	        }
                 
             PreparedStatement statement = connection.prepareStatement("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query);
-            System.out.println("SELECT " + cmd.toString() + " FROM " + this.GetTableName() + query);
 	        for (int i=0;i<params.length;++i)
 	        {
 	        	if ("string".equals(params_type[i]))
@@ -249,12 +257,12 @@ public abstract class DBSimpleRecord
 	        StringBuilder cmd = new StringBuilder();
 	        if ((selection!=null) && (selection.length!=0))
 	        {
-	            for (int i=1;i<=selection.length;i++)
+	            for (int i=0;i<selection.length;i++)
 	            {
 	            	cmd.append(selection[i]);
 	            	cmd.append(", ");
 	            }
-	            cmd.substring(0, cmd.length()-2);
+	            cmd.delete(cmd.length()-2, cmd.length());
 	        }
 	        else {
 	            cmd.append("*");
@@ -287,7 +295,7 @@ public abstract class DBSimpleRecord
             	result.add(row);
             }
             
-            return (DBSimpleRecord[])result.toArray();
+            return result.toArray(new DBSimpleRecord[result.size()]);
         } catch (ClassNotFoundException e1) {
 		e1.printStackTrace();
         } catch (InstantiationException e) {
@@ -312,7 +320,6 @@ public abstract class DBSimpleRecord
             query = " WHERE " + query;
         }
         try {
-        	System.out.println("DELETE FROM " + this.GetTableName() + query);
             PreparedStatement statement = connection.prepareStatement("DELETE FROM " + this.GetTableName() + query);
             for (int i=0;i<params.length;++i)
 	        {

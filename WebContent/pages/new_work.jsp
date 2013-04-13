@@ -50,10 +50,16 @@
 					<div class="field">
 						<label>Assignee</label>
 						<input size="25" name="assignee" id="assignee" type="text" pattern="^[^;]{5,}(;[^;]{5,})*$">
+						<div id="auto_comp_assignee">
+							<ul id="auto_comp_inflate_assignee"></ul>
+						</div>
 					</div>
 					<div class="field">
 						<label>Tag</label>
 						<input size="25" name="tag" id="tag" type="text">
+						<div id="auto_comp_tag">
+							<ul id="auto_comp_inflate_tag"></ul>
+						</div>
 					</div>
 					<div class="buttons">
 						<button type="submit">Save</button>

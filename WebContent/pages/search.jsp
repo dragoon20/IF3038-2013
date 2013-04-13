@@ -1,3 +1,6 @@
+<%@page import="java.util.Arrays"%>
+<%@page import="models.DBSimpleRecord"%>
+<%@page import="java.util.List"%>
 <%@page import="models.Task"%>
 <%@page import="models.Category"%>
 <%@page import="controllers.MainApp"%>
@@ -27,10 +30,10 @@
 	boolean all = ("all".equals(query_type.toLowerCase()));
 	
 	int id = MainApp.currentUserId(session);
-	String baseTaskQ = "id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+" WHERE id_user='?' "+
-			 "OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user='?') "+
+	String baseTaskQ = "id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+" WHERE id_user=? "+
+			 "OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user=?) "+
 			 "OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
-			 "ON t.id_task=a.id_task WHERE t.id_user = '?' OR a.id_user = '?' ))";
+			 "ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? ))";
 	
 	request.setAttribute("title", "MOA - Search");
 	request.setAttribute("currentPage", (request.getParameter("id")!=null) ? "" : "search");
@@ -53,7 +56,8 @@
 		<%
 			if (("task".equals(query_type.toLowerCase())) || (all))
 			{
-				tasks = (Task[])Task.getModel().findAllLimit(baseTaskQ+" AND nama_task LIKE '?'", new Object[]{id, id, id, id, terms}, new String[]{"integer", "integer", "integer", "integer", "string"}, null, 0, 10);
+				List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAllLimit(baseTaskQ+" AND nama_task LIKE ?", new Object[]{id, id, id, id, terms}, new String[]{"integer", "integer", "integer", "integer", "string"}, null, 0, 10));
+				tasks = list.toArray(new Task[list.size()]);
 		%>
 				<div class="result-set">
 					<section class="tasks">
@@ -85,7 +89,8 @@
 			}
 			if (("user".equals(query_type.toLowerCase())) || (all))
 			{
-				users = (User[])User.getModel().findAllLimit("username LIKE '?' OR fullname LIKE '?' OR email LIKE '?' OR birthdate LIKE '?'", new Object[]{terms, terms, terms, terms}, new String[]{"string", "string", "string", "string"}, new String[]{"id_user", "username", "avatar", "fullname"}, 0, 10);
+				List<DBSimpleRecord> list = Arrays.asList(User.getModel().findAllLimit("username LIKE ? OR fullname LIKE ? OR email LIKE ? OR birthdate LIKE ?", new Object[]{terms, terms, terms, terms}, new String[]{"string", "string", "string", "string"}, new String[]{"id_user", "username", "avatar", "fullname"}, 0, 10));
+				users = list.toArray(new User[list.size()]);
 		%>
 				<div class="result-set">
 					<section class="users">
@@ -116,7 +121,8 @@
 			}
 			if (("category".equals(query_type.toLowerCase())) || (all))
 			{
-				categories = (Category[])Category.getModel().findAllLimit("nama_kategori LIKE '?'", new Object[]{terms}, new String[]{"string"}, null, 0, 10);
+				List<DBSimpleRecord> list = Arrays.asList(Category.getModel().findAllLimit("nama_kategori LIKE ?", new Object[]{terms}, new String[]{"string"}, null, 0, 10));
+				categories = list.toArray(new Category[list.size()]);
 		%>
 		<div class="result-set">
 			<section class="categories">

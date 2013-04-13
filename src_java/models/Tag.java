@@ -6,7 +6,9 @@ package models;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,25 +41,41 @@ public class Tag extends DBSimpleRecord{
     	return "tag";
     }
     
+    public static String getTableName()
+    {
+    	return "tag";
+    }
+    
     public boolean save() 
     {
     	Connection connection = DBConnection.getConnection();
         // check same tag_name
-        if (!this.data.containsKey("tag_name"))
+        if (!this.data.containsKey("id_tag"))
         {
             // new tag
             try {
                 PreparedStatement statement = connection.prepareStatement
-                ("INSERT INTO `"+ User.getModel().GetTableName()+"` (id_tag,tag_name) VALUES (?, ?)"); 
+                ("INSERT INTO `"+ getTableName()+"` (tag_name) VALUES (?)", Statement.RETURN_GENERATED_KEYS); 
                 // Parameters start with 1
-                statement.setInt(1, getId_tag());
-                statement.setString(2, getTag_name());
+                statement.setString(1, getTag_name());
                 statement.executeUpdate();
+                
+                ResultSet rs = statement.getGeneratedKeys();
+                if (rs.next())
+                {
+                	setId_tag(rs.getInt(1));
+                }
+                return true;
             } catch (SQLException ex) {
                 Logger.getLogger(Tag.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
             }
         }
-        return true;
+        else
+        {
+        	return false;
+        }
+        
     }
     
     public boolean checkValidity() 
@@ -89,6 +107,6 @@ public class Tag extends DBSimpleRecord{
      * @param tag_name the tag_name to set
      */
     public void setTag_name(String tag_name) {
-        data.put(tag_name,"tag_name");
+        data.put("tag_name", tag_name);
     }
 }

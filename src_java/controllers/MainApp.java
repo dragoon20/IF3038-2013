@@ -181,6 +181,11 @@ public class MainApp extends HttpServlet
 		request.getRequestDispatcher("pages/search.jsp").forward(request, response);
 	}
 	
+	public void search_partial(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		request.getRequestDispatcher("pages/search_partial.jsp").forward(request, response);
+	}
+	
 	public void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
@@ -292,7 +297,6 @@ public class MainApp extends HttpServlet
 		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
 			Task task = new Task();
-			task.addData(request.getParameterMap());
 			task.setId_user(MainApp.currentUserId(request.getSession()));
 			
 			List<Map<String, Object>> attachments = new ArrayList<Map<String,Object>>();
@@ -333,9 +337,10 @@ public class MainApp extends HttpServlet
 				{
 					Map<String, Object> tempmap = new HashMap<String, Object>();
 					String extension = fi.getName().split("\\.")[fi.getName().split("\\.").length-1]; 
-					tempmap.put("attachment", DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension);
+					String name = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
+					tempmap.put("attachment", name);
 					tempmap.put("temp", fi.getInputStream());
-					tempmap.put("location", MainApp.fullPath(request.getSession())+"upload/attachments/"+DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension);
+					tempmap.put("location", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
 					attachments.add(tempmap);
 				}
 			}
@@ -352,7 +357,7 @@ public class MainApp extends HttpServlet
 			{
 				if (task.save())
 				{
-					response.sendRedirect("tugas?id"+task.getId_task());
+					response.sendRedirect("tugas?id="+task.getId_task());
 				}
 				else
 				{
@@ -377,82 +382,94 @@ public class MainApp extends HttpServlet
 
 		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
-			Task task = (Task)Task.getModel().find("id_task = ?", new Object[]{(request.getParameter("id_task")!=null) ? request.getParameter("id_task") : 0 }, new String[]{"integer"}, null);
+			Task task = new Task();
 			
-			if ((!task.isEmpty()) && (task.getEditable(MainApp.currentUserId(request.getSession()))))
+			List<Map<String, Object>> attachments = new ArrayList<Map<String,Object>>();
+			FileItemFactory factory = new DiskFileItemFactory();
+			ServletFileUpload upload = new ServletFileUpload(factory);
+			List<FileItem> items = null;
+			try
 			{
-				task.addData(request.getParameterMap());
-				
-				List<Map<String, Object>> attachments = new ArrayList<Map<String,Object>>();
-				FileItemFactory factory = new DiskFileItemFactory();
-				ServletFileUpload upload = new ServletFileUpload(factory);
-				List<FileItem> items = null;
-				try
+				items = upload.parseRequest(request);
+			}
+			catch (FileUploadException e)
+			{
+				e.printStackTrace();
+			}
+			for (FileItem fi : items)
+			{
+				if (fi.isFormField())
 				{
-					items = upload.parseRequest(request);
-				}
-				catch (FileUploadException e)
-				{
-					e.printStackTrace();
-				}
-				for (FileItem fi : items)
-				{
-					if (fi.isFormField())
+					if ("deadline".equals(fi.getFieldName()))
 					{
-						if ("deadline".equals(fi.getFieldName()))
-						{
-							try {
-								task.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
-							} catch (ParseException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+						try {
+							task.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-						else if ("id_kategori".equals(fi.getFieldName()))
-						{
-							task.putData(fi.getFieldName(), Integer.parseInt(fi.getString()));
-						}
-						else
-						{
-							task.putData(fi.getFieldName(), fi.getString());
-						}
+					}
+					else if ("id_task".equals(fi.getFieldName()))
+					{
+						task.putData(fi.getFieldName(), Integer.parseInt(fi.getString()));
+					}
+					else if ("id_kategori".equals(fi.getFieldName()))
+					{
+						task.putData(fi.getFieldName(), Integer.parseInt(fi.getString()));
 					}
 					else
 					{
-						Map<String, Object> tempmap = new HashMap<String, Object>();
-						String extension = fi.getName().split("\\.")[fi.getName().split("\\.").length-1]; 
-						tempmap.put("attachment", DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension);
-						tempmap.put("temp", fi.getInputStream());
-						attachments.add(tempmap);
+						task.putData(fi.getFieldName(), fi.getString());
 					}
-				}
-				task.putData("attachments", attachments);
-				
-				boolean temperror = task.checkValidity();
-				if (temperror)
-				{
-					// TODO go to error page
 				}
 				else
 				{
-					if (task.save())
+					Map<String, Object> tempmap = new HashMap<String, Object>();
+					String extension = fi.getName().split("\\.")[fi.getName().split("\\.").length-1]; 
+					String name = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
+					tempmap.put("attachment", name);
+					tempmap.put("temp", fi.getInputStream());
+					tempmap.put("location", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
+					attachments.add(tempmap);
+				}
+			}
+			
+			Task real_task = (Task)Task.getModel().find("id_task = ?", new Object[]{task.getId_task()}, new String[]{"integer"}, null);
+			
+			if ((!real_task.isEmpty()) && (real_task.getEditable(MainApp.currentUserId(request.getSession()))))
+			{				
+				real_task.replaceData(task);
+				real_task.putData("attachments", attachments);
+				
+				boolean temperror = real_task.checkValidity();
+				if (temperror)
+				{
+					// TODO go to error page
+					System.out.println("error1");
+				}
+				else
+				{
+					if (real_task.save())
 					{
-						response.sendRedirect("tugas?id"+task.getId_task());
+						response.sendRedirect("tugas?id="+real_task.getId_task());
 					}
 					else
 					{
 						// TODO got to error page
+						System.out.println("error2");
 					}
 				}
 			}
 			else
 			{
 				// TODO go to error page
+				System.out.println("error3");
 			}
 		}
 		else
 		{
 			// TODO go to error page
+			System.out.println("error4");
 		}
 	}
 	

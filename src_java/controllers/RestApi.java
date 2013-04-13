@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
 
 import models.Category;
 import models.Comment;
@@ -355,7 +358,6 @@ public class RestApi extends HttpServlet
 			int id_task = Integer.parseInt(request.getParameter("id_task"));
 			//$task = array();
 			Task task = (Task)Task.getModel().find("id_task = ? ", new Object[]{id_task}, new String[]{"integer"}, new String[]{"id_task", "nama_task", "status", "deadline"});
-	
 			User[] users = task.getAssignee();
 			List<Map<String, Object>> temp = new ArrayList<Map<String,Object>>();
 			for (User user : users)
@@ -417,7 +419,7 @@ public class RestApi extends HttpServlet
 				statement.setInt(2, id_task);
 				int affectedrows = statement.executeUpdate();
 				
-				if (affectedrows > 1)
+				if (affectedrows >= 1)
 				{
 					ret.put("success", true);
 					ret.put("taskId", id_task);
@@ -427,6 +429,7 @@ public class RestApi extends HttpServlet
 				{
 					ret.put("success", false);
 				}
+				pw.println(ret.toJSONString());
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -592,10 +595,19 @@ public class RestApi extends HttpServlet
 	{
 		if ((request.getParameter("id_task")!=null) && (request.getParameter("timestamp")!=null) && (MainApp.LoggedIn(session)))
 		{
-			//$return = Comment::getOlder($params['id_task'], $params['timestamp']);
+			PrintWriter pw = response.getWriter();
+			JSONObject ret = new JSONObject();
+			
+			Comment[] comments = Comment.getModel().getOlder(Integer.parseInt(request.getParameter("id_task")), request.getParameter("timestamp"));
+			List<Map<String, Object>> list = new ArrayList<Map<String,Object>>();
+			for (Comment c : comments)
+			{
+				Map<String, Object> map = c.getData();
+				map.put("timestamp", ((Timestamp)map.get("timestamp")).toString());
+				list.add(map);
+			}			
+			pw.println(JSONValue.toJSONString(list));
 		}
-		// print result
-		//return $return;
 	}
 	
 	/**
@@ -611,13 +623,14 @@ public class RestApi extends HttpServlet
 			
 			Comment[] comments = Comment.getModel().getLatest(Integer.parseInt(request.getParameter("id_task")), request.getParameter("timestamp"));
 			
-			int i = 0;
+			List<Map<String, Object>> list = new ArrayList<Map<String,Object>>();
 			for (Comment c : comments)
 			{
-				ret.put(i, c.getData());
-				i++;
+				Map<String, Object> map = c.getData();
+				map.put("timestamp", ((Timestamp)map.get("timestamp")).toString());
+				list.add(map);
 			}
-			pw.println(ret.toJSONString());
+			pw.println(JSONValue.toJSONString(list));
 		}
 	}
 	
@@ -629,10 +642,11 @@ public class RestApi extends HttpServlet
 	{
 		PrintWriter pw = response.getWriter();
 		JSONObject ret = new JSONObject();
-		if (("POST".equals(request.getMethod())) && (request.getParameter("komentar")!=null) && (MainApp.LoggedIn(session)))
+		if (("POST".equals(request.getMethod())) && (request.getParameter("komentar")!=null) && (request.getParameter("id_task")!=null) && (MainApp.LoggedIn(session)))
 		{
 			Comment comment = new Comment();
-			comment.addData(request.getParameterMap());
+			comment.setId_task(Integer.parseInt(request.getParameter("id_task")));
+			comment.setKomentar(request.getParameter("komentar"));
 			comment.setId_user(MainApp.currentUserId(session));
 			if (comment.save())
 			{
@@ -656,7 +670,7 @@ public class RestApi extends HttpServlet
 		JSONObject ret = new JSONObject();
 		if (("POST".equals(request.getMethod())) && (request.getParameter("id")!=null) && (MainApp.LoggedIn(session)))
 		{
-			if (Comment.getModel().delete("id_komentar = ? AND id_user = ? ", new Object[]{request.getParameter("id"), MainApp.currentUserId(session)}, new String[]{"integer", "integer"})==1)
+			if (Comment.getModel().delete("id_komentar = ? AND id_user = ? ", new Object[]{Integer.parseInt(request.getParameter("id")), MainApp.currentUserId(session)}, new String[]{"integer", "integer"})==1)
 			{
 				ret.put("status", "success");
 			}
@@ -699,12 +713,12 @@ public class RestApi extends HttpServlet
 			
 			List<DBSimpleRecord> list = Arrays.asList(User.getModel().findAll(" username LIKE ? "+not_query+" LIMIT 10", param.toArray(), paramTypes.toArray(new String[paramTypes.size()]), null));
 			User[] ret = list.toArray(new User[list.size()]);
-			JSONObject res = new JSONObject();
+			List<String> result = new ArrayList<String>();
 			for (int i=0;i<ret.length;++i)
 			{
-				res.put(i, ret[i].getUsername());
+				result.add(ret[i].getUsername());
 			}
-			pw.println(res.toJSONString());
+			pw.println(JSONValue.toJSONString(result));
 		}
 	}
 	
@@ -807,7 +821,6 @@ public class RestApi extends HttpServlet
 			if (!"".equals(q))
 			{
 				PrintWriter pw = response.getWriter();
-				JSONObject ret = new JSONObject();
 				
 				boolean all = ("all".equals(type));
 				
@@ -848,7 +861,7 @@ public class RestApi extends HttpServlet
 					}
 				}
 				
-				ret.put("", suggestion);
+				pw.println(JSONValue.toJSONString(suggestion));
 			}
 		}
 	}

@@ -76,8 +76,10 @@ public class User extends DBSimpleRecord
                     statement.executeUpdate();
                     
                     ResultSet gen = statement.getGeneratedKeys();
-                    gen.next();
-                    setId_user(gen.getInt(1));
+                    if (gen.next())
+                    {
+                    	setId_user(gen.getInt(1));
+                    }
                     return true;
                 } catch (SQLException ex) {
                 	System.out.println("----------------------------------------------------------");
@@ -212,34 +214,37 @@ public class User extends DBSimpleRecord
     
     public Task[] getTasksLike(String q)
     {
-    	q = q.replaceAll(" ", "%");
+    	q = "%"+q.replaceAll(" ", "%")+"%";
     	
-    	return (Task[])Task.getModel().findAll("(id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+
+    	List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("(id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+
     			" WHERE id_user=? OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user=?) "+
     			"OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
-    			"ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? ))) AND nama_task LIKE '%?%'", 
+    			"ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? ))) AND nama_task LIKE ?", 
     			new Object[]{getId_user(), getId_user(), getId_user(), getId_user(), q}, 
-    			new String[]{"integer", "integer", "integer", "integer", "string"}, null);
+    			new String[]{"integer", "integer", "integer", "integer", "string"}, null));
+    	return list.toArray(new Task[list.size()]);
     }
     
     public Category[] getCategoriesLike(String q)
     {
-    	q = q.replaceAll(" ", "%");
+    	q = "%"+q.replaceAll(" ", "%")+"%";
     	
-    	return (Category[])Category.getModel().findAll(
+    	List<DBSimpleRecord> list = Arrays.asList(Category.getModel().findAll(
     			"(id_user=? OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user=?) "+
     			"OR id_kategori IN (SELECT id_kategori FROM "+Task.getTableName()+" AS t LEFT OUTER JOIN assign AS a "+
-    			"ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? )) AND nama_kategori LIKE '%?%'", 
+    			"ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? )) AND nama_kategori LIKE ?", 
     			new Object[]{getId_user(), getId_user(), getId_user(), getId_user(), q}, 
-    			new String[]{"integer", "integer", "integer", "integer", "string"}, null);
+    			new String[]{"integer", "integer", "integer", "integer", "string"}, null));
+    	return list.toArray(new Category[list.size()]);
     }
     
     public User[] findAllLike(String q)
     {
-    	q = q.replaceAll(" ", "%");
+    	q = "%"+q.replaceAll(" ", "%")+"%";
     	
-    	return (User[])User.getModel().findAll("username LIKE ? OR fullname LIKE ? OR email LIKE ? OR birthdate LIKE ? LIMIT 0, 10", 
-    					new Object[]{q, q, q, q}, new String[]{"string", "string", "string", "string"}, null);
+    	List<DBSimpleRecord> list = Arrays.asList(User.getModel().findAll("username LIKE ? OR fullname LIKE ? OR email LIKE ? OR birthdate LIKE ? LIMIT 0, 10", 
+				new Object[]{q, q, q, q}, new String[]{"string", "string", "string", "string"}, null));
+    	return list.toArray(new User[list.size()]);
     }
 	
 	public User findByUsername(String username)

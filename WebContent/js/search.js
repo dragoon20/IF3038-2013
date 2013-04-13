@@ -22,7 +22,7 @@ Rp(function() {
 		isLoading[typ] = true;
 
 		page = pageCount[typ] + 1;
-		var req = Rp.ajaxRequest('search_partial.php?q=' + q+ '&type=' + typ + '&page=' + page);
+		var req = Rp.ajaxRequest('search_partial?q=' + q+ '&type=' + typ + '&page=' + page);
 		req.onreadystatechange = function() {
 			console.log(typ);
 			list = document.getElementById(typ + 'List');

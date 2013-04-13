@@ -108,6 +108,7 @@ Rp(function()
 	fillCategories = function(cats) {
 		catsList = Rp('#categoryList');
 		catsList.empty();
+		catsList.append("<li id=\"categoryLi0\"><a href=\"dashboard\" data-category-id=\"0\">All Tasks</a></li>");
 		cats.forEach(function(cat) {
 			catsList.append(createCategoryElement(cat));
 		});
@@ -249,7 +250,7 @@ Rp(function()
 						goToCategory(response.categoryID, response.categoryName);
 					}
 					catch (e) {
-
+						console.log(e);
 					}
 					hideModal();
 					break;
@@ -390,8 +391,8 @@ Rp(function()
 						{
 							temp++;
 							var newLi = document.createElement("li");
-							newLi.innerHTML = "<a href='javascript:choose_assignee(\""+response[i].data.username+"\")'>"+
-												response[i].data.username+"</a>";
+							newLi.innerHTML = "<a href='javascript:choose_assignee(\""+response[i]+"\")'>"+
+												response[i]+"</a>";
 							inflate.insertBefore(newLi, inflate.firstChild);
 						}
 						

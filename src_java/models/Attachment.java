@@ -27,13 +27,30 @@ public class Attachment extends DBSimpleRecord {
         return model;
     }
     
+    @Override
+    protected String GetClassName() 
+    {
+        return "models.Attachment";
+    }
+    
+    @Override
+    protected String GetTableName() 
+    {
+    	return "task_attachment";
+    }
+    
+    public static String getTableName()
+    {
+    	return "task_attachment";
+    }
+    
     public boolean save() 
     {
     	Connection connection = DBConnection.getConnection();
         // check same id_task and attachment
         try {
             PreparedStatement statement = connection.prepareStatement
-            ("INSERT INTO `"+ User.getModel().GetTableName()+"` (id_task, attachment) VALUES (?, ?)");
+            ("INSERT INTO `"+ getTableName()+"` (id_task, attachment) VALUES (?, ?)");
             // Parameters start with 1
             statement.setInt(1, getId_task());
             statement.setString(2, getAttachment());
@@ -48,19 +65,6 @@ public class Attachment extends DBSimpleRecord {
     {
         return true;
     }
-    
-    @Override
-    protected String GetClassName() 
-    {
-        return "models.Attachment";
-    }
-    
-    @Override
-    protected String GetTableName() 
-    {
-    	return " task_attachment";
-    }
-    
     
     /**
      * @return the id_task

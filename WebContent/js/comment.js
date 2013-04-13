@@ -61,7 +61,7 @@ Rp(function()
 								comment.timestamp.substr(11,2),comment.timestamp.substr(14,2),comment.timestamp.substr(17,2));
 				var temphour = (date.getHours()>=10)? "" : "0";
 				var tempmin = (date.getMinutes()>=10)? "" : "0";
-				string += temphour + date.getHours()+":"+tempmin+date.getMinutes()+" – "+Day[date.getDay()]+"/"+Mon[date.getMonth()];
+				string += temphour + date.getHours()+":"+tempmin+date.getMinutes()+" - "+Day[date.getDay()]+"/"+Mon[date.getMonth()];
 				if (comment.id_user==id_user)
 					string += ' <a href="javascript:delete_comment('+comment.id_komentar+')">DELETE</a>';
 			string += '</div>';
@@ -104,7 +104,7 @@ Rp(function()
 						}
 					}
 					catch (e) {
-
+						console.log(e);
 					}
 					break;
 			}
@@ -130,7 +130,7 @@ Rp(function()
 					Rp('#commentForm').removeClass('loading');
 					try {
 						response = Rp.parseJSON(req.responseText);
-						if (response == "success")
+						if (response.status == "success")
 						{
 							document.getElementById("commentBody").value = "";
 							retrievecomment();
@@ -169,7 +169,7 @@ function delete_comment(id)
 				Rp('#commentForm').removeClass('loading');
 				try {
 					response = Rp.parseJSON(req.responseText);
-					if (response == "success")
+					if (response.status == "success")
 					{
 						var element = document.getElementById("comment_"+id);
 						element.parentNode.removeChild(element);
@@ -201,7 +201,7 @@ function prepend_comment(comment)
 								comment.timestamp.substr(11,2),comment.timestamp.substr(14,2),comment.timestamp.substr(17,2));
 			var temphour = (date.getHours()>=10)? "" : "0";
 			var tempmin = (date.getMinutes()>=10)? "" : "0";
-			var tempstring = temphour + date.getHours()+":"+tempmin+date.getMinutes()+" – "+Day[date.getDay()]+"/"+Mon[date.getMonth()];
+			var tempstring = temphour + date.getHours()+":"+tempmin+date.getMinutes()+" - "+Day[date.getDay()]+"/"+Mon[date.getMonth()];
 			string += tempstring;
 			if (comment.id_user==id_user)
 				string += ' <a href="javascript:delete_comment('+comment.id_komentar+')">DELETE</a>';
@@ -252,7 +252,7 @@ function more_comment()
 					document.getElementById("show_status").innerHTML = "Showing "+current_total_comment+" of "+total_comment;
 				}
 				catch (e) {
-
+					console.log(e);
 				}
 				break;
 		}

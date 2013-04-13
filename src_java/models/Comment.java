@@ -56,24 +56,31 @@ public class Comment extends DBSimpleRecord{
     public boolean save() 
     {
     	Connection connection = DBConnection.getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement
-            ("INSERT INTO `"+ User.getModel().GetTableName()+"` (id_komentar, komentar, id_user, id_task) VALUES (?, ?, ?)");
-            // Parameters start with 1
-            statement.setInt(1, getId_komentar());
-            statement.setString(2, getKomentar());
-            statement.setInt(3, getId_user());
-            statement.setInt(4, getId_task());
-            statement.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(Comment.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return true;
+    	if (!this.data.containsKey("id_komentar"))
+    	{
+	        try 
+	        {
+	            PreparedStatement statement = connection.prepareStatement
+	            ("INSERT INTO `"+ getTableName()+"` (komentar, id_user, id_task) VALUES (?, ?, ?)");
+	            // Parameters start with 1
+	            statement.setString(1, getKomentar());
+	            statement.setInt(2, getId_user());
+	            statement.setInt(3, getId_task());
+	            statement.executeUpdate();
+	        } catch (SQLException ex) {
+	            Logger.getLogger(Comment.class.getName()).log(Level.SEVERE, null, ex);
+	        }
+	        return true;
+    	}
+    	else
+    	{
+    		return false;
+    	}
     }
     
     public boolean checkValidity() 
     {
-        return true;
+        return false;
     }
     
     public User getUser()
