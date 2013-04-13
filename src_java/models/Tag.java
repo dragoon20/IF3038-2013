@@ -4,6 +4,7 @@
  */
 package models;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -40,6 +41,7 @@ public class Tag extends DBSimpleRecord{
     
     public boolean save() 
     {
+    	Connection connection = DBConnection.getConnection();
         // check same tag_name
         if (!this.data.containsKey("tag_name"))
         {

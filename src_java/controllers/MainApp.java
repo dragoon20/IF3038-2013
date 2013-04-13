@@ -241,6 +241,7 @@ public class MainApp extends HttpServlet
 				String extension = avatar.getName().split("\\.")[avatar.getName().split("\\.").length-1];
 				String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
 				user.setAvatar(new_filename);
+				user.hashPassword();
 				if (user.save())
 				{
 					InputStream in = avatar.getInputStream();
@@ -310,7 +311,23 @@ public class MainApp extends HttpServlet
 			{
 				if (fi.isFormField())
 				{
-					task.putData(fi.getFieldName(), fi.getString());
+					if ("deadline".equals(fi.getFieldName()))
+					{
+						try {
+							task.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					else if ("id_kategori".equals(fi.getFieldName()))
+					{
+						task.putData(fi.getFieldName(), Integer.parseInt(fi.getString()));
+					}
+					else
+					{
+						task.putData(fi.getFieldName(), fi.getString());
+					}
 				}
 				else
 				{
@@ -318,16 +335,18 @@ public class MainApp extends HttpServlet
 					String extension = fi.getName().split("\\.")[fi.getName().split("\\.").length-1]; 
 					tempmap.put("attachment", DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension);
 					tempmap.put("temp", fi.getInputStream());
+					tempmap.put("location", MainApp.fullPath(request.getSession())+"upload/attachments/"+DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension);
 					attachments.add(tempmap);
 				}
 			}
 			task.putData("attachments", attachments);
-			task.putData("id_user", MainApp.currentUserId(request.getSession()));
+			task.setId_user(MainApp.currentUserId(request.getSession()));
 			
 			boolean temperror = task.checkValidity();
 			if (temperror)
 			{
 				// TODO go to error page
+				System.out.println("error1");
 			}
 			else
 			{
@@ -338,12 +357,14 @@ public class MainApp extends HttpServlet
 				else
 				{
 					// TODO got to error page
+					System.out.println("error2");
 				}
 			}
 		}
 		else
 		{
 			// TODO go to error page
+			System.out.println("error3");
 		}
 	}
 	
@@ -378,7 +399,23 @@ public class MainApp extends HttpServlet
 				{
 					if (fi.isFormField())
 					{
-						task.putData(fi.getFieldName(), fi.getString());
+						if ("deadline".equals(fi.getFieldName()))
+						{
+							try {
+								task.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
+							} catch (ParseException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						else if ("id_kategori".equals(fi.getFieldName()))
+						{
+							task.putData(fi.getFieldName(), Integer.parseInt(fi.getString()));
+						}
+						else
+						{
+							task.putData(fi.getFieldName(), fi.getString());
+						}
 					}
 					else
 					{
@@ -448,14 +485,25 @@ public class MainApp extends HttpServlet
 			{
 				if (fi.isFormField())
 				{
-					user.putData(fi.getFieldName(), fi.getString());
+					if ("birthdate".equals(fi.getFieldName()))
+					{
+						try {
+							user.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					else
+					{
+						user.putData(fi.getFieldName(), fi.getString());
+					}
 				}
 				else
 				{
-					if ("avatar".equals(fi.getFieldName()))
+					if (("avatar".equals(fi.getFieldName())) && (fi.getSize() > 0))
 					{
 						check = true;
-						user.setAvatar(fi.getName());
 						avatar = fi;
 					}
 				}
@@ -466,6 +514,7 @@ public class MainApp extends HttpServlet
 			if (temperror)
 			{
 				// TODO go to error page
+				System.out.println("error 1");
 			}
 			else
 			{
@@ -489,12 +538,14 @@ public class MainApp extends HttpServlet
 				else
 				{
 					// TODO go to error page
+					System.out.println("error 2");
 				}
 			}
 		}
 		else
 		{
 			// TODO go to error page
+			System.out.println("error 3");
 		}
 	}
 	
@@ -511,8 +562,8 @@ public class MainApp extends HttpServlet
 			
 			if (user.getPassword().equals(DBSimpleRecord.MD5((request.getParameter("current_password")!=null ? request.getParameter("current_password"): ""))))
 			{
-				user.setPassword(DBSimpleRecord.MD5(request.getParameter("new_password")));
-				user.putData("confirm_password", DBSimpleRecord.MD5(request.getParameter("confirm_password")));
+				user.setPassword(request.getParameter("new_password"));
+				user.putData("confirm_password", request.getParameter("confirm_password"));
 				
 				boolean temperror = user.checkValidity();
 				if (temperror)
@@ -521,6 +572,7 @@ public class MainApp extends HttpServlet
 				}
 				else
 				{
+					user.hashPassword();
 					if (user.save())
 					{
 						response.sendRedirect("index");

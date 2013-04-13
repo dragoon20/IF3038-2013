@@ -27,6 +27,7 @@
 	request.setAttribute("title", "MOA - New Task");
 	request.setAttribute("currentPage", (request.getParameter("id")!=null) ? "" : "");
 %>
+<%@ include file="../template/header.jsp" %>
 		<div class="content">
 			<div class="add-task">
 				<header>

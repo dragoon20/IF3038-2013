@@ -55,6 +55,7 @@ public class Comment extends DBSimpleRecord{
     
     public boolean save() 
     {
+    	Connection connection = DBConnection.getConnection();
         try {
             PreparedStatement statement = connection.prepareStatement
             ("INSERT INTO `"+ User.getModel().GetTableName()+"` (id_komentar, komentar, id_user, id_task) VALUES (?, ?, ?)");

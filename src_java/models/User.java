@@ -4,6 +4,7 @@
  */
 package models;
 
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -56,11 +57,11 @@ public class User extends DBSimpleRecord
     
     public boolean save() 
     {
-        // check same username or email
+    	Connection connection = DBConnection.getConnection();
         if (!this.data.containsKey("id_user"))
         {
             // new user
-            if ((User.getModel().find("username = ?",new Object[] {this.data.get("username")}, new String[]{"string"}, null)).isEmpty())
+        	if (User.getModel().find("username = ? or email = ?", new Object[]{getUsername(), getEmail()}, new String[]{"string", "string"}, null).isEmpty())
             {
                 try {
                     PreparedStatement statement = connection.prepareStatement
@@ -71,13 +72,13 @@ public class User extends DBSimpleRecord
                     statement.setString(3, getFullname());
                     statement.setString(4, getAvatar());
                     statement.setDate(5, getBirthdate());
-                    statement.setString(6, DBSimpleRecord.MD5(getPassword()));
+                    statement.setString(6, getPassword());
                     statement.executeUpdate();
                     
                     ResultSet gen = statement.getGeneratedKeys();
                     gen.next();
                     setId_user(gen.getInt(1));
-                    
+                    return true;
                 } catch (SQLException ex) {
                 	System.out.println("----------------------------------------------------------");
                 	System.out.println("INSERT INTO `"+ User.getModel().GetTableName()+"` (username, email, fullname, avatar, birthdate, password) VALUES ('" + 
@@ -89,23 +90,79 @@ public class User extends DBSimpleRecord
                             getPassword() + "')");
                 	System.out.println("----------------------------------------------------------");
                     Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+                    return false;
                 }
-                return true;
             }
             else
             {   
                 // username and email already used
                 return false;
-            }
-            
-            //if(User.find("username = ?",new Object[]{this.data.containsKey("username")}, new String[]{"integer"}, null)
+            }            
         }
-        return true;
+        else
+        {
+        	List<DBSimpleRecord> list = Arrays.asList(User.getModel().findAll("username = ? or email = ?", new Object[]{getUsername(), getEmail()}, new String[]{"string", "string"}, null));
+        	if (list.size() > 1)
+        	{
+        		return false;
+        	}
+        	else
+        	{
+        		try {
+        			PreparedStatement statement = connection.prepareStatement
+                        ("UPDATE `"+ User.getModel().GetTableName()+"` SET username = ?, email = ?, fullname = ?, avatar = ?, birthdate = ?, password = ? WHERE id_user = ?");
+	                // Parameters start with 1
+	                statement.setString(1, getUsername());
+	                statement.setString(2, getEmail());
+	                statement.setString(3, getFullname());
+	                statement.setString(4, getAvatar());
+	                statement.setDate(5, getBirthdate());
+	                statement.setString(6, getPassword());
+	                statement.setInt(7, getId_user());
+	                statement.executeUpdate();
+	                return true;
+        		} catch (SQLException ex) {
+        			ex.printStackTrace();
+        			return false;
+        		}
+        	}
+        }
     }
     
     public boolean checkValidity() 
     {
-        return false;
+    	boolean status = false;
+    	if (!getUsername().matches(".{5,}"))
+    	{
+    		status = true;
+    	}
+    	if ((!getPassword().matches(".{8,}")) || (data.get("confirm_password")!=getPassword()) || 
+    			(getPassword()==getEmail()) || (getPassword()==getUsername()))
+    	{
+    		status = true;
+    	}
+    	if (!getFullname().matches(".+ .+"))
+    	{
+    		status = true;
+    	}
+		if (!((DBSimpleRecord.sdf.format(getBirthdate()).matches("[1-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]")) && (getBirthdate().getYear()>=1955)))
+		{
+			status = true;
+		}
+		if (!getEmail().matches(".+@.+\\...+"))
+		{
+			status = true;
+		}
+		if (!getAvatar().matches(".+\\.(jpe?g|JPE?G)"))
+		{
+			status = true;
+		}
+		return status;
+    }
+    
+    public void hashPassword()
+    {
+    	setPassword(DBSimpleRecord.MD5(getPassword()));
     }
     
     public Task[] getCreatedTasks()

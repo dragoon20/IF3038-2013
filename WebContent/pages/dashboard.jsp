@@ -75,7 +75,7 @@
 				<header>
 					<h1>Dashboard</h1>
 					<ul id="categoryTasks">
-						<li class="add-task-link" id="deleteCategoryLi"><a href="newwork.php" id="deleteCategoryLink">Delete Category</a></li>
+						<li class="add-task-link" id="deleteCategoryLi"><a href="newwork" id="deleteCategoryLink">Delete Category</a></li>
 						<li class="add-task-link" id="addTaskLi"><a id="addTaskCat" href="new_work">New Task</a></li>
 					</ul>
 				</header>
@@ -87,7 +87,15 @@
 						</header>
 
 						<div id="tasksList">
-<?php foreach ($todo as $task) { include dirname(__FILE__) . '/../template/task.php'; } ?>
+						<%
+							for (Task task : todo)
+							{
+								request.setAttribute("task", task);
+						%>
+								<%@ include file="../template/task.jsp" %>
+						<%
+							}
+						%>
 						</div>
 					</section>
 
@@ -97,8 +105,15 @@
 						</header>
 
 						<div id="completedTasksList">
-<?php
-foreach ($done as $task) { include dirname(__FILE__) . '/../template/task.php'; } ?>
+						<%
+							for (Task task : done)
+							{
+								request.setAttribute("task", task);
+						%>
+								<%@ include file="../template/task.jsp" %>
+						<%
+							}
+						%>
 						</div>
 					</section>
 					</form>
@@ -111,7 +126,7 @@ foreach ($done as $task) { include dirname(__FILE__) . '/../template/task.php'; 
 						</header>
 						<ul id="categoryList">
 							<li id="categoryLi0" <% if (currentCat==null) out.print("class=\"active\""); %>>
-								<a href="dashboard.php" data-category-id="0">
+								<a href="dashboard" data-category-id="0">
 									All Tasks
 								</a>
 							</li>
@@ -120,7 +135,7 @@ foreach ($done as $task) { include dirname(__FILE__) . '/../template/task.php'; 
 								{
 							%>
 									<li data-deletable="<%= (cate.getId_user()==MainApp.currentUserId(session)) ? "true" : "false" %>" id="categoryLi<%= cate.getId_kategori() %>"<%= ((currentCat!=null) && (currentCat.getId_kategori() == cate.getId_kategori()))? "class=\"active\"" : "" %>>
-										<a href="dashboard.php?cat=<%= cate.getId_kategori() %>" data-category-id="<%= cate.getId_kategori() %>">
+										<a href="dashboard?cat=<%= cate.getId_kategori() %>" data-category-id="<%= cate.getId_kategori() %>">
 											<%= cate.getNama_kategori() %>
 										</a>
 									</li>

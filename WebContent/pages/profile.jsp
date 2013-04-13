@@ -26,7 +26,7 @@
 	request.setAttribute("title", "MOA - Profile");
 	request.setAttribute("currentPage", (request.getParameter("id")!=null) ? "" : "profile");
 	
-	SimpleDateFormat date_format = new SimpleDateFormat("dd MMMM YYYY");
+	SimpleDateFormat date_format = new SimpleDateFormat("dd MMMM yyyy");
 %>	
 <%@ include file="../template/header.jsp" %>
 	<div class="content">

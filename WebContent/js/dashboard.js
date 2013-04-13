@@ -65,7 +65,7 @@ Rp(function()
 			delP = Rp.factory('p').addClass('delete');
 			delA = Rp.factory('a')
 			.attr('data-task-id', task.id)
-			.prop('href', 'delete.php?task_id=' + task.id)
+			.prop('href', 'delete?task_id=' + task.id)
 			.text('delete');
 			delA.on('click', deleteTask);
 			delP.append(delA);
@@ -82,7 +82,7 @@ Rp(function()
 		li = Rp.factory('li').prop('id', 'categoryLi' + cat.id);
 		a = Rp
 			.factory('a')
-			.attr('href', 'dashboard.php?cat=' + cat.id)
+			.attr('href', 'dashboard?cat=' + cat.id)
 			.attr('data-category-id', cat.id)
 			.attr('data-deletable', cat.canDeleteCategory ? 'true' : 'false')
 			.text(cat.name);

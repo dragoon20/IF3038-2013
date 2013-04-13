@@ -4,6 +4,7 @@
  */
 package models;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -28,6 +29,7 @@ public class Attachment extends DBSimpleRecord {
     
     public boolean save() 
     {
+    	Connection connection = DBConnection.getConnection();
         // check same id_task and attachment
         try {
             PreparedStatement statement = connection.prepareStatement

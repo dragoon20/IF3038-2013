@@ -229,9 +229,9 @@ public class RestApi extends HttpServlet
 			
 			String id_task = request.getParameter("task_id");
 			boolean success = false;
-			if (((Task)(Task.getModel().find("id_task = ?", new Object[]{id_task}, new String[]{"string"}, null))).getDeletable(MainApp.currentUserId(session)) && (MainApp.LoggedIn(session)))
+			if (((Task)(Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(id_task)}, new String[]{"integer"}, null))).getDeletable(MainApp.currentUserId(session)) && (MainApp.LoggedIn(session)))
 			{
-				if (Task.getModel().delete("id_task = ?", new Object[]{id_task}, new String[]{"string"})==1)
+				if (Task.getModel().delete("id_task = ?", new Object[]{Integer.parseInt(id_task)}, new String[]{"integer"})==1)
 				{
 					ret.put("success", true);
 				}
@@ -266,10 +266,10 @@ public class RestApi extends HttpServlet
 					int categoryId = cat.getId_kategori();
 					String categoryName = cat.getNama_kategori();
 					boolean canDeleteCategory = (cat.getId_user()==MainApp.currentUserId(session));
-					boolean canEditCategory = (cat.getEditable(MainApp.currentUserId(session)));
+					boolean canEditCategory = ((canDeleteCategory) || (cat.getEditable(MainApp.currentUserId(session))));
 					
 					ret.put("success", true);
-					ret.put("categoryId", categoryId);
+					ret.put("categoryID", categoryId);
 					ret.put("categoryName", categoryName);
 					ret.put("canDeleteCategory", canDeleteCategory);
 					ret.put("canEditCategory", canEditCategory);

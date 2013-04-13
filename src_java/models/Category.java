@@ -4,6 +4,7 @@
  */
 package models;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -51,6 +52,7 @@ public class Category extends DBSimpleRecord{
     
     public boolean save() 
     {
+    	Connection connection = DBConnection.getConnection();
         if(!this.data.containsKey("id_kategori"))
         {
             try {

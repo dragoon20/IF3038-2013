@@ -30,14 +30,12 @@ import java.util.logging.Logger;
  */
 public abstract class DBSimpleRecord 
 {
-    protected Connection connection;
     protected HashMap<String, Object> data;
     
-    public static SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+    public static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     
     public DBSimpleRecord() 
     {
-        connection = DBConnection.getConnection();
         data = new HashMap<String, Object>();
     }
     
@@ -102,6 +100,7 @@ public abstract class DBSimpleRecord
     
     public DBSimpleRecord find(String query, Object[] params, String[] params_type , String[] selection)
     {
+    	Connection connection = DBConnection.getConnection();
     	try
     	{
             Class<?> c = Class.forName(GetClassName());
@@ -171,6 +170,7 @@ public abstract class DBSimpleRecord
     
     public DBSimpleRecord[] findAll(String query, Object[] params, String[] params_type , String[] selection)
     {
+    	Connection connection = DBConnection.getConnection();
         try {
             Class<?> c = Class.forName(GetClassName());
             List<DBSimpleRecord> result = new ArrayList<DBSimpleRecord>();
@@ -238,6 +238,7 @@ public abstract class DBSimpleRecord
     
     public DBSimpleRecord[] findAllLimit(String query, Object[] params, String[] params_type , String[] selection, int limitStart, int limitEnd)
     {
+    	Connection connection = DBConnection.getConnection();
     	try {
             Class<?> c = Class.forName(GetClassName());
             List<DBSimpleRecord> result = new ArrayList<DBSimpleRecord>();
@@ -304,13 +305,27 @@ public abstract class DBSimpleRecord
     
     public int delete(String query, Object[] params, String[] params_type)
     {
+    	Connection connection = DBConnection.getConnection();
         int affected_row=0;
         if (query != "")
         {
             query = " WHERE " + query;
         }
         try {
-            PreparedStatement statement = connection.prepareStatement("DELETE FROM" + this.GetClassName() + query);
+        	System.out.println("DELETE FROM " + this.GetTableName() + query);
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM " + this.GetTableName() + query);
+            for (int i=0;i<params.length;++i)
+	        {
+	        	if ("string".equals(params_type[i]))
+	        	{
+	        		statement.setNString(i+1, (String)params[i]);
+	        	}
+	        	else if ("integer".equals(params_type[i]))
+	        	{
+	        		statement.setInt(i+1, (Integer)params[i]);
+	        	}
+	        }
+            
             affected_row = statement.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(DBSimpleRecord.class.getName()).log(Level.SEVERE, null, ex);

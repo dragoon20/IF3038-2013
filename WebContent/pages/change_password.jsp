@@ -16,7 +16,7 @@
 	<div class="content">
 		<div class="profile">
 			<header>
-				<h1><?php echo $user->fullname; ?></h1>
+				<h1><%= user.getFullname() %></h1>
 			</header>
 
 			<section class="profile-details">

@@ -4,7 +4,7 @@
 <%@page import="models.Task"%>
 <%
 	Task temptask = (Task)request.getAttribute("task");
-	SimpleDateFormat temp_task_deadline = new SimpleDateFormat("j F Y");
+	SimpleDateFormat temp_task_deadline = new SimpleDateFormat("dd MMMM yyyy");
 %>
 
 						<article class="task" data-task-id="<%= temptask.getId_task() %>" id="task<%= temptask.getId_task() %>">

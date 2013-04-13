@@ -86,8 +86,7 @@
 									{
 										string.append("<a href='profile?id="+user.getId_user()+"'>"+user.getUsername()+"</a>,");
 									}
-									string.substring(0, (string.length()==0) ? 0 :string.length()-1);
-									out.println(string.toString());
+									out.println(string.substring(0, (string.length()==0) ? 0 :string.length()-1));
 								%>
 							</span>
 						</p>
@@ -175,8 +174,7 @@
 									{
 										string.append(user.getUsername()+",");
 									}
-									string.substring(0, (string.length()==0) ? 0 :string.length()-1);
-									out.println(string.toString());
+									out.println(string.substring(0, (string.length()==0) ? 0 :string.length()-1));
 								%>">
 							<div id="auto_comp_assignee">
 								<ul id="auto_comp_inflate_assignee"></ul>
@@ -190,8 +188,7 @@
 									{
 										string.append(tag.getTag_name()+",");
 									}
-									string.substring(0, string.length()-1);
-									out.println(string.toString());
+									out.println(string.substring(0, (string.length()==0) ? 0 :string.length()-1));
 								%>">
 							<div id="auto_comp_tag">
 								<ul id="auto_comp_inflate_tag"></ul>
