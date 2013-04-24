@@ -162,12 +162,13 @@ public class Task extends DBSimpleRecord {
         	try {
                 int affected_row=0;
                 PreparedStatement statement = connection.prepareStatement
-                ("UPDATE `"+ Task.getModel().GetTableName()+"` SET nama_task = ?, deadline = ?, id_kategori = ?, id_user = ?");
+                ("UPDATE `"+ Task.getModel().GetTableName()+"` SET nama_task = ?, deadline = ?, id_kategori = ?, id_user = ? WHERE id_task = ?");
                 // Parameters start with 1
                 statement.setString(1, getNama_task());
                 statement.setDate(2, getDeadline());
                 statement.setInt(3, getId_kategori());
                 statement.setInt(4, getId_user());
+                statement.setInt(5, getId_task());
                 
                 affected_row = statement.executeUpdate();
                 if (affected_row ==0) 

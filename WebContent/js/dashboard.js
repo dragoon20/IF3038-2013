@@ -356,7 +356,7 @@ Rp(function()
 		if (catreq.readyState)
 			return;
 		if (catid!=0) {
-			intreq.get('api/retrieve_tasks?category_id=' + catid);
+			intreq.get('api/retrieve_tasks?category_id=' + catid + '&' + (new Date()).getTime());
 		}
 		else {
 			intreq.get('api/retrieve_tasks');

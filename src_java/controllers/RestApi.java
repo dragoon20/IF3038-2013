@@ -5,9 +5,11 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -783,6 +785,13 @@ public class RestApi extends HttpServlet
 			
 			User user = new User();
 			user.addData(request.getParameterMap());
+			SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+			try {
+				user.setBirthdate(new Date(sdf.parse(request.getParameter("birthdate")).getTime()));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			boolean temperror = user.checkValidity();
 			
 			if (temperror)
@@ -797,7 +806,7 @@ public class RestApi extends HttpServlet
 				errors.add("Username/email sudah digunakan.");
 			}
 			ret.put("status", status);
-			ret.put("errors", errors);
+			ret.put("error", errors);
 		}
 		else
 		{

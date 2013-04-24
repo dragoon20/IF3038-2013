@@ -134,7 +134,7 @@ public class User extends DBSimpleRecord
     public boolean checkValidity() 
     {
     	boolean status = false;
-    	if (!getUsername().matches(".{5,}"))
+    	/*if (!getUsername().matches(".{5,}"))
     	{
     		status = true;
     	}
@@ -158,7 +158,7 @@ public class User extends DBSimpleRecord
 		if (!getAvatar().matches(".+\\.(jpe?g|JPE?G)"))
 		{
 			status = true;
-		}
+		}*/
 		return status;
     }
     
