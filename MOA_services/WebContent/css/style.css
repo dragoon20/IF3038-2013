@@ -1,0 +1,47 @@
+@CHARSET "UTF-8";
+
+body
+{
+	background-color: gray;
+}
+
+
+#content_box
+{	
+	margin: auto;
+	width: 400px;
+	height: 200px;
+	border: 1px solid black;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	padding: 20px;	
+	margin-top: 200px;
+	color: #FFFFFF;
+	background-color: blue;
+}
+
+.row
+{
+	padding: 10px;
+	height: 20px;
+	line-height: 25px;
+}
+
+.row label
+{
+	float: left;
+	width: 170px;
+}
+
+.row input[type="text"], .row input[type="password"]
+{
+	width: 200px;
+}
+
+.row input[type="submit"]
+{
+	float: right;
+	padding: 5px;
+}
+
