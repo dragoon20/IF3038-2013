@@ -84,7 +84,7 @@ public abstract class DBSimpleRecord
     {
     	for (Entry<String, String[]> entry : map.entrySet())
     	{
-    		data.put(entry.getKey(), entry.getValue().toString());
+    		data.put(entry.getKey(), entry.getValue()[0]);
     	}
     }
     
