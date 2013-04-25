@@ -58,7 +58,7 @@ public class MainApp extends HttpServlet
     
     public static int currentUserId(HttpSession session)
     {
-    	return ((int)session.getAttribute("user_id"));
+    	return ((Integer)session.getAttribute("user_id"));
     }
     
     public static User currentUser(HttpSession session)
