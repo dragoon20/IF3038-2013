@@ -4,19 +4,23 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.soap.SOAPConnection;
+import javax.xml.soap.SOAPConnectionFactory;
 
 /**
  * Servlet implementation class BasicServlet
  */
-public class BasicServlet extends HttpServlet 
+public class BasicServlet extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
     protected HttpSession session;
+    protected SOAPConnection soap_connection;
 	
     /**
      * @see HttpServlet#HttpServlet()
@@ -26,6 +30,22 @@ public class BasicServlet extends HttpServlet
         super();
     }
 
+    @Override
+    public void init(ServletConfig servletConfig) throws ServletException
+    {
+        super.init(servletConfig);
+
+        try 
+        {
+        	SOAPConnectionFactory connectionFactory = SOAPConnectionFactory.newInstance();
+        	soap_connection = connectionFactory.createConnection();
+        } catch(Exception e) 
+        {
+        	e.printStackTrace();
+        }
+    }
+
+    
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
