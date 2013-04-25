@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.helper.GeneralHelper;
 import com.models.DBSimpleRecord;
 import com.models.Comment;
+import com.models.User;
 import com.template.BasicServlet;
 
 import org.json.simple.JSONObject;
@@ -31,7 +32,7 @@ public class CommentService extends BasicServlet
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public void add_comment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	public void add_new_comment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		try
 		{
@@ -70,5 +71,42 @@ public class CommentService extends BasicServlet
 		}
 	}
         
+	public void delete_comment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+        {
+		try
+		{
+			int id_user;
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			{
+                            PrintWriter pw = response.getWriter();
+                            JSONObject ret = new JSONObject();
+				if (("POST".equals(request.getMethod())) && (request.getParameter("id")!=null))
+				{
+					if (Comment.getModel().delete("id_komentar = ? AND id_user = ? ", new Object[]{Integer.parseInt(request.getParameter("id")),id_user}, new String[]{"integer","integer"})==1){
+                                            ret.put("status", "success");
+                                        }else{
+                                            ret.put("status", "fail");
+                                        }
+                                        pw.println(ret.toJSONString());
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+			request.getRequestDispatcher("pages/error.jsp").forward(request, response);
+		}
+        }
+        
+        public User getUser(){
+            
+        }
 }
 
