@@ -134,7 +134,7 @@ public class AuthorizationServlet extends HttpServlet
 		    			session.setAttribute(token, user.getId_user());
 		    			
 		    			String redirect_url = rs.getString(1);
-						response.sendRedirect(redirect_url);
+						response.sendRedirect(redirect_url+"?token="+token);
 		    		}
 				}
 				else

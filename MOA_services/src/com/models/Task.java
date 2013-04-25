@@ -4,22 +4,15 @@
  */
 package com.models;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,8 +56,6 @@ public class Task extends DBSimpleRecord {
     
     public boolean save() 
     {
-        // TIDAK MENGGUNAKAN USER ID, USER ID HARUS DITANGANI DI LUAR
-        // check task name
     	Connection connection = DBConnection.getConnection();
         if (!this.data.containsKey("id_task"))
         {
@@ -89,73 +80,12 @@ public class Task extends DBSimpleRecord {
                 if (generatedkeys.next()) 
                 {
                 	setId_task(generatedkeys.getInt(1));
-                	
-                	List<User> assignees = (List<User>) data.get("assignee");
-                	for (User u : assignees)
-                	{
-	                    statement = connection.prepareStatement
-	                    		("INSERT INTO `assign` (id_user, id_task) VALUES (?,?)");
-	                    statement.setInt(1, u.getId_user());
-	                    statement.setInt(2, getId_task());
-	                    
-	                    statement.executeUpdate();
-                	}
-                	
-                	List<Object> list = Arrays.asList((Object[])data.get("tag"));
-                	String[] tags = list.toArray(new String[list.size()]);
-                	for (String tag : tags)
-                	{
-                		Tag temptag = (Tag)Tag.getModel().find("tag_name = ?", new Object[]{tag}, new String[]{"string"}, null);
-                		if (temptag.isEmpty())
-                		{
-                			temptag.setTag_name(tag);
-                			temptag.save();
-                		}
-                		
-                		statement = connection.prepareStatement
-	                    		("INSERT INTO `have_tags` (id_task, id_tag) VALUES (?,?)");
-	                    statement.setInt(1, getId_task());
-	                    statement.setInt(2, temptag.getId_tag());
-	                    
-	                    statement.executeUpdate();
-                	}
-                	
-                	List<Map<String, Object>> attachments = (List<Map<String, Object>>)data.get("attachments");
-                	for (Map<String, Object> entry : attachments)
-                	{
-                		String name = (String)entry.get("attachment");
-                		InputStream in = (InputStream)entry.get("temp");
-
-                		Attachment attachment = new Attachment();
-                		attachment.setId_task(getId_task());
-                		attachment.setAttachment(name);
-                		if (attachment.save())
-                		{
-                			FileOutputStream out = new FileOutputStream(new File((String)entry.get("location")));
-    						
-    						int read = 0;
-    						byte[] bytes = new byte[1024];
-    						while ((read = in.read(bytes)) != -1)
-    						{
-    							out.write(bytes, 0, read);
-    						}
-    						out.close();
-                		}
-                	}
                 }
                 return true;
             } catch (SQLException ex) {
                 Logger.getLogger(Task.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
-            } catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return false;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return false;
-			}
+            }
         }
         else
         {
@@ -180,74 +110,10 @@ public class Task extends DBSimpleRecord {
                 		("DELETE FROM `assign` WHERE id_task = ?");
             	statement.setInt(1, getId_task());
             	statement.executeUpdate();
-            	List<User> assignees = (List<User>) data.get("assignee");
-            	for (User u : assignees)
-            	{
-                    statement = connection.prepareStatement
-                    		("INSERT INTO `assign` (id_user, id_task) VALUES (?,?)");
-                    statement.setInt(1, u.getId_user());
-                    statement.setInt(2, getId_task());
-                    
-                    statement.executeUpdate();
-            	}
-            	
-            	statement = connection.prepareStatement
-                		("DELETE FROM `have_tags` WHERE id_task = ?");
-            	statement.setInt(1, getId_task());
-            	statement.executeUpdate();
-            	List<Object> list = Arrays.asList((Object[])data.get("tag"));
-            	String[] tags = list.toArray(new String[list.size()]);
-            	for (String tag : tags)
-            	{
-            		Tag temptag = (Tag)Tag.getModel().find("tag_name = ?", new Object[]{tag}, new String[]{"string"}, null);
-            		if (temptag.isEmpty())
-            		{
-            			temptag.setTag_name(tag);
-            			temptag.save();
-            		}
-            		
-            		statement = connection.prepareStatement
-                    		("INSERT INTO `have_tags` (id_task, id_tag) VALUES (?,?)");
-                    statement.setInt(1, getId_task());
-                    statement.setInt(2, temptag.getId_tag());
-                    
-                    statement.executeUpdate();
-            	}
-            	
-            	List<Map<String, Object>> attachments = (List<Map<String, Object>>)data.get("attachments");
-            	for (Map<String, Object> entry : attachments)
-            	{
-            		String name = (String)entry.get("attachment");
-            		InputStream in = (InputStream)entry.get("temp");
-
-            		Attachment attachment = new Attachment();
-            		attachment.setId_task(getId_task());
-            		attachment.setAttachment(name);
-            		if (attachment.save())
-            		{
-            			FileOutputStream out = new FileOutputStream(new File((String)entry.get("location")));
-						
-						int read = 0;
-						byte[] bytes = new byte[1024];
-						while ((read = in.read(bytes)) != -1)
-						{
-							out.write(bytes, 0, read);
-						}
-						out.close();
-            		}
-                }
                 return true;
             } catch (SQLException ex) {
                 Logger.getLogger(Task.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
-            } catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return false;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return false;
 			}
         }
     }
@@ -259,26 +125,6 @@ public class Task extends DBSimpleRecord {
     	{
     		status = true;
     	}
-		
-    	String[] tempuser = ((String)data.get("assignee")).split(",");
-    	List<User> assignees = new ArrayList<User>();
-    	for (String user : tempuser)
-    	{
-    		User temp = (User)User.getModel().find("username = ?", new Object[]{user}, new String[]{"string"}, new String[]{"id_user"});
-    		if (!temp.isEmpty())
-    		{
-    			User u = new User();
-    			u.setId_user(temp.getId_user());
-    			u.setUsername(user);
-    			assignees.add(u);
-    		}
-    		else
-    		{
-    			status = true;
-    		}
-    	}
-    	putData("assignee", assignees);
-    	putData("tag", ((String)data.get("tag")).split(","));
         return status;
     }
     
