@@ -75,8 +75,23 @@ public class Category extends DBSimpleRecord{
         }
         else 
         {
-            // username and email already used
-            return false;
+            try {
+                // new category
+                PreparedStatement statement = connection.prepareStatement
+                ("UPDATE `"+ Category.getModel().GetTableName()+"` SET nama_kategori = ? WHERE id_kategori = ?", Statement.RETURN_GENERATED_KEYS);
+                // Parameters start with 1
+                statement.setString(1, getNama_kategori());
+                statement.setInt(2, getId_kategori());
+                
+                statement.executeUpdate();
+
+                ResultSet gen = statement.getGeneratedKeys();
+                gen.next();
+                setId_kategori(gen.getInt(1));
+            } catch (SQLException ex) {
+                Logger.getLogger(Category.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return true;
         }
     }
     
