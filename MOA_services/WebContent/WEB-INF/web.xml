@@ -16,8 +16,8 @@
     <servlet>
         <description/>
         <display-name>Comment</display-name>
-        <servlet-name>CommentService</servlet-name>
-        <servlet-class>com.models.CommentService</servlet-class>
+        <servlet-name>Comment</servlet-name>
+        <servlet-class>com.services.CommentService</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Comment</servlet-name>

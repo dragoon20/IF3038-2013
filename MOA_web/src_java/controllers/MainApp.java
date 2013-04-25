@@ -56,9 +56,9 @@ public class MainApp extends HttpServlet
 				(((String)session.getAttribute("full_path"))!=null));
 	}
     
-    public static int currentUserId(HttpSession session)
+    public static Integer currentUserId(HttpSession session)
     {
-    	return ((int)session.getAttribute("user_id"));
+    	return ((Integer)session.getAttribute("user_id"));
     }
     
     public static User currentUser(HttpSession session)
