@@ -1,24 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.services;
-import java.io.PrintWriter;
-
 import java.io.IOException;
-import java.sql.Date;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.simple.JSONObject;
+
 import com.helper.GeneralHelper;
-import com.models.DBSimpleRecord;
 import com.models.Comment;
 import com.template.BasicServlet;
-
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
  *
@@ -41,13 +35,12 @@ public class CommentService extends BasicServlet
 				if (("POST".equals(request.getMethod())) && (request.getParameter("id_task")!=null) && (request.getParameter("komentar")!=null))
 				{
 					Comment komentar = new Comment();
-                                        komentar.setId_user(id_user);
-                                        komentar.setId_task(Integer.parseInt(request.getParameter("id_task")));
-                                        komentar.setKomentar(request.getParameter("komentar"));
+                    komentar.setId_user(id_user);
+                    komentar.setId_task(Integer.parseInt(request.getParameter("id_task")));
+                    komentar.setKomentar(request.getParameter("komentar"));
 					if ((!komentar.checkValidity()) && (komentar.save()))
 					{
 						// return SOAP response
-                                            
 					}
 					else
 					{
@@ -66,7 +59,6 @@ public class CommentService extends BasicServlet
 		} catch(Exception e)
 		{
 			e.printStackTrace();
-			request.getRequestDispatcher("pages/error.jsp").forward(request, response);
 		}
 	}
         

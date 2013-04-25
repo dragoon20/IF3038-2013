@@ -2,30 +2,31 @@
 <web-app id="WebApp_ID" version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <display-name>MOA_services</display-name>
     <servlet>
-        <description/>
         <display-name>User</display-name>
         <servlet-name>User</servlet-name>
         <servlet-class>com.services.UserService</servlet-class>
     </servlet>
+    <servlet-mapping>
+        <servlet-name>User</servlet-name>
+        <url-pattern>/user/*</url-pattern>
+    </servlet-mapping>
     <servlet>
-        <description/>
         <display-name>Assign</display-name>
         <servlet-name>Assign</servlet-name>
         <servlet-class>com.services.AssignService</servlet-class>
     </servlet>
+    <servlet-mapping>
+        <servlet-name>Assign</servlet-name>
+        <url-pattern>/assign/*</url-pattern>
+    </servlet-mapping>
     <servlet>
-        <description/>
         <display-name>Comment</display-name>
-        <servlet-name>CommentService</servlet-name>
-        <servlet-class>com.models.CommentService</servlet-class>
+        <servlet-name>Comment</servlet-name>
+        <servlet-class>com.services.CommentService</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Comment</servlet-name>
         <url-pattern>/comment/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>User</servlet-name>
-        <url-pattern>/user/*</url-pattern>
     </servlet-mapping>
     <servlet>
         <description/>
@@ -47,10 +48,6 @@
         <servlet-name>AuthorizationServlet</servlet-name>
         <url-pattern>/authorize</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>Assign</servlet-name>
-        <url-pattern>/assign/*</url-pattern>
-    </servlet-mapping>
     <filter>
         <display-name>BasicFilter</display-name>
         <filter-name>BasicFilter</filter-name>
@@ -59,6 +56,5 @@
     <filter-mapping>
         <filter-name>BasicFilter</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping>
-    
+    </filter-mapping>    
 </web-app>
