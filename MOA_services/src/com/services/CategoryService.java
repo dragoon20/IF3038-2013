@@ -15,8 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.helper.GeneralHelper;
 import com.models.DBSimpleRecord;
-import com.models.Assign;
 import com.models.Category;
+import com.models.Comment;
 import com.template.BasicServlet;
 
 import org.json.simple.JSONObject;
@@ -121,38 +121,36 @@ public class CategoryService extends BasicServlet
 		}
 	}
         
-         public void get_editable(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+      	public void delete_category(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		try
 		{
 			int id_user;
 			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
 			{
-                            Category kategori;
-                            if (("POST".equals(request.getMethod())) && (request.getParameter("id_kategori")!=null) && (request.getParameter("nama_kategori")!=null) && 
-                                    ((kategori = (Category)Category.getModel().find("id_kategori = ?", new Object[]{Integer.parseInt(request.getParameter("id_kategori"))}, new String[]{"integer"}, null)).getEditable(id_user)))
-                            {
-                                    kategori.setNama_kategori(request.getParameter("nama_kategori"));
-                                    kategori.setId_user(id_user);
-                                    if ((!kategori.checkValidity()) && (kategori.save()))
-                                    {
-                                            Map<String, Boolean> map = new HashMap<String, Boolean>();
-                                            map.put("success", true);
-                                            JSONObject ret = new JSONObject(map);
-
-                                            PrintWriter pw = response.getWriter();
-                                            pw.print(ret.toJSONString());
-                                            pw.close();
-                                    }
-                                    else
-                                    {
-                                            throw new Exception();
-                                    }
-                            }
-                            else
-                            {
-                                    throw new Exception();
-                            }
+				if (("POST".equals(request.getMethod())) && 
+					(request.getParameter("id_kategori")!=null) &&  
+					(((Category)Category.getModel().find("id_kategori = ?", new Object[]{Integer.parseInt(request.getParameter("id_kategori"))}, new String[]{"integer"}, null)).getDeletable(id_user)))
+				{
+					if (Category.getModel().delete("id_kategori = ?", new Object[]{Integer.parseInt(request.getParameter("id_kategori"))}, new String[]{"integer"})==1)
+					{
+						Map<String, Boolean> map = new HashMap<String, Boolean>();
+						map.put("success", true);
+						JSONObject ret = new JSONObject(map);
+						
+						PrintWriter pw = response.getWriter();
+						pw.print(ret.toJSONString());
+						pw.close();
+					}
+					else
+					{
+						throw new Exception();
+					}
+				}
+				else
+				{
+					throw new Exception();
+				}
 			}
 			else
 			{
@@ -170,5 +168,83 @@ public class CategoryService extends BasicServlet
 			pw.close();
 		}
 	}
+        
+	public void get_editable(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		try
+		{
+			int id_user;
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			{
+				if (request.getParameter("id_kategori")!=null)
+				{
+					Category kategori = (Category)Category.getModel().find("id_kategori = ?", new Object[]{Integer.parseInt(request.getParameter("id_kategori"))}, new String[]{"integer"}, null);
+					
+                                        Map<String, Object> map = new HashMap<String, Object>();
+					map.put("success", kategori.getEditable(id_user));
+					JSONObject ret = new JSONObject(map);
+					
+					PrintWriter pw = response.getWriter();
+					pw.print(JSONValue.toJSONString(ret));
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("success", "");
+			JSONObject ret = new JSONObject(map);
+			PrintWriter pw = response.getWriter();
+			pw.print(JSONValue.toJSONString(ret));
+		}
+	}
+     
+        public void get_deletable(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		try
+		{
+			int id_user;
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			{
+				if (request.getParameter("id_kategori")!=null)
+				{
+					Category kategori = (Category)Category.getModel().find("id_kategori = ?", new Object[]{Integer.parseInt(request.getParameter("id_kategori"))}, new String[]{"integer"}, null);
+					
+                                        Map<String, Object> map = new HashMap<String, Object>();
+                                        boolean success = kategori.getDeletable(id_user);
+					map.put("success", success);
+					JSONObject ret = new JSONObject(map);
+					
+					PrintWriter pw = response.getWriter();
+					pw.print(JSONValue.toJSONString(ret));
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("success", "");
+			JSONObject ret = new JSONObject(map);
+			PrintWriter pw = response.getWriter();
+			pw.print(JSONValue.toJSONString(ret));
+		}
+	}
+        
 }
 
