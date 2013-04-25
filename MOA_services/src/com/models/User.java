@@ -10,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
@@ -103,6 +105,7 @@ public class User extends DBSimpleRecord
         }
         else
         {
+                System.out.println(">>>test update");
         	List<DBSimpleRecord> list = Arrays.asList(User.getModel().findAll("username = ? or email = ?", new Object[]{getUsername(), getEmail()}, new String[]{"string", "string"}, null));
         	if (list.size() > 1)
         	{
@@ -169,7 +172,8 @@ public class User extends DBSimpleRecord
     
     public Task[] getCreatedTasks()
     {
-    	List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("id_task IN (SELECT id_task FROM have_task WHERE id_user=?)", new Object[]{getId_user()}, new String[]{"integer"}, null));
+        System.out.println(">>test");
+    	List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("id_user=?", new Object[]{getId_user()}, new String[]{"integer"}, null));
     	return list.toArray(new Task[list.size()]);
     }
     
@@ -257,7 +261,7 @@ public class User extends DBSimpleRecord
      */
     public int getId_user() 
     {
-    	return (Integer)data.get("id_user");
+    	return  Integer.parseInt(data.get("id_user").toString());
     }
 
     /**
@@ -335,9 +339,15 @@ public class User extends DBSimpleRecord
     /**
      * @return the birthdate
      */
-    public Date getBirthdate() 
+    public java.sql.Date getBirthdate() 
     {
-    	return ((Date)data.get("birthdate"));
+        try {
+            String [] date = data.get("birthdate").toString().split("-");
+            return (new java.sql.Date(Integer.parseInt(date[0]), Integer.parseInt(date[1]), Integer.parseInt(date[2])));
+        } catch (Exception ex) {
+            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 
     /**

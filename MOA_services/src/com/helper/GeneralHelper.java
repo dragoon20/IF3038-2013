@@ -8,7 +8,7 @@ public class GeneralHelper
 	{
 		if (session.getAttribute(token)!=null)
 		{
-			return (int)session.getAttribute(token);
+			return (Integer)session.getAttribute(token);
 		}
 		return -1;
 	}
