@@ -1,12 +1,21 @@
 package controllers;
 
+import com.mysql.jdbc.StringUtils;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.sql.Date;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -36,10 +45,11 @@ import models.User;
  */
 public class MainApp extends HttpServlet 
 {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 	
-	public static final String appName = "MOA";
+    public static final String appName = "MOA";
     public static final String appTagline = "Multiuser Online Agenda";
+    public static final String serviceURL = "http://localhost:8080/MOA_services/";
     
     /**
      * @see HttpServlet#HttpServlet()
@@ -618,4 +628,56 @@ public class MainApp extends HttpServlet
 		pw.println(request.getServletContext().getRealPath("/"));
 		pw.close();
 	}
+        
+        private static String buildWebQuery(Map<String, String> parameters) throws Exception {
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                String key = URLEncoder.encode(entry.getKey(), "UTF-8");
+                String value = URLEncoder.encode(entry.getValue(), "UTF-8");
+                sb.append(key).append("=").append(value).append("&");
+            }
+            return sb.toString().substring(0, sb.length() - 1);
+        }
+        
+        // contoh pemanggilan : callRestfulWebService("http://localhost:8080/MOA_Servicesnew/",params,"",0)
+        public static String callRestfulWebService(String address, Map<String, String> parameters, String proxy, int port) throws Exception {
+ 
+            Proxy proxyObject = null;
+            if (!proxy.equals("") && port > 0) {
+                InetSocketAddress proxyAddress = new InetSocketAddress(proxy, port);
+                proxyObject = new Proxy(Proxy.Type.HTTP, proxyAddress);
+            }
+
+            String response = "";
+            String query = buildWebQuery(parameters);
+
+            URL url = new URL(address);
+            
+            URLConnection urlc = null;
+            if (proxyObject == null) {
+                urlc = url.openConnection();
+            } else {
+                urlc = url.openConnection(proxyObject);
+            }
+            urlc.setDoOutput(true);
+            urlc.setAllowUserInteraction(false);
+
+            // Send message
+            PrintStream ps = new PrintStream(urlc.getOutputStream());
+            ps.print(query);
+            ps.close();
+
+            // retrieve result
+            BufferedReader br = new BufferedReader(new InputStreamReader(urlc.getInputStream(), "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+                sb.append("\n");
+            }
+            br.close();
+            response = sb.toString();
+
+            return response;
+        }
 }
