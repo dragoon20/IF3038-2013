@@ -26,6 +26,9 @@ import org.apache.tomcat.util.http.fileupload.FileItemFactory;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import models.DBSimpleRecord;
 import models.Task;
@@ -237,7 +240,9 @@ public class MainApp extends HttpServlet
 			if ((temperror) || (!check))
 			{
 				// TODO print error screen
-				System.out.println("error1");
+				PrintWriter pw = response.getWriter();
+				pw.println("error1");
+				pw.close();
 			}
 			else
 			{
@@ -274,14 +279,18 @@ public class MainApp extends HttpServlet
 				else
 				{
 					// TODO print error screen
-					System.out.println("error2");
+					PrintWriter pw = response.getWriter();
+					pw.println("error2");
+					pw.close();
 				}
 			}
 		}
 		else
 		{
 			// TODO print error screen
-			System.out.println("error3");
+			PrintWriter pw = response.getWriter();
+			pw.println("error3");
+			pw.close();
 		}
 	}
 	
@@ -615,7 +624,15 @@ public class MainApp extends HttpServlet
 	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		PrintWriter pw = response.getWriter();
-		pw.println(request.getServletContext().getRealPath("/"));
+		JSONObject credentials = (JSONObject)
+									((JSONObject)
+										((JSONArray)
+											((JSONObject)
+												JSONValue.parse(System.getenv("VCAP_SERVICES")))
+											.get("mysql-5.1"))
+										.get(0))
+									.get("credentials");
+		pw.println(credentials.toString());
 		pw.close();
 	}
 }

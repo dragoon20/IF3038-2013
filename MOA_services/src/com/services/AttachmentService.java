@@ -102,4 +102,12 @@ public class AttachmentService extends BasicServlet
 			pw.print(JSONValue.toJSONString(ret));
 		}
 	}
+	
+	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		PrintWriter pw = response.getWriter();
+		pw.println("Sharon Loh");
+		pw.println(request.getParameter("id"));
+		pw.close();
+	}
 }

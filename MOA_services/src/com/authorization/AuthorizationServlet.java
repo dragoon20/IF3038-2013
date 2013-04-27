@@ -123,6 +123,7 @@ public class AuthorizationServlet extends HttpServlet
 				ResultSet rs = prep.executeQuery();
 				if ((rs.last()) && (rs.getRow()==1))
 				{
+					String redirect_url = rs.getString(1);
 					String query = "username = ? AND password = ?";
 		    		User user = (User)User.getModel().find(query, 
 		    				new Object[]{request.getParameter("username"), DBSimpleRecord.MD5(request.getParameter("password"))}, 
@@ -133,7 +134,6 @@ public class AuthorizationServlet extends HttpServlet
 		    			HttpSession session = request.getSession();
 		    			session.setAttribute(token, user.getId_user());
 		    			
-		    			String redirect_url = rs.getString(1);
 						response.sendRedirect(redirect_url+"?token="+token);
 		    		}
 				}
@@ -143,7 +143,6 @@ public class AuthorizationServlet extends HttpServlet
 				}
 			} catch (Exception e) 
 			{
-				e.printStackTrace();
 				request.getRequestDispatcher("pages/error.jsp").forward(request, response);
 			}
 		}
