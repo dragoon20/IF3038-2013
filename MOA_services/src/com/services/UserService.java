@@ -132,8 +132,18 @@ public class UserService extends BasicServlet
     {
         try
 		{
-			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+                        String token = request.getParameter("token");
+			int id_user = GeneralHelper.isLogin(session, token);
+                        
+                        Map<String, String> map2 = new HashMap<String, String>();
+                        map2.put("token", token);
+                        map2.put("id_user", ""+id_user);
+                        JSONObject ret = new JSONObject(map2);
+
+                        PrintWriter pw2 = response.getWriter();
+                        pw2.print(ret.toJSONString());
+                    
+			if ((request.getParameter("token")!=null) && (id_user!=-1))
 			{
                             User user = new User();
                             user.setId_user(id_user);
@@ -151,20 +161,19 @@ public class UserService extends BasicServlet
                                         map.put("id_user",""+task.getId_user());
                                         listOfTask.add(map);
                                 }
-
                             PrintWriter pw = response.getWriter();
                             pw.println(listOfTask);
                             pw.close();
 			}
 			else
 			{
-				throw new Exception();
+				throw new Exception("Token tidak ada");
 			}
 		} catch(Exception e)
 		{
                     e.printStackTrace();
                     Map<String, Boolean> map = new HashMap<String, Boolean>();
-                    map.put("success", false);
+                    map.put("Succes", false);
                     JSONObject ret = new JSONObject(map);
 
                     PrintWriter pw = response.getWriter();
