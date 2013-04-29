@@ -170,7 +170,6 @@ public class User extends DBSimpleRecord
     
     public Task[] getCreatedTasks()
     {
-        System.out.println(">>test");
     	List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("id_user=?", new Object[]{getId_user()}, new String[]{"integer"}, null));
     	return list.toArray(new Task[list.size()]);
     }

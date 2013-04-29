@@ -128,7 +128,7 @@ public class UserService extends BasicServlet
     {
         try
 		{
-			int id_user;
+        	int id_user;
 			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
                             User user = new User();
@@ -147,20 +147,19 @@ public class UserService extends BasicServlet
                                         map.put("id_user",""+task.getId_user());
                                         listOfTask.add(map);
                                 }
-
                             PrintWriter pw = response.getWriter();
                             pw.println(listOfTask);
                             pw.close();
 			}
 			else
 			{
-				throw new Exception();
+				throw new Exception("Token tidak ada");
 			}
 		} catch(Exception e)
 		{
                     e.printStackTrace();
                     Map<String, Boolean> map = new HashMap<String, Boolean>();
-                    map.put("success", false);
+                    map.put("Succes", false);
                     JSONObject ret = new JSONObject(map);
 
                     PrintWriter pw = response.getWriter();

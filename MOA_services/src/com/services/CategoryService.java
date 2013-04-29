@@ -244,8 +244,3 @@ public class CategoryService extends BasicServlet
 	}
         
 }
-
-
-        
-}
-

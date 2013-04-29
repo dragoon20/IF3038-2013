@@ -17,8 +17,8 @@ import javax.xml.soap.SOAPConnectionFactory;
  * Servlet implementation class BasicServlet
  */
 public class BasicServlet extends HttpServlet
-{
-	private static final long serialVersionUID = 1L;
+{   
+    private static final long serialVersionUID = 1L;
     protected HttpSession session;
     protected SOAPConnection soap_connection;
 	
@@ -92,11 +92,6 @@ public class BasicServlet extends HttpServlet
 			e.printStackTrace();
 		} catch (SecurityException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-}
-d catch block
 			e.printStackTrace();
 		}
 	}
