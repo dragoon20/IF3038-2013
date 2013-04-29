@@ -46,7 +46,8 @@ public class BasicFilter implements Filter {
 		else
 		{
 			// render normal page
-			String page = topfolder;
+			chain.doFilter(request, response);
+			/*String page = topfolder;
 			String parameter = "";
 			if (topfolder.contains("?"))
 			{
@@ -54,7 +55,7 @@ public class BasicFilter implements Filter {
 				parameter = topfolder.substring(topfolder.indexOf('?')+1, topfolder.length() - topfolder.indexOf('?') - 1);
 			}
 			request.setAttribute("page", page);
-			request.getRequestDispatcher("/authorize?"+parameter).forward(request, response);
+			request.getRequestDispatcher("/authorize?"+parameter).forward(request, response);*/
 		}
 	}
 

@@ -65,7 +65,6 @@ public class BasicServlet extends HttpServlet
 	protected void proccessRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		session = request.getSession();
-		session.setMaxInactiveInterval(30*24*60*60);
 		String page = request.getRequestURL().substring(request.getRequestURL().lastIndexOf("/")+1, request.getRequestURL().length());
 		
 		Class<?>[] param_handler = new Class[2];

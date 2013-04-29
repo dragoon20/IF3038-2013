@@ -29,13 +29,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.swing.JOptionPane;
 
 import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileItemFactory;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import com.sun.xml.internal.ws.api.model.wsdl.WSDLModel.WSDLParser;
+import com.sun.xml.internal.ws.wsdl.writer.document.Definitions;
 
 import models.DBSimpleRecord;
 import models.Task;
@@ -248,7 +253,9 @@ public class MainApp extends HttpServlet
 			if ((temperror) || (!check))
 			{
 				// TODO print error screen
-				System.out.println("error1");
+				PrintWriter pw = response.getWriter();
+				pw.println("error1");
+				pw.close();
 			}
 			else
 			{
@@ -285,14 +292,18 @@ public class MainApp extends HttpServlet
 				else
 				{
 					// TODO print error screen
-					System.out.println("error2");
+					PrintWriter pw = response.getWriter();
+					pw.println("error2");
+					pw.close();
 				}
 			}
 		}
 		else
 		{
 			// TODO print error screen
-			System.out.println("error3");
+			PrintWriter pw = response.getWriter();
+			pw.println("error3");
+			pw.close();
 		}
 	}
 	
@@ -625,19 +636,6 @@ public class MainApp extends HttpServlet
 	
 	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		/*PrintWriter pw = response.getWriter();
-		pw.println(request.getServletContext().getRealPath("/"));
-		pw.close();*/
-            System.out.println("masuk");
-            Map<String, String> parameter = new HashMap<String, String>();
-            parameter.put("id_kategori", "38 ");
-            try{
-                String test = callRestfulWebService("http://localhost:8086/MOA_servicesnew/category/delete_category",parameter,"",5);
-                PrintWriter out = response.getWriter();
-                out.println(test);
-            }catch(Exception e){
-                e.printStackTrace();
-            }
 	}
         
         private static String buildWebQuery(Map<String, String> parameters) throws Exception {
@@ -661,6 +659,7 @@ public class MainApp extends HttpServlet
 
             String response = "";
             String query = buildWebQuery(parameters);
+
             URL url = new URL(address);
             
             URLConnection urlc = null;
@@ -687,7 +686,7 @@ public class MainApp extends HttpServlet
             }
             br.close();
             response = sb.toString();
-            JOptionPane.showMessageDialog(null, response);
+
             return response;
         }
 }

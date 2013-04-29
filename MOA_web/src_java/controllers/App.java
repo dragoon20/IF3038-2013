@@ -8,7 +8,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -43,7 +42,7 @@ public class App implements Filter {
 		{
 			sess.setMaxInactiveInterval(30*24*3600);
 			sess.setAttribute("base_url", req.getRequestURL().substring(0, req.getRequestURL().lastIndexOf("/")+1));
-			sess.setAttribute("full_path", request.getServletContext().getRealPath("/"));
+			//sess.setAttribute("full_path", request.getServletContext().getRealPath("/"));
 		}
 				
 		String path = req.getRequestURI().replaceFirst(req.getContextPath(), "");

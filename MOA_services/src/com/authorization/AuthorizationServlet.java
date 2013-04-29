@@ -12,7 +12,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import com.models.DBConnection;
 import com.models.DBSimpleRecord;
@@ -118,23 +117,34 @@ public class AuthorizationServlet extends HttpServlet
     		try 
 			{
 	    		Connection conn = DBConnection.getConnection();
-				PreparedStatement prep = conn.prepareStatement("SELECT redirect_url FROM `applications` WHERE app_id = ?");
+				PreparedStatement prep = conn.prepareStatement("SELECT * FROM `applications` WHERE app_id = ?");
 				prep.setString(1, request.getParameter("app_id"));
 				ResultSet rs = prep.executeQuery();
 				if ((rs.last()) && (rs.getRow()==1))
 				{
+					String redirect_url = rs.getString(4);
+					int id_app = rs.getInt(1);
 					String query = "username = ? AND password = ?";
 		    		User user = (User)User.getModel().find(query, 
 		    				new Object[]{request.getParameter("username"), DBSimpleRecord.MD5(request.getParameter("password"))}, 
 		    				new String[]{"string", "string"}, null);
+		    		
 		    		if (!user.isEmpty())
 		    		{
 		    			String token = DBSimpleRecord.MD5(user.getUsername() + UUID.randomUUID());
-		    			HttpSession session = request.getSession();
-		    			session.setAttribute(token, user.getId_user());
 		    			
-		    			String redirect_url = rs.getString(1);
-						response.sendRedirect(redirect_url+"?token="+token);
+		    			conn = DBConnection.getConnection();
+		    			prep = conn.prepareStatement("INSERT INTO `tokens` (timestamp, token, id_user, id_app) " +
+		    								"VALUES (NOW(), ?, ?, ?)");
+		    			prep.setString(1, token);
+		    			prep.setInt(2, user.getId_user());
+		    			prep.setInt(3, id_app);
+		    			
+		    			int affected = prep.executeUpdate();
+		    			if (affected == 1)
+		    			{
+		    				response.sendRedirect(redirect_url+"?token="+token);
+		    			}
 		    		}
 				}
 				else
@@ -143,7 +153,6 @@ public class AuthorizationServlet extends HttpServlet
 				}
 			} catch (Exception e) 
 			{
-				e.printStackTrace();
 				request.getRequestDispatcher("pages/error.jsp").forward(request, response);
 			}
 		}

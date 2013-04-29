@@ -40,7 +40,7 @@ public class TaskService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (("POST".equals(request.getMethod())) && 
 					(request.getParameter("nama_task")!=null) && (request.getParameter("deadline")!=null) && 
@@ -83,7 +83,7 @@ public class TaskService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				Task task;
 				if (("POST".equals(request.getMethod())) && 
@@ -138,7 +138,7 @@ public class TaskService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (("POST".equals(request.getMethod())) && 
 					(request.getParameter("id_task")!=null) &&  
@@ -185,7 +185,7 @@ public class TaskService extends BasicServlet
 	{
 		try
 		{
-			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (request.getParameter("id_task")!=null)
 				{
@@ -226,7 +226,7 @@ public class TaskService extends BasicServlet
 	{
 		try
 		{
-			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (request.getParameter("id_task")!=null)
 				{
@@ -266,7 +266,7 @@ public class TaskService extends BasicServlet
 	{
 		try
 		{
-			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (request.getParameter("id_task")!=null)
 				{
@@ -307,7 +307,7 @@ public class TaskService extends BasicServlet
 	{
 		try
 		{
-			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (request.getParameter("id_task")!=null)
 				{
@@ -348,7 +348,7 @@ public class TaskService extends BasicServlet
 	{
 		try
 		{
-			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (request.getParameter("id_task")!=null)
 				{
@@ -398,7 +398,7 @@ public class TaskService extends BasicServlet
 	{
 		try
 		{
-			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (request.getParameter("id_task")!=null)
 				{
@@ -438,7 +438,7 @@ public class TaskService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (request.getParameter("id_task")!=null)
 				{
@@ -477,7 +477,7 @@ public class TaskService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (request.getParameter("id_task")!=null)
 				{
@@ -516,7 +516,7 @@ public class TaskService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if ((request.getParameter("id_task")!=null) && (request.getParameter("id_user")!=null) && 
 					(((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getEditable(id_user)) && 
@@ -561,7 +561,7 @@ public class TaskService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if ((request.getParameter("id_task")!=null) && (request.getParameter("id_tag")!=null) && 
 					(((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getEditable(id_user)) && 
@@ -606,7 +606,7 @@ public class TaskService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if ((request.getParameter("id_task")!=null) && 
 					(((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getEditable(id_user)))
@@ -649,7 +649,7 @@ public class TaskService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if ((request.getParameter("id_task")!=null) && 
 					(((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getEditable(id_user)))
@@ -692,7 +692,7 @@ public class TaskService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if ((request.getParameter("id_task")!=null) && 
 					(((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getEditable(id_user)))
