@@ -3,24 +3,21 @@
  * and open the template in the editor.
  */
 package com.services;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.IOException;
-import java.sql.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.helper.GeneralHelper;
-import com.models.DBSimpleRecord;
-import com.models.Category;
-import com.models.Comment;
-import com.template.BasicServlet;
-
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+
+import com.helper.GeneralHelper;
+import com.models.Category;
+import com.template.BasicServlet;
 
 /**
  *
@@ -38,7 +35,7 @@ public class CategoryService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (("POST".equals(request.getMethod())) && (request.getParameter("nama_kategori")!=null))
 				{
@@ -76,7 +73,7 @@ public class CategoryService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
                             Category kategori;
                             if (("POST".equals(request.getMethod())) && (request.getParameter("id_kategori")!=null) && (request.getParameter("nama_kategori")!=null) && 
@@ -126,7 +123,7 @@ public class CategoryService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (("POST".equals(request.getMethod())) && 
 					(request.getParameter("id_kategori")!=null) &&  
@@ -174,7 +171,7 @@ public class CategoryService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (request.getParameter("id_kategori")!=null)
 				{
@@ -212,7 +209,7 @@ public class CategoryService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin(session, request.getParameter("token")))!=-1))
+			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
 			{
 				if (request.getParameter("id_kategori")!=null)
 				{
@@ -245,6 +242,10 @@ public class CategoryService extends BasicServlet
 			pw.print(JSONValue.toJSONString(ret));
 		}
 	}
+        
+}
+
+
         
 }
 

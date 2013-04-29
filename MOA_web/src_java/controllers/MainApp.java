@@ -30,6 +30,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import com.sun.xml.internal.ws.api.model.wsdl.WSDLModel.WSDLParser;
+import com.sun.xml.internal.ws.wsdl.writer.document.Definitions;
+
 import models.DBSimpleRecord;
 import models.Task;
 import models.User;
@@ -623,16 +626,5 @@ public class MainApp extends HttpServlet
 	
 	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		PrintWriter pw = response.getWriter();
-		JSONObject credentials = (JSONObject)
-									((JSONObject)
-										((JSONArray)
-											((JSONObject)
-												JSONValue.parse(System.getenv("VCAP_SERVICES")))
-											.get("mysql-5.1"))
-										.get(0))
-									.get("credentials");
-		pw.println(credentials.toString());
-		pw.close();
 	}
 }
