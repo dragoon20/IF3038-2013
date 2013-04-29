@@ -1,5 +1,6 @@
 package com.helper;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,7 +12,7 @@ import com.models.DBConnection;
 
 public class GeneralHelper 
 {
-	public static String app_id = "";
+	public static BigInteger timeout = new BigInteger("2592000000");
 	
 	public static Integer isLogin(String token, String app_id)
 	{
@@ -20,7 +21,7 @@ public class GeneralHelper
 			Connection conn = DBConnection.getConnection();
 			PreparedStatement prep;
 			prep = conn.prepareStatement("SELECT * FROM `tokens` WHERE token = ? AND id_app IN " +
-										"(SELECT * FROM `applications WHERE app_id = ? LIMIT 1`) LIMIT 1");
+										"(SELECT id FROM `applications` WHERE app_id = ?) LIMIT 1");
 			
 			prep.setString(1, token);
 			prep.setString(2, app_id);
@@ -32,7 +33,7 @@ public class GeneralHelper
 				int id_user = rs.getInt(3);
 				int id_app = rs.getInt(4);
 				rs.close();
-				if (new Date().getTime() - timestamp.getTime() <= (1000 * 60 * 60 * 24 * 30))
+				if (timeout.compareTo(BigInteger.valueOf(new Date().getTime() - timestamp.getTime())) >= 0)
 				{
 					conn = DBConnection.getConnection();
 					prep = conn.prepareStatement("UPDATE `tokens` SET timestamp = NOW() WHERE id_user = ? AND id_app = ?");

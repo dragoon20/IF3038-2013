@@ -35,7 +35,7 @@ public class CommentService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if (("POST".equals(request.getMethod())) && (request.getParameter("id_task")!=null) && (request.getParameter("komentar")!=null))
 				{
@@ -68,11 +68,11 @@ public class CommentService extends BasicServlet
 	}
         
 	public void delete_comment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-        {
+    {
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
                             PrintWriter pw = response.getWriter();
                             JSONObject ret = new JSONObject();
@@ -111,7 +111,7 @@ public class CommentService extends BasicServlet
     {
         try
         {
-                if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+                if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
                 {
                         if ((request.getParameter("id_komentar")!=null))
                         {
@@ -156,7 +156,7 @@ public class CommentService extends BasicServlet
     {
         try
         {
-                if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+                if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
                 {
                         if ((request.getParameter("id_komentar")!=null))
                         {
@@ -209,7 +209,7 @@ public class CommentService extends BasicServlet
     {
         try
         {
-                if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+                if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
                 {
                         if ((request.getParameter("id_task")!=null)&&(request.getParameter("timestamp")!=null))
                         {
@@ -258,7 +258,7 @@ public class CommentService extends BasicServlet
     {
         try
         {
-                if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+                if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
                 {
                         if ((request.getParameter("id_task")!=null)&&(request.getParameter("timestamp")!=null))
                         {

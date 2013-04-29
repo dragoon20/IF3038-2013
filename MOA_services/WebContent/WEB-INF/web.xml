@@ -59,13 +59,13 @@
   </servlet-mapping>
   <servlet>
     <description></description>
-    <display-name>AuthorizationServlet</display-name>
-    <servlet-name>AuthorizationServlet</servlet-name>
-    <servlet-class>com.authorization.AuthorizationServlet</servlet-class>
+    <display-name>Token</display-name>
+    <servlet-name>Token</servlet-name>
+    <servlet-class>com.services.TokenService</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>AuthorizationServlet</servlet-name>
-    <url-pattern>/authorize</url-pattern>
+    <servlet-name>Token</servlet-name>
+    <url-pattern>/token/*</url-pattern>
   </servlet-mapping>
   <filter>
     <display-name>BasicFilter</display-name>
@@ -80,7 +80,7 @@
     <param-name>contextConfigLocation</param-name>
     <param-value>WEB-INF/cxf-beans.xml</param-value>
   </context-param>
-  <listener>
+  <!-- <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
   <servlet>
@@ -93,7 +93,7 @@
   <servlet-mapping>
     <servlet-name>cxf</servlet-name>
     <url-pattern>/services/*</url-pattern>
-  </servlet-mapping>
+  </servlet-mapping> -->
   <session-config>
     <session-timeout>43200</session-timeout>
   </session-config>

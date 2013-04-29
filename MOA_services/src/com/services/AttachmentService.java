@@ -31,7 +31,7 @@ public class AttachmentService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if ((request.getParameter("id_task")!=null) && (request.getParameter("attachment")!=null) && 
 					(((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getEditable(id_user)))
@@ -64,7 +64,7 @@ public class AttachmentService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if ((request.getParameter("id_attachment")!=null) && 
 					(((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getEditable(id_user)))

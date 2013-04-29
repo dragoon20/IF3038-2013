@@ -29,7 +29,7 @@ public class TagService extends BasicServlet
 	{
 		try
 		{
-			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if (request.getParameter("tag_name")!=null)
 				{
@@ -59,7 +59,7 @@ public class TagService extends BasicServlet
 	{
 		try
 		{
-			if ((request.getParameter("token")!=null) && ((GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if (request.getParameter("id_tag")!=null)
 				{

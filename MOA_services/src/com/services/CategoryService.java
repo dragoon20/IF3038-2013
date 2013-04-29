@@ -35,7 +35,7 @@ public class CategoryService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if (("POST".equals(request.getMethod())) && (request.getParameter("nama_kategori")!=null))
 				{
@@ -73,7 +73,7 @@ public class CategoryService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
                             Category kategori;
                             if (("POST".equals(request.getMethod())) && (request.getParameter("id_kategori")!=null) && (request.getParameter("nama_kategori")!=null) && 
@@ -123,7 +123,7 @@ public class CategoryService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if (("POST".equals(request.getMethod())) && 
 					(request.getParameter("id_kategori")!=null) &&  
@@ -171,7 +171,7 @@ public class CategoryService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if (request.getParameter("id_kategori")!=null)
 				{
@@ -209,7 +209,7 @@ public class CategoryService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if (request.getParameter("id_kategori")!=null)
 				{
