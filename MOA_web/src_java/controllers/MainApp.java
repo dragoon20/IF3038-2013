@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.swing.JOptionPane;
 
 import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileItemFactory;
@@ -624,9 +625,19 @@ public class MainApp extends HttpServlet
 	
 	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		PrintWriter pw = response.getWriter();
+		/*PrintWriter pw = response.getWriter();
 		pw.println(request.getServletContext().getRealPath("/"));
-		pw.close();
+		pw.close();*/
+            System.out.println("masuk");
+            Map<String, String> parameter = new HashMap<String, String>();
+            parameter.put("id_kategori", "38 ");
+            try{
+                String test = callRestfulWebService("http://localhost:8086/MOA_servicesnew/category/delete_category",parameter,"",5);
+                PrintWriter out = response.getWriter();
+                out.println(test);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
 	}
         
         private static String buildWebQuery(Map<String, String> parameters) throws Exception {
@@ -650,7 +661,6 @@ public class MainApp extends HttpServlet
 
             String response = "";
             String query = buildWebQuery(parameters);
-
             URL url = new URL(address);
             
             URLConnection urlc = null;
@@ -677,7 +687,7 @@ public class MainApp extends HttpServlet
             }
             br.close();
             response = sb.toString();
-
+            JOptionPane.showMessageDialog(null, response);
             return response;
         }
 }
