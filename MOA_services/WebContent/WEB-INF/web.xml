@@ -67,6 +67,16 @@
     <servlet-name>Token</servlet-name>
     <url-pattern>/token/*</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>Authorize</display-name>
+    <servlet-name>Authorize</servlet-name>
+    <servlet-class>com.authorization.AuthorizationServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Authorize</servlet-name>
+    <url-pattern>/authorize</url-pattern>
+  </servlet-mapping>
   <filter>
     <display-name>BasicFilter</display-name>
     <filter-name>BasicFilter</filter-name>
