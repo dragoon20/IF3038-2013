@@ -57,9 +57,9 @@
 	request.setAttribute("title", "MOA - Dashboard");
 	request.setAttribute("currentPage", "dashboard");
 	
-	SimpleDateFormat date_format = new SimpleDateFormat("dd MMMM YYYY");
-	SimpleDateFormat date_format2 = new SimpleDateFormat("YYYY-MM-dd");
-	SimpleDateFormat date_format3 = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+	SimpleDateFormat date_format = new SimpleDateFormat("dd MMMM yyyy");
+	SimpleDateFormat date_format2 = new SimpleDateFormat("yyyy-MM-dd");
+	SimpleDateFormat date_format3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	SimpleDateFormat date_format4 = new SimpleDateFormat("HH:mm - EEE/MMMM");
 %>
 <%@ include file="../template/header.jsp" %>

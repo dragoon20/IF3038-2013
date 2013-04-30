@@ -319,7 +319,7 @@ public class CommentService extends BasicServlet
                     {
                         Map<String, Object> map = new HashMap<String, Object>();
                         boolean success = false;
-                        if(request.getParameter("id_user").equals(id_user)){
+                        if(request.getParameter("id_user").equals(""+id_user)){
                             success = true;
                         }
                         map.put("success", success);
@@ -331,12 +331,12 @@ public class CommentService extends BasicServlet
                     }
                     else
                     {
-                        throw new Exception();
+                        throw new Exception(">>>>>>>>no id user");
                     }
                 }
                 else
                 {
-                        throw new Exception();
+                        throw new Exception(">>>>>>>>no token / app id");
                 }
         } catch(Exception e)
         {

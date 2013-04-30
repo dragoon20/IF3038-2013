@@ -185,7 +185,7 @@ public class MainApp extends HttpServlet
 	public void tugas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		request.getRequestDispatcher("pages/tugas.jsp").forward(request, response);
-	}
+	}   
 
 	public void search(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
@@ -443,10 +443,6 @@ public class MainApp extends HttpServlet
 					{
 						params.put(fi.getFieldName(), Integer.parseInt(fi.getString()));
 					}
-					else if ("id_kategori".equals(fi.getFieldName()))
-					{
-						params.put(fi.getFieldName(), Integer.parseInt(fi.getString()));
-					}
 					else
 					{
 						params.put(fi.getFieldName(), fi.getString());
@@ -470,7 +466,7 @@ public class MainApp extends HttpServlet
 				HashMap<String, String> parameter = new HashMap<String,String>();
 				parameter.put("token", token(request.getSession()));
 				parameter.put("app_id", appId);
-				parameter.put("id_task", (String)params.get("id_task"));
+				parameter.put("id_task", ""+params.get("id_task"));
 				String responseString = callRestfulWebService(serviceURL+"task/check_task", parameter, "", 0);
 				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
 				check_task = (Boolean)ret.get("success");
@@ -483,7 +479,7 @@ public class MainApp extends HttpServlet
 				HashMap<String, String> parameter = new HashMap<String,String>();
 				parameter.put("token", token(request.getSession()));
 				parameter.put("app_id", appId);
-				parameter.put("id_task", (String)params.get("id_task"));
+				parameter.put("id_task", ""+params.get("id_task"));
 				String responseString = callRestfulWebService(serviceURL+"task/get_editable", parameter, "", 0);
 				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
 				editable = (Boolean)ret.get("success");
@@ -498,10 +494,9 @@ public class MainApp extends HttpServlet
 					HashMap<String, String> parameter = new HashMap<String,String>();
 					parameter.put("token", token(request.getSession()));
 					parameter.put("app_id", appId);
-					parameter.put("id_task", (String)params.get("id_task"));
+					parameter.put("id_task", ""+params.get("id_task"));
 					parameter.put("nama_task", (String)params.get("nama_task"));
 					parameter.put("deadline", (String)params.get("deadline"));
-					parameter.put("id_kategori", (String)params.get("id_kategori"));
 
 					String responseString = callRestfulWebService(serviceURL+"task/update_task", parameter, "", 0);
 					JSONObject ret = (JSONObject)JSONValue.parse(responseString);
@@ -515,10 +510,10 @@ public class MainApp extends HttpServlet
 					JaxWsProxyFactoryBean fb = new JaxWsProxyFactoryBean();
 
 					fb.setServiceClass(com.soap.AddService.class);
-			        fb.setAddress(serviceURL+"services/AddService?wsdl");
-			        fb.getInInterceptors().add(new LoggingInInterceptor());
-			        fb.getOutInterceptors().add(new LoggingOutInterceptor());
-			        com.soap.AddService client = (com.soap.AddService) fb.create();
+                                        fb.setAddress(serviceURL+"services/AddService?wsdl");
+                                        fb.getInInterceptors().add(new LoggingInInterceptor());
+                                        fb.getOutInterceptors().add(new LoggingOutInterceptor());
+                                        com.soap.AddService client = (com.soap.AddService) fb.create();
 
 			        try {
 						HashMap<String, String> parameter = new HashMap<String,String>();
