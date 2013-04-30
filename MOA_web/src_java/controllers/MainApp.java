@@ -82,6 +82,28 @@ public class MainApp extends HttpServlet
 		    	String response = callRestfulWebService(serviceURL+"token/check_token", map, "", 0);
 		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(response);
 		    	status = (boolean)resp_obj.get("status");
+		    	
+		    	if ((status) && (currentUser(session)==null))
+		    	{
+		    		try {
+						HashMap<String, String> parameter = new HashMap<String,String>();
+						parameter.put("token", token(session));
+						parameter.put("app_id", appId);
+						String responseString = callRestfulWebService(serviceURL+"user/get_user_data", parameter, "", 0);
+						JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+
+						User user = new User();
+						user.setUsername((String)ret.get("username"));
+						user.setAvatar((String)ret.get("avatar"));
+						user.setBirthdate(new Date(DBSimpleRecord.sdf.parse((String)ret.get("birthdate")).getTime()));
+						user.setEmail((String)ret.get("email"));
+						user.setFullname((String)ret.get("fullname"));
+						session.setAttribute("current_user", user);
+						
+					} catch(Exception exc) {
+						exc.printStackTrace();
+					}
+		    	}
     		} catch (Exception e)
     		{
     			e.printStackTrace();
@@ -652,6 +674,28 @@ public class MainApp extends HttpServlet
 				String responseString = callRestfulWebService(serviceURL+"task/update_user", parameter, "", 0);
 				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
 				success = (Boolean)ret.get("success");
+				
+				if (success)
+				{
+					try {
+						HashMap<String, String> param = new HashMap<String,String>();
+						param.put("token", token(request.getSession()));
+						param.put("app_id", appId);
+						String responseStr = callRestfulWebService(serviceURL+"user/get_user_data", parameter, "", 0);
+						JSONObject retjs = (JSONObject)JSONValue.parse(responseStr);
+
+						User user = new User();
+						user.setUsername((String)retjs.get("username"));
+						user.setAvatar((String)retjs.get("avatar"));
+						user.setBirthdate(new Date(DBSimpleRecord.sdf.parse((String)retjs.get("birthdate")).getTime()));
+						user.setEmail((String)retjs.get("email"));
+						user.setFullname((String)retjs.get("fullname"));
+						request.getSession().setAttribute("current_user", user);
+						
+					} catch(Exception exc) {
+						exc.printStackTrace();
+					}
+				}
 			} catch(Exception exc) {
 				exc.printStackTrace();
 			}

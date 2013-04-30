@@ -320,7 +320,7 @@ public class Task extends DBSimpleRecord {
         }
     }
 
-    public Category getCategory(String token,int id_task)
+    public Category getCategory(String token, int id_task)
     {
         try {
             TreeMap<String, String> parameter = new TreeMap<String,String>();

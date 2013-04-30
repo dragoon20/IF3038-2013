@@ -91,18 +91,18 @@ public class Category extends DBSimpleRecord{
         return false;
     }
     
-    public boolean getEditable(int id_user, String token, String id_kategori)
+    public boolean getEditable(String token, String id_kategori)
     {
             boolean editable = false;
             try {
 			TreeMap<String, String> parameter = new TreeMap<String,String>();
 			parameter.put("token", token);
 			parameter.put("app_id", MainApp.appId);
-                        parameter.put("id_kategori", id_kategori);
+            parameter.put("id_kategori", id_kategori);
 			String response = MainApp.callRestfulWebService(MainApp.serviceURL+"category/get_editable", parameter, "", 0);
 			Object obj = JSONValue.parse(response);
-                        JSONObject js_obj = (JSONObject) obj;
-                        editable = (Boolean)(js_obj.get("success"));
+            JSONObject js_obj = (JSONObject) obj;
+            editable = (Boolean)(js_obj.get("success"));
             }catch(Exception exc){
                   exc.printStackTrace();
             }

@@ -1,18 +1,11 @@
 package com.soap;
 
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.jws.WebService;
-
-import org.json.simple.JSONObject;
 
 import com.helper.GeneralHelper;
 import com.models.Category;
@@ -70,6 +63,7 @@ public class AddServiceImpl implements AddService
 			int id_user;
 			if ((token!=null) &&(app_id!=null) && ((id_user = GeneralHelper.isLogin(token, app_id))!=-1))
 			{
+				System.out.println(id_kategori);
 				if ((nama_task!=null) && (deadline!=null) && (id_kategori!=null) && 
 					(((Category)Category.getModel().find("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"}, null)).getEditable(id_user)))
 				{

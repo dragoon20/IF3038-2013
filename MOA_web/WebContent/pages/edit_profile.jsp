@@ -7,8 +7,7 @@
 		response.sendRedirect("index");
 	}
 
-	int id = MainApp.currentUserId(session);
-	User user = (User)User.getModel().find("id_user = ?", new Object[]{id}, new String[]{"integer"}, new String[]{"username", "email", "fullname", "avatar", "birthdate"});
+	User user = MainApp.currentUser(session);
 	
 	ArrayList<String> javascripts = new ArrayList<String>();
 	javascripts.add("edit_profile");
@@ -27,7 +26,7 @@
 
 			<section class="profile-details">
 				<figure class="profile-image">
-					<img src="upload/user_profile_pict/<%= user.getAvatar() %>" alt="Profile Photo">
+					<img src="<%= user.getAvatar() %>" alt="Profile Photo">
 				</figure>
 				
 				<form enctype="multipart/form-data" id="edit_form" action="change_profile_data" method="post">

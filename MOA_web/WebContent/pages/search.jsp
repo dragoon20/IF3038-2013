@@ -1,3 +1,8 @@
+<%@page import="java.sql.Date"%>
+<%@page import="org.json.simple.JSONArray"%>
+<%@page import="org.json.simple.JSONObject"%>
+<%@page import="org.json.simple.JSONValue"%>
+<%@page import="java.util.HashMap"%>
 <%@page import="java.util.Arrays"%>
 <%@page import="models.DBSimpleRecord"%>
 <%@page import="java.util.List"%>
@@ -29,12 +34,6 @@
 	}
 	boolean all = ("all".equals(query_type.toLowerCase()));
 	
-	int id = MainApp.currentUserId(session);
-	String baseTaskQ = "id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+" WHERE id_user=? "+
-			 "OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user=?) "+
-			 "OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
-			 "ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? ))";
-	
 	request.setAttribute("title", "MOA - Search");
 	request.setAttribute("currentPage", (request.getParameter("id")!=null) ? "" : "search");
 	
@@ -52,11 +51,35 @@
 		<header>
 			<h1>Search</h1>
 		</header>
-		<div class="search-results<?php if ($all) echo ' all' ?>">
+		<div class="search-results<%= (all) ? "all" : "" %>">
 		<%
 			if (("task".equals(query_type.toLowerCase())) || (all))
 			{
-				List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAllLimit(baseTaskQ+" AND nama_task LIKE ?", new Object[]{id, id, id, id, terms}, new String[]{"integer", "integer", "integer", "integer", "string"}, null, 0, 10));
+				List<Task> list = new ArrayList<Task>();
+				try {
+					HashMap<String, String> parameter = new HashMap<String,String>();
+					parameter.put("token", MainApp.token(session));
+					parameter.put("app_id", MainApp.appId);
+					parameter.put("terms", terms);
+					parameter.put("start", ""+0);
+
+					String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"task/search_tasks", parameter, "", 0);
+					JSONArray ret = (JSONArray)JSONValue.parse(responseString);
+					for (Object obj : ret)
+					{
+						JSONObject js_obj = (JSONObject) obj;
+						Task task = new Task();
+						task.setId_task(Integer.parseInt(js_obj.get("id_task").toString()));
+						task.setNama_task(js_obj.get("nama_task").toString());
+						task.setDeadline(new Date(DBSimpleRecord.sdf.parse(js_obj.get("deadline").toString()).getTime()));
+						task.setId_kategori(Integer.parseInt(js_obj.get("id_kategori").toString()));
+						task.setStatus(Boolean.valueOf(js_obj.get("id_task").toString()));
+						
+						list.add(task);
+					}
+				} catch(Exception exc) {
+					exc.printStackTrace();
+				}
 				tasks = list.toArray(new Task[list.size()]);
 		%>
 				<div class="result-set">
@@ -89,7 +112,29 @@
 			}
 			if (("user".equals(query_type.toLowerCase())) || (all))
 			{
-				List<DBSimpleRecord> list = Arrays.asList(User.getModel().findAllLimit("username LIKE ? OR fullname LIKE ? OR email LIKE ? OR birthdate LIKE ?", new Object[]{terms, terms, terms, terms}, new String[]{"string", "string", "string", "string"}, new String[]{"id_user", "username", "avatar", "fullname"}, 0, 10));
+				List<User> list = new ArrayList<User>();
+				try {
+					HashMap<String, String> parameter = new HashMap<String,String>();
+					parameter.put("token", MainApp.token(session));
+					parameter.put("app_id", MainApp.appId);
+					parameter.put("terms", terms);
+					parameter.put("start", ""+0);
+
+					String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"user/search_users", parameter, "", 0);
+					JSONArray ret = (JSONArray)JSONValue.parse(responseString);
+					for (Object obj : ret)
+					{
+						JSONObject js_obj = (JSONObject) obj;
+						User user = new User();
+						user.setUsername(js_obj.get("username").toString());
+						user.setAvatar(js_obj.get("avatar").toString());
+						user.setFullname(js_obj.get("fullname").toString());
+						
+						list.add(user);
+					}
+				} catch(Exception exc) {
+					exc.printStackTrace();
+				}
 				users = list.toArray(new User[list.size()]);
 		%>
 				<div class="result-set">
@@ -121,7 +166,28 @@
 			}
 			if (("category".equals(query_type.toLowerCase())) || (all))
 			{
-				List<DBSimpleRecord> list = Arrays.asList(Category.getModel().findAllLimit("nama_kategori LIKE ?", new Object[]{terms}, new String[]{"string"}, null, 0, 10));
+				List<Category> list = new ArrayList<Category>();
+				try {
+					HashMap<String, String> parameter = new HashMap<String,String>();
+					parameter.put("token", MainApp.token(session));
+					parameter.put("app_id", MainApp.appId);
+					parameter.put("terms", terms);
+					parameter.put("start", ""+0);
+
+					String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"category/search_categories", parameter, "", 0);
+					JSONArray ret = (JSONArray)JSONValue.parse(responseString);
+					for (Object obj : ret)
+					{
+						JSONObject js_obj = (JSONObject) obj;
+						Category cate = new Category();
+						cate.setId_kategori(Integer.parseInt(js_obj.get("id_category").toString()));
+						cate.setNama_kategori(js_obj.get("category_name").toString());
+						
+						list.add(cate);
+					}
+				} catch(Exception exc) {
+					exc.printStackTrace();
+				}
 				categories = list.toArray(new Category[list.size()]);
 		%>
 		<div class="result-set">

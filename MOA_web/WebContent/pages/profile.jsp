@@ -1,3 +1,8 @@
+<%@page import="java.sql.Date"%>
+<%@page import="models.DBSimpleRecord"%>
+<%@page import="org.json.simple.JSONObject"%>
+<%@page import="org.json.simple.JSONValue"%>
+<%@page import="java.util.HashMap"%>
 <%@page import="models.Tag"%>
 <%@page import="models.Task"%>
 <%@page import="java.text.SimpleDateFormat"%>
@@ -9,19 +14,46 @@
 		response.sendRedirect("index");
 	}
 
-	int id = MainApp.currentUserId(session);
-	if (request.getParameter("id")!=null)
+	String username = MainApp.currentUser(session).getUsername();
+	if (request.getParameter("username")!=null)
 	{
 		try
 		{
-			id = Integer.parseInt(request.getParameter("id"));
+			username = request.getParameter("username");
 		}
 		catch (NumberFormatException e)
 		{
 		}
 	}
-	User user = (User)User.getModel().find("id_user = ?", new Object[]{id}, new String[]{"integer"}, new String[]{"id_user", "username", "email", "fullname", "avatar", "birthdate"});
-	Task[] tasks = user.getAssignedTasks();
+	
+	User user = null;
+	try {
+		HashMap<String, String> parameter = new HashMap<String,String>();
+		parameter.put("token", MainApp.token(request.getSession()));
+		parameter.put("app_id", MainApp.appId);
+		parameter.put("username", username);
+		String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"user/get_user_data_from_username", parameter, "", 0);
+		JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+
+		user = new User();
+		user.setUsername((String)ret.get("username"));
+		user.setAvatar((String)ret.get("avatar"));
+		user.setBirthdate(new Date(DBSimpleRecord.sdf.parse((String)ret.get("birthdate")).getTime()));
+		user.setEmail((String)ret.get("email"));
+		user.setFullname((String)ret.get("fullname"));
+		request.getSession().setAttribute("current_user", user);
+		
+	} catch(Exception exc) {
+		exc.printStackTrace();
+		user = null;
+	}
+	
+	if (user==null)
+	{
+		response.sendRedirect("404");
+	}
+	
+	Task[] tasks = user.getAssignedTasks(MainApp.token(session));
 
 	request.setAttribute("title", "MOA - Profile");
 	request.setAttribute("currentPage", (request.getParameter("id")!=null) ? "" : "profile");
@@ -34,7 +66,7 @@
 			<header>
 				<h1><%= user.getFullname() %></h1>
 				<%
-					if (id == MainApp.currentUserId(session))
+					if (username.equals(MainApp.currentUser(session).getUsername()))
 					{
 				%>
 						<ul>
@@ -48,7 +80,7 @@
 
 			<section class="profile-details">
 				<figure class="profile-image">
-					<img src="upload/user_profile_pict/<%= user.getAvatar() %>" alt="Profile Photo">
+					<img src="<%= user.getAvatar() %>" alt="Profile Photo">
 				</figure>
 				<p class="username">
 					<span class="detail-label">Username:</span>
@@ -77,7 +109,7 @@
 						{
 							check = false;
 				%>
-						<article class="task" data-task-id="<%= task.getId_task() %>" data-category="<%= task.getCategory().getNama_kategori() %>">
+						<article class="task" data-task-id="<%= task.getId_task() %>" data-category="<%= task.getCategory(MainApp.token(session), task.getId_task()).getNama_kategori() %>">
 							<header>
 								<h1>
 									<label>
@@ -95,7 +127,7 @@
 								<p class="tags">
 									<span class="detail-label">Tag:</span>
 									<%
-										Tag[] tags = task.getTags();
+										Tag[] tags = task.getTags(MainApp.token(session), task.getId_task());
 										for (Tag tag : tags)
 										{
 											out.println("<span class=\"tag\">" + tag.getTag_name() + "</span>");
@@ -128,7 +160,7 @@
 						{
 							check = false;
 				%>
-						<article class="task" data-task-id="<%= task.getId_task() %>" data-category="<%= task.getCategory().getNama_kategori() %>">
+						<article class="task" data-task-id="<%= task.getId_task() %>" data-category="<%= task.getCategory(MainApp.token(session), task.getId_task()).getNama_kategori() %>">
 							<header>
 								<h1>
 									<label>
@@ -146,7 +178,7 @@
 								<p class="tags">
 									<span class="detail-label">Tag:</span>
 									<%
-										Tag[] tags = task.getTags();
+										Tag[] tags = task.getTags(MainApp.token(session), task.getId_task());
 										for (Tag tag : tags)
 										{
 											out.println("<span class=\"tag\">" + tag.getTag_name() + "</span>");

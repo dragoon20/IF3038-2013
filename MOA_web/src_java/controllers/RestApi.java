@@ -25,6 +25,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 
+
 /**
  * Servlet implementation class RestApi
  */
@@ -512,7 +513,6 @@ public class RestApi extends HttpServlet
 		{
 			try {
 				HashMap<String, String> parameter = new HashMap<String,String>();
-				parameter.put("token", MainApp.token(session));
 				parameter.put("app_id", MainApp.appId);
 				parameter.put("username", request.getParameter("username"));
 				parameter.put("email", request.getParameter("email"));
@@ -563,4 +563,5 @@ public class RestApi extends HttpServlet
 			}
 		}
 	}
+	
 }

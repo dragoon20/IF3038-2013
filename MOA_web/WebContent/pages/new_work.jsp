@@ -1,3 +1,6 @@
+<%@page import="org.json.simple.JSONObject"%>
+<%@page import="org.json.simple.JSONValue"%>
+<%@page import="java.util.HashMap"%>
 <%@page import="models.Category"%>
 <%@page import="controllers.MainApp"%>
 <%
@@ -18,8 +21,22 @@
 		}
 	}
 	
-	Category cat = (Category)Category.getModel().find("id_kategori=?", new Object[]{id}, new String[]{"integer"}, null);
-	if ((cat==null) || (cat.getEditable(MainApp.currentUserId(session))))
+	Category cat = null;
+	
+	try {
+		HashMap<String, String> parameter = new HashMap<String,String>();
+		parameter.put("token", MainApp.token(session));
+		parameter.put("app_id", MainApp.appId);
+		parameter.put("id_kategori", ""+id);
+		String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"category/get_category", parameter, "", 0);
+		JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+		cat = new Category();
+		cat.setId_kategori(id);
+		cat.setNama_kategori((String)ret.get("nama_kategori"));
+	} catch(Exception exc) {
+		exc.printStackTrace();
+	}
+	if ((cat==null) || (cat.getEditable(MainApp.token(session), ""+id)))
 	{
 		// redirect to error page
 	}
@@ -68,9 +85,6 @@
 			</div>
 		</div>
 		<%@ include file="../template/calendar.jsp" %>	
-		<script type="text/javascript">
-			var id_user = <%= MainApp.currentUserId(session) %>;
-		</script>
 <% 
 	ArrayList<String> javascripts = new ArrayList<String>();
 	javascripts.add("datepicker");

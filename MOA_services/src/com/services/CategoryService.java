@@ -6,6 +6,7 @@ package com.services;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.json.simple.JSONValue;
 
 import com.helper.GeneralHelper;
 import com.models.Category;
+import com.models.DBSimpleRecord;
 import com.models.User;
 import com.template.BasicServlet;
 
@@ -280,6 +282,50 @@ public class CategoryService extends BasicServlet
 			
 			PrintWriter pw = response.getWriter();
 			pw.print("{}");
+			pw.close();
+		}
+	}
+    
+    public void search_categories(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+    	try
+		{
+    		if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				if ((request.getParameter("terms")!=null) && (request.getParameter("start")!=null))
+				{
+					List<DBSimpleRecord> list = Arrays.asList(Category.getModel().findAllLimit("nama_kategori LIKE ?", new Object[]{request.getParameter("terms")}, new String[]{"string"}, null, Integer.parseInt(request.getParameter("start")), 10));
+
+					List<Map<String, Object>> ret = new ArrayList<Map<String,Object>>();
+					Category[] categories = list.toArray(new Category[list.size()]);
+					for (Category category : categories)
+					{
+						Map<String, Object> map = new HashMap<String, Object>();
+						map.put("id_category", category.getId_kategori());
+						map.put("category_name", category.getNama_kategori());
+						
+						ret.add(map);
+					}
+					
+					PrintWriter pw = response.getWriter();
+					pw.print(JSONValue.toJSONString(ret));
+					pw.close();
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+			
+			PrintWriter pw = response.getWriter();
+			pw.print("[]");
 			pw.close();
 		}
 	}

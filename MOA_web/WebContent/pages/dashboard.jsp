@@ -39,7 +39,7 @@
 			parameter.put("token", MainApp.token(session));
 			parameter.put("app_id", MainApp.appId);
 			parameter.put("id_category", ""+cat);
-			String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"task/check_task", parameter, "", 0);
+			String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"category/get_category", parameter, "", 0);
 			JSONObject ret = (JSONObject)JSONValue.parse(responseString);
 			currentCat = new Category();
 			currentCat.setId_kategori(cat);

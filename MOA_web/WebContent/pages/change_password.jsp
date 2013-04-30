@@ -6,8 +6,7 @@
 		response.sendRedirect("index");
 	}
 
-	int id = MainApp.currentUserId(session);
-	User user = (User)User.getModel().find("id_user = ? ", new Object[]{id}, new String[]{"integer"}, new String[]{"username", "email", "fullname", "avatar", "birthdate"});
+	User user = MainApp.currentUser(session);
 	
 	request.setAttribute("title", "MOA - Profile");
 	request.setAttribute("currentPage", "profile");

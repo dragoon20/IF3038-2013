@@ -46,7 +46,7 @@
 										if ("profile".equals(key)) 
 										{
 									%>
-											<img src="upload/user_profile_pict/<%= MainApp.currentUser(session).getAvatar() %>" alt="">
+											<img src="<%= MainApp.currentUser(session).getAvatar() %>" alt="">
 									<%
 										}
 									%>

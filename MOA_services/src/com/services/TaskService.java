@@ -975,6 +975,58 @@ public class TaskService extends BasicServlet
 			pw.close();
 		}
 	}
+	
+	public void search_tasks(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		try
+		{
+			int id_user;
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				if ((request.getParameter("terms")!=null) && (request.getParameter("start")!=null))
+				{
+					List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAllLimit("id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+" WHERE id_user=? "+
+							 "OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user=?) "+
+							 "OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
+							 "ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? )) AND nama_task LIKE ?"
+							 , new Object[]{id_user, id_user, id_user, id_user, request.getParameter("terms")}, new String[]{"integer", "integer", "integer", "integer", "string"}, null, Integer.parseInt(request.getParameter("start")), 10));
+
+					List<Map<String, Object>> ret = new ArrayList<Map<String,Object>>();
+					Task[] tasks = list.toArray(new Task[list.size()]);
+					for (Task task : tasks)
+					{
+						Map<String, Object> map = new HashMap<String, Object>();
+						map.put("id_task", task.getId_task());
+						map.put("nama_task", task.getNama_task());
+						map.put("deadline", DBSimpleRecord.sdf.format(task.getDeadline()));
+						map.put("id_kategori", task.getId_kategori());
+						map.put("status", task.isStatus());
+						
+						ret.add(map);
+					}
+					
+					PrintWriter pw = response.getWriter();
+					pw.print(JSONValue.toJSONString(ret));
+					pw.close();
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+			
+			PrintWriter pw = response.getWriter();
+			pw.print("[]");
+			pw.close();
+		}
+	}
 }
 
 

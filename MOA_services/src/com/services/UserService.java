@@ -664,6 +664,92 @@ public class UserService extends BasicServlet
         }
 	}
     
+    public void get_user_data_from_username(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+    	try
+		{
+    		int id_user;
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				if (request.getParameter("username")!=null)
+				{
+	    			User user = (User)User.getModel().find("username = ?", new Object[]{request.getParameter("username")}, new String[]{"string"}, null);
+	    			
+	    			HashMap<String, Object> map = new HashMap<String, Object>();
+	    			map.put("username", user.getUsername());
+	    			map.put("avatar", user.getAvatar());
+	    			map.put("birthdate", DBSimpleRecord.sdf.format(user.getBirthdate()));
+	    			map.put("email", user.getEmail());
+	    			map.put("fullname", user.getFullname());
+	    			
+	            	PrintWriter pw = response.getWriter();
+	    			pw.println(new JSONObject(map).toJSONString());
+	    			pw.close();
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+                throw new Exception();
+			}
+		} catch(Exception e)
+		{
+	        e.printStackTrace();
+	
+	        PrintWriter pw = response.getWriter();
+	        pw.print("{}");
+	        pw.close();
+        }
+	}
+    
+    public void search_users(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+    	try
+		{
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				if ((request.getParameter("terms")!=null) && (request.getParameter("start")!=null))
+				{
+					List<DBSimpleRecord> list = Arrays.asList(User.getModel().findAllLimit("username LIKE ? OR fullname LIKE ? OR email LIKE ? OR birthdate LIKE ?", new Object[]{request.getParameter("terms"), request.getParameter("terms"), request.getParameter("terms"), request.getParameter("terms")}, new String[]{"string", "string", "string", "string"}, new String[]{"id_user", "username", "avatar", "fullname"}, Integer.parseInt(request.getParameter("start")), 10));
+
+					List<Map<String, Object>> ret = new ArrayList<Map<String,Object>>();
+					User[] users = list.toArray(new User[list.size()]);
+					for (User user : users)
+					{
+						Map<String, Object> map = new HashMap<String, Object>();
+						map.put("username", user.getUsername());
+						map.put("avatar", user.getAvatar());
+						map.put("fullname", user.getFullname());
+						
+						ret.add(map);
+					}
+					
+					PrintWriter pw = response.getWriter();
+					pw.print(JSONValue.toJSONString(ret));
+					pw.close();
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+	        e.printStackTrace();
+	
+	        PrintWriter pw = response.getWriter();
+	        pw.print("[]");
+	        pw.close();
+        }
+    }
+    
     public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		PrintWriter pw = response.getWriter();
