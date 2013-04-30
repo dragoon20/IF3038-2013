@@ -268,13 +268,13 @@ public class RestApi extends HttpServlet
 					int categoryId = cat.getId_kategori();
 					String categoryName = cat.getNama_kategori();
 					boolean canDeleteCategory = (cat.getId_user()==MainApp.currentUserId(session));
-					boolean canEditCategory = ((canDeleteCategory) || (cat.getEditable(MainApp.currentUserId(session))));
+					//boolean canEditCategory = ((canDeleteCategory) || (cat.getEditable(MainApp.currentUserId(session))));
 					
 					ret.put("success", true);
 					ret.put("categoryID", categoryId);
 					ret.put("categoryName", categoryName);
 					ret.put("canDeleteCategory", canDeleteCategory);
-					ret.put("canEditCategory", canEditCategory);
+					//ret.put("canEditCategory", canEditCategory);
 					
 					List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("id_kategori = ?", new Object[]{request.getParameter("category_id")}, new String[]{"string"}, null));
 					Task[] tasks = list.toArray(new Task[list.size()]);
@@ -463,7 +463,7 @@ public class RestApi extends HttpServlet
 				map.put("nama_kategori", cat.getNama_kategori());
 				map.put("id", cat.getId_kategori());
 				map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
-				map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
+				//map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
 				
 				result.add(map);
 			}
@@ -537,7 +537,7 @@ public class RestApi extends HttpServlet
 						map.put("nama_kategori", cat.getNama_kategori());
 						map.put("id", cat.getId_kategori());
 						map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
-						map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
+						//map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
 						
 						result.add(map);
 					}
@@ -597,14 +597,14 @@ public class RestApi extends HttpServlet
 			PrintWriter pw = response.getWriter();
 			JSONObject ret = new JSONObject();
 			
-			Comment[] comments = Comment.getModel().getOlder(Integer.parseInt(request.getParameter("id_task")), request.getParameter("timestamp"));
+			//Comment[] comments = Comment.getModel().getOlder(Integer.parseInt(request.getParameter("id_task")), request.getParameter("timestamp"));
 			List<Map<String, Object>> list = new ArrayList<Map<String,Object>>();
-			for (Comment c : comments)
+			/*for (Comment c : comments)
 			{
 				Map<String, Object> map = c.getData();
 				map.put("timestamp", ((Timestamp)map.get("timestamp")).toString());
 				list.add(map);
-			}			
+			}*/			
 			pw.println(JSONValue.toJSONString(list));
 		}
 	}
@@ -620,15 +620,15 @@ public class RestApi extends HttpServlet
 			PrintWriter pw = response.getWriter();
 			JSONObject ret = new JSONObject();
 			
-			Comment[] comments = Comment.getModel().getLatest(Integer.parseInt(request.getParameter("id_task")), request.getParameter("timestamp"));
+			//Comment[] comments = Comment.getModel().getLatest(Integer.parseInt(request.getParameter("id_task")), request.getParameter("timestamp"));
 			
 			List<Map<String, Object>> list = new ArrayList<Map<String,Object>>();
-			for (Comment c : comments)
+			/*for (Comment c : comments)
 			{
 				Map<String, Object> map = c.getData();
 				map.put("timestamp", ((Timestamp)map.get("timestamp")).toString());
 				list.add(map);
-			}
+			}*/
 			pw.println(JSONValue.toJSONString(list));
 		}
 	}

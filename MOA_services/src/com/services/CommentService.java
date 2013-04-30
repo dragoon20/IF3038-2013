@@ -127,8 +127,8 @@ public class CommentService extends BasicServlet
 				
                                PrintWriter pw = response.getWriter();
                                pw.print(ret.toJSONString());
-                               
-                        }
+                              
+                        }   
                         else
                         {
                                 throw new Exception();
@@ -225,7 +225,7 @@ public class CommentService extends BasicServlet
                                    map.put("id_user",Integer.toString(comment.getId_user()));
                                    User user = comment.getUser();
                                    map.put("username",user.getUsername());
-                                   map.put("username",user.getFullname());
+                                   map.put("fullname",user.getFullname());
                                    map.put("avatar", user.getAvatar());
                                    komentar_val.add(map);
                                }

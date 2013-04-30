@@ -134,7 +134,6 @@ public class CategoryService extends BasicServlet
 						Map<String, Boolean> map = new HashMap<String, Boolean>();
 						map.put("success", true);
 						JSONObject ret = new JSONObject(map);
-						
 						PrintWriter pw = response.getWriter();
 						pw.print(ret.toJSONString());
 						pw.close();
@@ -180,9 +179,9 @@ public class CategoryService extends BasicServlet
                                         Map<String, Object> map = new HashMap<String, Object>();
 					map.put("success", kategori.getEditable(id_user));
 					JSONObject ret = new JSONObject(map);
-					
 					PrintWriter pw = response.getWriter();
-					pw.print(JSONValue.toJSONString(ret));
+					pw.print(ret.toJSONString());
+                                        pw.close();
 				}
 				else
 				{
@@ -200,7 +199,8 @@ public class CategoryService extends BasicServlet
 			map.put("success", "");
 			JSONObject ret = new JSONObject(map);
 			PrintWriter pw = response.getWriter();
-			pw.print(JSONValue.toJSONString(ret));
+			pw.print(ret.toJSONString());
+                        pw.close();
 		}
 	}
      

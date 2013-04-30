@@ -33,12 +33,15 @@ import javax.servlet.http.HttpSession;
 import models.DBSimpleRecord;
 import models.Task;
 import models.User;
+import models.Comment;
+import models.Category;
 
 import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileItemFactory;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -52,7 +55,7 @@ public class MainApp extends HttpServlet
     public static final String appId = "0d2d2a7531376b3b05ff4203aeaa6b41";
     public static final String appName = "MOA";
     public static final String appTagline = "Multiuser Online Agenda";
-    public static final String serviceURL = "http://localhost:8080/MOA_services/";
+    public static final String serviceURL = "http://localhost:8088/MOA_services/";
     
     /**
      * @see HttpServlet#HttpServlet()
@@ -75,7 +78,7 @@ public class MainApp extends HttpServlet
 		    	
 		    	String response = callRestfulWebService(serviceURL+"token/check_token", map, "", 0);
 		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(response);
-		    	status = (boolean)resp_obj.get("status");
+		    	status = (Boolean)resp_obj.get("status");
     		} catch (Exception e)
     		{
     			e.printStackTrace();
@@ -681,7 +684,7 @@ public class MainApp extends HttpServlet
 		    	
 		    	String resp = callRestfulWebService(serviceURL+"token/logout", map, "", 0);
 		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(resp);
-		    	status = (boolean)resp_obj.get("status");
+		    	status = (Boolean)resp_obj.get("status");
     		} catch (Exception e)
     		{
     			e.printStackTrace();
@@ -708,18 +711,13 @@ public class MainApp extends HttpServlet
 	
 	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		try {
-			String token = request.getParameter("token");
-			TreeMap<String, String> parameter = new TreeMap<String,String>();
-			parameter.put("token", token);
-			parameter.put("app_id", MainApp.appId);
-			String responseString = callRestfulWebService("http://localhost:8080/MOA_services/user/get_created_tasks", parameter, "", 0);
-			PrintWriter pw = response.getWriter();
-			pw.println(responseString);
-			pw.close();
-		}catch(Exception exc){
-			exc.printStackTrace();
-		}
+            Comment komen = new Comment();
+            Comment[] arraykomen = komen.getLatest(request.getParameter("id_task"), request.getParameter("timestamp"),request.getParameter("token"));
+            PrintWriter pw = response.getWriter();
+            for (int i = 0; i< arraykomen.length; i++){
+                pw.print(arraykomen[i].getId_komentar());
+            }
+            pw.close();
 	}
         
     private static String buildWebQuery(Map<String, String> parameters) throws Exception {

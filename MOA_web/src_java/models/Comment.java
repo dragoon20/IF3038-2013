@@ -4,6 +4,8 @@
  */
 package models;
 
+import controllers.MainApp;
+import java.sql.Date;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,9 +13,14 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 /**
  *
@@ -83,88 +90,106 @@ public class Comment extends DBSimpleRecord{
         return false;
     }
     
-    public User getUser()
+    public User getUser(String token, String id_komentar)
 	{
-    	return (User)User.getModel().find("id_user = ?", new Object[]{getId_user()}, new String[]{"integer"}, new String[]{"id_user", "username", "fullname", "avatar"});
-	}
+            User user = new User();
+            try {
+			TreeMap<String, String> parameter = new TreeMap<String,String>();
+			parameter.put("token", token);
+			parameter.put("app_id", MainApp.appId);
+                        parameter.put("id_komentar",id_komentar);
+			String response = MainApp.callRestfulWebService(MainApp.serviceURL+"comment/get_user", parameter, "", 0);
+			Object obj = JSONValue.parse(response);
+                        JSONObject js_obj = (JSONObject) obj;
+                        user.setId_user(Integer.valueOf((String)js_obj.get("id_user")));
+                        user.setUsername((String)js_obj.get("user_name"));
+                        user.setFullname((String)js_obj.get("fullname"));
+                        user.setAvatar((String)js_obj.get("avatar"));
+            }catch(Exception exc){
+                  exc.printStackTrace();
+            }
+            return user;
+    	}
 	
-	public Task getTask()
+	public Task getTask(String token, String id_komentar)
 	{
-		return (Task)Task.getModel().find("id_task = ?", new Object[]{getId_task()}, new String[]{"integer"}, null);
+		//return (Task)Task.getModel().find("id_task = ?", new Object[]{getId_task()}, new String[]{"integer"}, null);
+            Task task = new Task();
+            try {
+			TreeMap<String, String> parameter = new TreeMap<String,String>();
+			parameter.put("token", token);
+			parameter.put("app_id", MainApp.appId);
+                        parameter.put("id_komentar",id_komentar);
+			String response = MainApp.callRestfulWebService(MainApp.serviceURL+"comment/get_task", parameter, "", 0);
+			Object obj = JSONValue.parse(response);
+                        JSONObject js_obj = (JSONObject) obj;
+                        
+                        task.setId_task(Integer.valueOf((String)js_obj.get("id_task")));
+                        task.setNama_task((String)js_obj.get("nama_task"));
+                        task.setStatus(Boolean.valueOf((String)js_obj.get("task_status")));
+                        task.setDeadline(Date.valueOf((String) js_obj.get("deadline")));
+                        task.setId_kategori(Integer.valueOf((String)js_obj.get("id_kategori")));
+                        task.setId_task(Integer.valueOf((String)js_obj.get("id_task")));
+            }catch(Exception exc){
+                  exc.printStackTrace();
+            }
+            return task;
 	}
     
-    public Comment[] getLatest(int id_task, String timestamp)
+    public Comment[] getLatest(String id_task, String timestamp, String token)
     {
-		try 
-		{
-	    	Connection conn = DBConnection.getConnection();
-	    	PreparedStatement prep = conn.prepareStatement("SELECT id_komentar, timestamp, komentar, c.id_user, username, fullname, avatar"+
-										" FROM "+Comment.getTableName()+" as c INNER JOIN "+User.getTableName()+" as u "+
-										" ON c.id_user=u.id_user WHERE id_task = ? AND timestamp > ? ORDER BY timestamp");
-			prep.setInt(1, id_task);
-	    	prep.setString(2, timestamp);
-	    	
-	    	List<Comment> result = new ArrayList<Comment>();
-	    	ResultSet rs = prep.executeQuery();
-	    	if (rs.next())
-	    	{
-	    		ResultSetMetaData metadata = rs.getMetaData();
-	    		int column_count = metadata.getColumnCount();
-	    		
-	    		do
-	    		{
-	    			Comment c = new Comment();
-	    			for (int i=1;i<=column_count;++i)
-	    			{
-	    				String label = metadata.getColumnLabel(i);
-	    				c.putData(label, rs.getObject(i));
-	    			}
-	        		result.add(c);
-	    		}while (rs.next());
-	    	}
-	    	return result.toArray(new Comment[result.size()]);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+        List<Comment> commentlist = new ArrayList<Comment>();
+        try {
+			TreeMap<String, String> parameter = new TreeMap<String,String>();
+			parameter.put("token", token);
+			parameter.put("app_id", MainApp.appId);
+                        parameter.put("id_task", id_task);
+                        parameter.put("timestamp", timestamp);
+			String response = MainApp.callRestfulWebService("http://localhost:8088/MOA_services/comment/get_latest", parameter, "", 0);
+                        
+			JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+			for (Object obj : resp_obj)
+			{
+				JSONObject js_obj = (JSONObject) obj;
+				Comment komen = new Comment();
+                                komen.setId_komentar(Integer.valueOf((String)js_obj.get("id_komentar")));
+                                komen.setTimestamp(Timestamp.valueOf((String)js_obj.get("timestamp")));
+                                komen.setKomentar((String)js_obj.get("komentar"));
+                                komen.setId_user(Integer.valueOf((String)js_obj.get("id_user")));
+                                commentlist.add(komen);
+			}
+        }catch(Exception exc){
+
+        }
+        return commentlist.toArray(new Comment[commentlist.size()]);
     }
     
-    public Comment[] getOlder(int id_task, String timestamp)
+    public Comment[] getOlder(String id_task, String timestamp, String token)
     {
-    	try 
-		{
-	    	Connection conn = DBConnection.getConnection();
-	    	PreparedStatement prep = conn.prepareStatement("SELECT id_komentar, timestamp, komentar, c.id_user, username, fullname, avatar"+
-	    							" FROM "+Comment.getTableName()+" as c INNER JOIN "+User.getTableName()+" as u "+
-	    							" ON c.id_user=u.id_user WHERE id_task = ? AND timestamp < ? ORDER BY timestamp DESC LIMIT 10");
-	    	prep.setInt(1, id_task);
-	    	prep.setString(2, timestamp);
-	    	
-	    	List<Comment> result = new ArrayList<Comment>();
-	    	ResultSet rs = prep.executeQuery();
-	    	if (rs.next())
-	    	{
-	    		ResultSetMetaData metadata = rs.getMetaData();
-	    		int column_count = metadata.getColumnCount();
-	    		
-	    		do
-	    		{
-	    			Comment c = new Comment();
-	    			for (int i=1;i<=column_count;++i)
-	    			{
-	    				String label = metadata.getColumnLabel(i);
-	    				c.putData(label, rs.getObject(i));
-	    			}
-	        		result.add(c);
-	    		}while (rs.next());
-	    	}
-	    	return result.toArray(new Comment[result.size()]);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+    	List<Comment> commentlist = new ArrayList<Comment>();
+        try {
+			TreeMap<String, String> parameter = new TreeMap<String,String>();
+			parameter.put("token", token);
+			parameter.put("app_id", MainApp.appId);
+                        parameter.put("id_task", id_task);
+                        parameter.put("timestamp", timestamp);
+			String response = MainApp.callRestfulWebService("http://localhost:8088/MOA_services/comment/get_older", parameter, "", 0);
+                        
+			JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+			for (Object obj : resp_obj)
+			{
+				JSONObject js_obj = (JSONObject) obj;
+				Comment komen = new Comment();
+                                komen.setId_komentar(Integer.valueOf((String)js_obj.get("id_komentar")));
+                                komen.setTimestamp(Timestamp.valueOf((String)js_obj.get("timestamp")));
+                                komen.setKomentar((String)js_obj.get("komentar"));
+                                komen.setId_user(Integer.valueOf((String)js_obj.get("id_user")));
+                                commentlist.add(komen);
+			}
+        }catch(Exception exc){
+
+        }
+        return commentlist.toArray(new Comment[commentlist.size()]);
     }
 
     /**
