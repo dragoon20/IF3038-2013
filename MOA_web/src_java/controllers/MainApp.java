@@ -688,26 +688,41 @@ public class MainApp extends HttpServlet
 	
 	public void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-    	}
-        
-        public void dashboard_fake(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-      {
-        PrintWriter pw = response.getWriter();
-        pw.println(request.getSession().getAttribute("token"));
-        pw.close();
-      }
-
-      public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-      {
+    		}
+		
+	public void dashboard_fake(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		PrintWriter pw = response.getWriter();
+		pw.println(request.getSession().getAttribute("token"));
+		pw.close();
+	}
+	
+	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
                 Comment komen = new Comment();
                 Comment[] arraykomen = komen.getLatest(request.getParameter("id_task"), request.getParameter("timestamp"),request.getParameter("token"));
-                PrintWriter pw = response.getWriter();
+                    PrintWriter pw = response.getWriter();
+                    String token = request.getSession().getAttribute("token").toString();
+                    int id_task = Integer.parseInt(request.getParameter("id_task"));
+                    Task task = new Task();
+                    
+                    Tag [] tags = task.getTags(token, id_task);
+                    for(Tag tag : tags){
+                        pw.println("--------------");
+                        pw.println(tag.getTag_name());
+                        pw.println(tag.getId_tag());
                 for (int i = 0; i< arraykomen.length; i++){
                     pw.print(arraykomen[i].getId_komentar());
-                }
-                pw.close();
-      }
-	
+                        
+                        pw.println("");
+                    }
+                    
+                    Category cat = task.getCategory(token, id_task);
+                    
+                    pw.close();
+		}
+        }
+        
     private static String buildWebQuery(Map<String, String> parameters) throws Exception {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : parameters.entrySet()) {

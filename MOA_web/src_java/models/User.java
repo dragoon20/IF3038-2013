@@ -183,7 +183,7 @@ public class User extends DBSimpleRecord
             TreeMap<String, String> parameter = new TreeMap<String,String>();
             parameter.put("token", token);
             parameter.put("app_id", MainApp.appId);
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_created_tasks", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"user/get_created_tasks", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<Task> listOfTask = new ArrayList<Task>();
             for (Object obj : resp_obj)
@@ -217,7 +217,7 @@ public class User extends DBSimpleRecord
             TreeMap<String, String> parameter = new TreeMap<String,String>();
             parameter.put("token", token);
             parameter.put("app_id", MainApp.appId);
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_assigned_tasks", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"user/get_assigned_tasks", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<Task> listOfTask = new ArrayList<Task>();
             for (Object obj : resp_obj)
@@ -252,7 +252,7 @@ public class User extends DBSimpleRecord
             TreeMap<String, String> parameter = new TreeMap<String,String>();
             parameter.put("token", token);
             parameter.put("app_id", MainApp.appId);
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_categories", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"user/get_categories", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<Category> listOfCategory = new ArrayList<Category>();
             for (Object obj : resp_obj)
@@ -283,7 +283,7 @@ public class User extends DBSimpleRecord
             TreeMap<String, String> parameter = new TreeMap<String,String>();
             parameter.put("token", token);
             parameter.put("app_id", MainApp.appId);
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_tasks", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"user/get_tasks", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<Task> listOfTask = new ArrayList<Task>();
             for (Object obj : resp_obj)
@@ -320,7 +320,7 @@ public class User extends DBSimpleRecord
             parameter.put("app_id", MainApp.appId);
             parameter.put("status", ""+status);
             parameter.put("id_kategori", ""+category_id);
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_tasks", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"user/get_tasks", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<Task> listOfTask = new ArrayList<Task>();
             for (Object obj : resp_obj)
@@ -356,7 +356,7 @@ public class User extends DBSimpleRecord
             parameter.put("token", token);
             parameter.put("app_id", MainApp.appId);
             parameter.put("key", q);
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_tasks_like", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"user/get_tasks_like", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<Task> listOfTask = new ArrayList<Task>();
             for (Object obj : resp_obj)
@@ -392,7 +392,7 @@ public class User extends DBSimpleRecord
             parameter.put("token", token);
             parameter.put("app_id", MainApp.appId);
             parameter.put("key", q);
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_categories_like", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"user/get_categories_like", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<Category> listOfCategory = new ArrayList<Category>();
             for (Object obj : resp_obj)
@@ -424,7 +424,7 @@ public class User extends DBSimpleRecord
             parameter.put("token", token);
             parameter.put("app_id", MainApp.appId);
             parameter.put("key", q);
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/find_all_like", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"user/find_all_like", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<User> listOfUser = new ArrayList<User>();
             for (Object obj : resp_obj)
@@ -462,7 +462,7 @@ public class User extends DBSimpleRecord
                 parameter.put("token", token);
                 parameter.put("app_id", MainApp.appId);
                 parameter.put("username", username);
-                String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/find_by_username", parameter, "", 0);
+                String response = MainApp.callRestfulWebService(MainApp.serviceURL+"user/find_by_username", parameter, "", 0);
                 JSONObject resp_obj = (JSONObject) JSONValue.parse(response);
 
                 User usr = new User();

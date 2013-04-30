@@ -296,7 +296,7 @@ public class Task extends DBSimpleRecord {
             parameter.put("app_id", MainApp.appId);
             parameter.put("id_task", ""+id_task);
             
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/task/get_tags", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"task/get_tags", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<Tag> listOfTag = new ArrayList<Tag>();
             for (Object obj : resp_obj)
@@ -327,7 +327,7 @@ public class Task extends DBSimpleRecord {
             parameter.put("app_id", MainApp.appId);
             parameter.put("id_task", ""+id_task);
             
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/task/get_category", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"task/get_category", parameter, "", 0);
             JSONObject resp_obj = (JSONObject)JSONValue.parse(response);
             
             Category ctg = new Category();
@@ -348,7 +348,7 @@ public class Task extends DBSimpleRecord {
             parameter.put("app_id", MainApp.appId);
             parameter.put("id_task", ""+id_task);
             
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/task/get_attachments", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"task/get_attachments", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<Attachment> listOfAtt = new ArrayList<Attachment>();
             for (Object obj : resp_obj)
@@ -380,7 +380,7 @@ public class Task extends DBSimpleRecord {
             parameter.put("app_id", MainApp.appId);
             parameter.put("id_task", ""+id_task);
             
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/task/get_assignees", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"task/get_assignees", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<User> listOfUser = new ArrayList<User>();
             for (Object obj : resp_obj)
@@ -412,7 +412,7 @@ public class Task extends DBSimpleRecord {
             parameter.put("app_id", MainApp.appId);
             parameter.put("id_task", ""+id_task);
             
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/task/get_comments", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"task/get_comments", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<Comment> listOfComment = new ArrayList<Comment>();
             for (Object obj : resp_obj)
@@ -449,7 +449,7 @@ public class Task extends DBSimpleRecord {
             parameter.put("app_id", MainApp.appId);
             parameter.put("id_task", ""+id_task);
             
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/task/get_total_comments", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"task/get_total_comments", parameter, "", 0);
             JSONObject resp_obj = (JSONObject)JSONValue.parse(response);
             
             return Integer.valueOf(resp_obj.get("total_comments").toString());
@@ -467,7 +467,7 @@ public class Task extends DBSimpleRecord {
             parameter.put("app_id", MainApp.appId);
             parameter.put("id_task", ""+id_task);
             
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/task/get_editable", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"task/get_editable", parameter, "", 0);
             JSONObject resp_obj = (JSONObject)JSONValue.parse(response);
             
             return Boolean.valueOf(resp_obj.get("success").toString());
@@ -485,7 +485,7 @@ public class Task extends DBSimpleRecord {
             parameter.put("app_id", MainApp.appId);
             parameter.put("id_task", ""+id_task);
             
-            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/task/get_deleteable", parameter, "", 0);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"task/get_deleteable", parameter, "", 0);
             JSONObject resp_obj = (JSONObject)JSONValue.parse(response);
             
             return Boolean.valueOf(resp_obj.get("success").toString());

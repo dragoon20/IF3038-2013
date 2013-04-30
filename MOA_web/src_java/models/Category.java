@@ -108,7 +108,7 @@ public class Category extends DBSimpleRecord{
           return editable;  
     }
     
-    public boolean getDeletable(int id_user, String token, String id_kategori)
+    public boolean getDeletable(String token, String id_kategori)
     {
     	boolean deletable = false;
             try {

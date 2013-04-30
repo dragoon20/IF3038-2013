@@ -1,4 +1,3 @@
-<%@page import="sun.org.mozilla.javascript.json.JsonParser"%>
 <%@page import="models.Task"%>
 <%@page import="models.Category"%>
 <%@page import="java.util.ArrayList"%>
@@ -43,12 +42,14 @@
 			unset($cat);
 		}*/
 	}
+        
+        User user = new User();
+        String tokenString = request.getSession().getAttribute("token").toString();
+	Task[] tasks = user.getTasks(tokenString);
+	Task[] todo = user.getTasks(tokenString,0, cat);
+	Task[] done = user.getTasks(tokenString,1, cat);
 
-	Task[] tasks = MainApp.currentUser(session).getTasks();
-	Task[] todo = MainApp.currentUser(session).getTasks(0, cat);
-	Task[] done = MainApp.currentUser(session).getTasks(1, cat);
-
-	Category[] categories = MainApp.currentUser(session).getCategories();
+	Category[] categories = user.getCategories(tokenString);
 
 	// Presentation Logic Here
 	
@@ -133,8 +134,8 @@
 							<% 
 								for (Category cate : categories)
 								{
-							%>
-									<li data-deletable="<%= (cate.getId_user()==MainApp.currentUserId(session)) ? "true" : "false" %>" id="categoryLi<%= cate.getId_kategori() %>"<%= ((currentCat!=null) && (currentCat.getId_kategori() == cate.getId_kategori()))? "class=\"active\"" : "" %>>
+							%> 
+                                                                        <li data-deletable="<%= cate.getDeletable(tokenString, ""+cat) ? "true" : "false" %>" id="categoryLi<%= cate.getId_kategori() %>"<%= ((currentCat!=null) && (currentCat.getId_kategori() == cate.getId_kategori()))? "class=\"active\"" : "" %>>
 										<a href="dashboard?cat=<%= cate.getId_kategori() %>" data-category-id="<%= cate.getId_kategori() %>">
 											<%= cate.getNama_kategori() %>
 										</a>
