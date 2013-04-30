@@ -975,6 +975,42 @@ public class TaskService extends BasicServlet
 			pw.close();
 		}
 	}
+        
+        public void get_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+            try
+            {
+                int id_user;
+                if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+                {
+                    Task task = (Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null);
+                    
+                    HashMap<String,String> hashMap = new HashMap<String, String>();
+                    hashMap.put("id_task", ""+task.getId_task());
+                    hashMap.put("nama_task", task.getNama_task());
+                    hashMap.put("deadline", DBSimpleRecord.sdf.format(task.getDeadline()));
+                    hashMap.put("nama_kategori", task.getCategory().getNama_kategori());
+                    
+                    JSONObject ret = new JSONObject(hashMap);
+                    PrintWriter pw = response.getWriter();
+                    pw.println(ret.toJSONString());
+                    pw.close();
+                }
+                else
+                {
+                    throw new Exception("Token tidak ada");
+                }
+            } catch(Exception e)
+            {
+                e.printStackTrace();
+                Map<String, Boolean> map = new HashMap<String, Boolean>();
+                map.put("Succes", false);
+                JSONObject ret = new JSONObject(map);
+
+                PrintWriter pw = response.getWriter();
+                pw.print(ret.toJSONString());
+            }
+        }
 }
 
 

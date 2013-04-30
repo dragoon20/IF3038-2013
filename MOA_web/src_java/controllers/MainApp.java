@@ -81,7 +81,7 @@ public class MainApp extends HttpServlet
 
 		    	String response = callRestfulWebService(serviceURL+"token/check_token", map, "", 0);
 		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(response);
-		    	status = (boolean)resp_obj.get("status");
+		    	status = (Boolean)resp_obj.get("status");
     		} catch (Exception e)
     		{
     			e.printStackTrace();
@@ -740,7 +740,7 @@ public class MainApp extends HttpServlet
 
 		    	String resp = callRestfulWebService(serviceURL+"token/logout", map, "", 0);
 		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(resp);
-		    	status = (boolean)resp_obj.get("status");
+		    	status = (Boolean)resp_obj.get("status");
     		} catch (Exception e)
     		{
     			e.printStackTrace();

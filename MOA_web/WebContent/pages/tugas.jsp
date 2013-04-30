@@ -1,3 +1,7 @@
+<%@page import="models.DBSimpleRecord"%>
+<%@page import="org.json.simple.JSONValue"%>
+<%@page import="org.json.simple.JSONObject"%>
+<%@page import="java.util.HashMap"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="models.Comment"%>
@@ -17,17 +21,34 @@
 	Tag[] tags = null;
 	Attachment[] attachments = null;
 	Comment[] comments = null;
+        String namaKategori = "";
+        
 	if (request.getParameter("id")!=null)
 	{
-		task = (Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id"))}, new String[]{"integer"}, null);
+		//task = (Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id"))}, new String[]{"integer"}, null);
+                try{
+                        HashMap<String, String> parameter = new HashMap<String,String>();
+			parameter.put("token", MainApp.token(session));
+			parameter.put("app_id", MainApp.appId);
+			parameter.put("id_task", ""+request.getParameter("id"));
+			String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"task/get_task", parameter, "", 0);
+			JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+                        task = new Task();
+                        task.setId_task(Integer.valueOf(ret.get("id_task").toString()));
+                        task.setNama_task(String.valueOf(ret.get("nama_task")));
+                        task.setDeadline(new java.sql.Date(DBSimpleRecord.sdf.parse(ret.get("deadline").toString()).getTime()));
+                        namaKategori = String.valueOf(ret.get("nama_kategori"));
+		} catch(Exception exc) {
+			exc.printStackTrace();
+		}
 		if (task==null)
 		{
 			// redirect to error page
 		}
-		users = task.getAssignee();
-		tags = task.getTags();
-		attachments = task.getAttachment();
-		comments = task.getComment();
+		users = task.getAssignee(MainApp.token(session), task.getId_task());
+		tags = task.getTags(MainApp.token(session), task.getId_task());
+		attachments = task.getAttachment(MainApp.token(session), task.getId_task());
+		comments = task.getComment(MainApp.token(session), task.getId_task());
 	}
 	else
 	{
@@ -55,13 +76,13 @@
 
 					<ul>
 						<%
-							if (task.getDeletable(MainApp.currentUserId(session)))
+							if (task.getDeletable(MainApp.token(session), task.getId_task()))
 							{
 								out.println("<li><a href=\"#\" id=\"removeTaskLink\">Remove Task</a></li>");
 							}
 						%>
 						<%
-							if (task.getEditable(MainApp.currentUserId(session)))
+							if (task.getEditable(MainApp.token(session), task.getId_task()))
 							{
 								out.println("<li><a href=\"#\" id=\"editTaskLink\">Edit Task</a></li>");
 							}
@@ -92,7 +113,7 @@
 						</p>
 						<p class="category">
 							<span class="detail-label">Kategori:</span>
-							<span class="detail-content"><%= task.getCategory().getNama_kategori() %></span>
+							<span class="detail-content"><%= namaKategori %></span>
 						</p>
 						<p id="detail-tag" class="tags">
 							<span class="detail-label">Tag:</span>
@@ -201,7 +222,7 @@
 				</div>
 				<section class="comments">
 					<header>
-						<h3 id="total_comment"><% int total_comment = task.getTotalComment(); out.print(total_comment); %> Comment<%= (total_comment > 1) ? "s" : "" %></h3>
+                                            <h3 id="total_comment"><% int total_comment = task.getTotalComment(MainApp.token(session), task.getId_task()); out.print(total_comment); %> Comment<%= (total_comment > 1) ? "s" : "" %></h3>
 						<%
 							if (total_comment > 10)
 							{
@@ -229,14 +250,15 @@
 							
 							for (Comment comment : comments)
 							{
-								User user = comment.getUser();
+								User user = comment.getUser(MainApp.token(session), ""+comment.getId_komentar());
 								out.println("<article id=\"comment_"+comment.getId_komentar()+"\" class=\"comment\">");
-									out.println("<a href=\"profile?id="+user.getId_user()+"\">");
+                                                                out.println("<a href=\"profile?id="+user.getId_user()+"\">");
 										out.println("<img src=\"upload/user_profile_pict/"+user.getAvatar()+"\" alt=\""+user.getFullname()+"\" class=\"icon_pict\" >");
 									out.println("</a>");
 									out.println("<div class=\"right\">");
 										out.println(date_format4.format(comment.getTimestamp()));
-										if (user.getId_user()==MainApp.currentUserId(session))
+                                                                                
+                                                                                if(comment.getDeletable(user.getId_user(),MainApp.token(session)))
 										{
 											out.println("<a href=\"javascript:delete_comment("+comment.getId_komentar()+")\">DELETE</a>");
 										}
@@ -277,7 +299,7 @@
 			var first_timestamp = "<%= firsttimestamp %>";
 			var timestamp = "<%= lasttimestamp %>";
 			var total_comment = <%= total_comment %>;
-			var id_user = <%= MainApp.currentUserId(session) %>;
+			var id_user = <%= MainApp.token(session) %>;
 			var current_total_comment = <%= Math.min(10, total_comment) %>;
 		</script>
 <% 
