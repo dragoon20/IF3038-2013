@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><xs:schema xmlns:tns="http://test.com/" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://test.com/" version="1.0">
+<xs:element name="helloName" type="tns:helloName"/>
+<xs:element name="helloNameResponse" type="tns:helloNameResponse"/>
+<xs:complexType name="helloName">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="arg0" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="helloNameResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

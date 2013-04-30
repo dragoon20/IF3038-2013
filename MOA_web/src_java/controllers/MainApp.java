@@ -1,6 +1,5 @@
 package controllers;
 
-import com.mysql.jdbc.StringUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.servlet.ServletException;
@@ -30,21 +30,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import models.DBSimpleRecord;
+import models.Task;
+import models.User;
+
 import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileItemFactory;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-
-import com.sun.xml.internal.ws.api.model.wsdl.WSDLModel.WSDLParser;
-import com.sun.xml.internal.ws.wsdl.writer.document.Definitions;
-
-import models.DBSimpleRecord;
-import models.Task;
-import models.User;
 
 /**
  * Servlet implementation class MainApp
@@ -53,6 +49,7 @@ public class MainApp extends HttpServlet
 {
     private static final long serialVersionUID = 1L;
 	
+    public static final String appId = "0d2d2a7531376b3b05ff4203aeaa6b41";
     public static final String appName = "MOA";
     public static final String appTagline = "Multiuser Online Agenda";
     public static final String serviceURL = "http://localhost:8080/MOA_services/";
@@ -67,16 +64,41 @@ public class MainApp extends HttpServlet
 
     public static boolean LoggedIn(HttpSession session)
 	{
-		return (((session.getAttribute("user_id")!=null)) && 
-				(((User)session.getAttribute("current_user"))!=null) && 
-				(((String)session.getAttribute("full_path"))!=null));
+    	boolean status = false;
+    	if (session.getAttribute("token")!=null)
+    	{
+    		try
+    		{
+		    	HashMap<String, String> map = new HashMap<String, String>();
+		    	map.put("token", (String)session.getAttribute("token"));
+		    	map.put("app_id", appId);
+		    	
+		    	String response = callRestfulWebService(serviceURL+"token/check_token", map, "", 0);
+		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(response);
+		    	status = (boolean)resp_obj.get("status");
+    		} catch (Exception e)
+    		{
+    			e.printStackTrace();
+    		}
+    	}
+		return status;
 	}
     
+    /**
+     * @deprecated
+     * @param session
+     * @return
+     */
     public static Integer currentUserId(HttpSession session)
     {
     	return ((Integer)session.getAttribute("user_id"));
     }
     
+    /**
+     * @deprecated
+     * @param session
+     * @return
+     */
     public static User currentUser(HttpSession session)
     {
     	return ((User)session.getAttribute("current_user"));
@@ -287,7 +309,7 @@ public class MainApp extends HttpServlet
 					u.setAvatar(user.getAvatar());
 					session.setAttribute("current_user", u);
 					
-					response.sendRedirect("dashboard");
+					response.sendRedirect("dashboard_fake");
 				}
 				else
 				{
@@ -304,6 +326,20 @@ public class MainApp extends HttpServlet
 			PrintWriter pw = response.getWriter();
 			pw.println("error3");
 			pw.close();
+		}
+	}
+	
+	public void login_check(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		if (request.getParameter("token")!=null)
+		{
+			HttpSession session = request.getSession();
+			session.setAttribute("token", request.getParameter("token"));
+			response.sendRedirect("dashboard_fake");
+		}
+		else
+		{
+			response.sendRedirect("error");
 		}
 	}
 	
@@ -334,7 +370,11 @@ public class MainApp extends HttpServlet
 			for (FileItem fi : items)
 			{
 				if (fi.isFormField())
-				{
+				{/**
+				     * @deprecated
+				     * @param session
+				     * @return
+				     */
 					if ("deadline".equals(fi.getFieldName()))
 					{
 						try {
@@ -629,64 +669,109 @@ public class MainApp extends HttpServlet
 	
 	public void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
+		boolean status = false;
 		HttpSession session = request.getSession();
-		session.removeAttribute("user_id");
-		response.sendRedirect("index");
+    	if (session.getAttribute("token")!=null)
+    	{
+    		try
+    		{
+		    	HashMap<String, String> map = new HashMap<String, String>();
+		    	map.put("token", (String)session.getAttribute("token"));
+		    	map.put("app_id", appId);
+		    	
+		    	String resp = callRestfulWebService(serviceURL+"token/logout", map, "", 0);
+		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(resp);
+		    	status = (boolean)resp_obj.get("status");
+    		} catch (Exception e)
+    		{
+    			e.printStackTrace();
+    		}
+    	}
+		
+    	if (status)
+    	{
+			session.removeAttribute("token");
+			response.sendRedirect("index");
+    	}
+    	else
+    	{
+    		response.sendRedirect("error");
+    	}
+	}
+	
+	public void dashboard_fake(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		PrintWriter pw = response.getWriter();
+		pw.println(request.getSession().getAttribute("token"));
+		pw.close();
 	}
 	
 	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
+		try {
+			String token = request.getParameter("token");
+			TreeMap<String, String> parameter = new TreeMap<String,String>();
+			parameter.put("token", token);
+			parameter.put("app_id", MainApp.appId);
+			String responseString = callRestfulWebService("http://localhost:8080/MOA_services/user/get_created_tasks", parameter, "", 0);
+			PrintWriter pw = response.getWriter();
+			pw.println(responseString);
+			pw.close();
+		}catch(Exception exc){
+			exc.printStackTrace();
+		}
 	}
         
-        private static String buildWebQuery(Map<String, String> parameters) throws Exception {
-            StringBuilder sb = new StringBuilder();
-            for (Map.Entry<String, String> entry : parameters.entrySet()) {
-                String key = URLEncoder.encode(entry.getKey(), "UTF-8");
-                String value = URLEncoder.encode(entry.getValue(), "UTF-8");
-                sb.append(key).append("=").append(value).append("&");
-            }
-            return sb.toString().substring(0, sb.length() - 1);
+    private static String buildWebQuery(Map<String, String> parameters) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            String key = URLEncoder.encode(entry.getKey(), "UTF-8");
+            String value = URLEncoder.encode(entry.getValue(), "UTF-8");
+            sb.append(key).append("=").append(value).append("&");
         }
+        return sb.toString().substring(0, sb.length() - 1);
+    }
+    
+    // contoh pemanggilan : callRestfulWebService("http://localhost:8080/MOA_Servicesnew/",params,"",0)
+    public static String callRestfulWebService(String address, Map<String, String> parameters, String proxy, int port) throws Exception 
+    {
+        Proxy proxyObject = null;
+        if (!proxy.equals("") && port > 0) 
+        {
+            InetSocketAddress proxyAddress = new InetSocketAddress(proxy, port);
+            proxyObject = new Proxy(Proxy.Type.HTTP, proxyAddress);
+        }
+
+        String response = "";
+        String query = buildWebQuery(parameters);
+
+        URL url = new URL(address);
         
-        // contoh pemanggilan : callRestfulWebService("http://localhost:8080/MOA_Servicesnew/",params,"",0)
-        public static String callRestfulWebService(String address, Map<String, String> parameters, String proxy, int port) throws Exception {
- 
-            Proxy proxyObject = null;
-            if (!proxy.equals("") && port > 0) {
-                InetSocketAddress proxyAddress = new InetSocketAddress(proxy, port);
-                proxyObject = new Proxy(Proxy.Type.HTTP, proxyAddress);
-            }
-
-            String response = "";
-            String query = buildWebQuery(parameters);
-
-            URL url = new URL(address);
-            
-            URLConnection urlc = null;
-            if (proxyObject == null) {
-                urlc = url.openConnection();
-            } else {
-                urlc = url.openConnection(proxyObject);
-            }
-            urlc.setDoOutput(true);
-            urlc.setAllowUserInteraction(false);
-
-            // Send message
-            PrintStream ps = new PrintStream(urlc.getOutputStream());
-            ps.print(query);
-            ps.close();
-
-            // retrieve result
-            BufferedReader br = new BufferedReader(new InputStreamReader(urlc.getInputStream(), "UTF-8"));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-                sb.append("\n");
-            }
-            br.close();
-            response = sb.toString();
-
-            return response;
+        URLConnection urlc = null;
+        if (proxyObject == null) {
+            urlc = url.openConnection();
+        } else {
+            urlc = url.openConnection(proxyObject);
         }
+        urlc.setDoOutput(true);
+        urlc.setAllowUserInteraction(false);
+
+        // Send message
+        PrintStream ps = new PrintStream(urlc.getOutputStream());
+        ps.print(query);
+        ps.close();
+
+        // retrieve result
+        BufferedReader br = new BufferedReader(new InputStreamReader(urlc.getInputStream(), "UTF-8"));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line);
+            sb.append("\n");
+        }
+        br.close();
+        response = sb.toString();
+
+        return response;
+    }
 }

@@ -13,7 +13,7 @@
 			<div class="index">	
 				<header>
 					<ul>
-						<li class="login"><a href="http://localhost:8086/MOA_servicesnew/login?app_id=fc19f4f6fcedb12dc2904026c415eb5a" id="lowginLink">Login</a></li>
+						<li class="login"><a href="<%= MainApp.serviceURL %>login?app_id=<%= MainApp.appId %>" id="lowginLink">Login</a></li>
 					</ul>
 				</header>
 				

@@ -77,7 +77,7 @@ public class UserService extends BasicServlet
        try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if (("POST".equals(request.getMethod())) &&
     		(request.getParameter("username")!=null) && (request.getParameter("email")!=null) && 
@@ -129,27 +129,27 @@ public class UserService extends BasicServlet
         try
 		{
         	int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
-                            User user = new User();
-                            user.setId_user(id_user);
+                User user = new User();
+                user.setId_user(id_user);
 
-                            Task [] arrayOfTask = user.getCreatedTasks();
-                            List<Map<String, String>> listOfTask = new ArrayList<Map<String, String>>();
-                            for (Task task : arrayOfTask)
-                                {
-                                        Map<String, String> map = new HashMap<String, String>();
-                                        map.put("id_task",""+task.getId_task());
-                                        map.put("nama_task",task.getNama_task());
-                                        map.put("status",""+task.isStatus());
-                                        map.put("deadline",""+task.getDeadline());
-                                        map.put("id_kategori",""+task.getId_kategori());
-                                        map.put("id_user",""+task.getId_user());
-                                        listOfTask.add(map);
-                                }
-                            PrintWriter pw = response.getWriter();
-                            pw.println(listOfTask);
-                            pw.close();
+                Task [] arrayOfTask = user.getCreatedTasks();
+                List<Map<String, String>> listOfTask = new ArrayList<Map<String, String>>();
+                for (Task task : arrayOfTask)
+                    {
+                            Map<String, String> map = new HashMap<String, String>();
+                            map.put("id_task",""+task.getId_task());
+                            map.put("nama_task",task.getNama_task());
+                            map.put("status",""+task.isStatus());
+                            map.put("deadline",""+task.getDeadline());
+                            map.put("id_kategori",""+task.getId_kategori());
+                            map.put("id_user",""+task.getId_user());
+                            listOfTask.add(map);
+                    }
+                PrintWriter pw = response.getWriter();
+                pw.println(JSONValue.toJSONString(listOfTask));
+                pw.close();
 			}
 			else
 			{
@@ -172,7 +172,7 @@ public class UserService extends BasicServlet
         try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
                             User user = new User();
                             user.setId_user(id_user);
@@ -216,7 +216,7 @@ public class UserService extends BasicServlet
         try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
                             User user = new User();
                             user.setId_user(id_user);
@@ -257,7 +257,7 @@ public class UserService extends BasicServlet
         try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
                             User user = new User();
                             user.setId_user(id_user);
@@ -306,7 +306,7 @@ public class UserService extends BasicServlet
         try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
                             if((request.getParameter("key")!=null)){
                                 User user = new User();
@@ -354,7 +354,7 @@ public class UserService extends BasicServlet
         try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
                             if((request.getParameter("key")!=null)){
                                 User user = new User();
@@ -399,7 +399,7 @@ public class UserService extends BasicServlet
         try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
                             if((request.getParameter("key")!=null)){
                                 User user = new User();
@@ -449,7 +449,7 @@ public class UserService extends BasicServlet
         try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) && ((id_user = GeneralHelper.isLogin( request.getParameter("token"), GeneralHelper.app_id))!=-1))
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
                             if((request.getParameter("username")!=null)){
                                 User user = new User();

@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 3.4.11.1deb1
+-- version 3.5.8.1deb1
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 25, 2013 at 11:01 AM
--- Server version: 5.5.29
--- PHP Version: 5.4.6-1ubuntu1.2
+-- Generation Time: Apr 29, 2013 at 09:05 PM
+-- Server version: 5.5.31-0ubuntu0.13.04.1
+-- PHP Version: 5.4.9-4ubuntu2
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -33,14 +33,19 @@ CREATE TABLE IF NOT EXISTS `applications` (
   `redirect_url` text NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `app_id` (`app_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 --
 -- Dumping data for table `applications`
 --
 
 INSERT INTO `applications` (`id`, `app_name`, `app_id`, `redirect_url`) VALUES
-(1, 'MOA_web', '23192cc1851c9aec4201e2fb487a9c8b', 'http://localhost:8080/MOA/');
+(1, 'MOA_web', '23192cc1851c9aec4201e2fb487a9c8b', 'http://localhost:8080/MOA/'),
+(2, 'MOA_mobile', 'e55d47b937fee41b1cd75a01fbf76bc2', 'http://localhost:8080/MOA/'),
+(3, 'Google', 'a5d0dae7872611a27c3e01591fdffb5d', 'http://google.com'),
+(4, 'janice', 'fd4c6a9f93717cd136f3053def617c91', 'www.google.com'),
+(5, 'Sharon', 'dda15a7a60ec3d93467e46a46f4ab9b7', 'www.google.com'),
+(6, 'MOA_web_final', '0d2d2a7531376b3b05ff4203aeaa6b41', 'http://localhost:8080/MOA_web/login_check');
 
 -- --------------------------------------------------------
 
@@ -60,10 +65,7 @@ CREATE TABLE IF NOT EXISTS `assign` (
 --
 
 INSERT INTO `assign` (`id_user`, `id_task`) VALUES
-(13, 33),
-(13, 35),
 (13, 36),
-(13, 37),
 (4, 38),
 (6, 39);
 
@@ -82,24 +84,14 @@ CREATE TABLE IF NOT EXISTS `comment` (
   PRIMARY KEY (`id_komentar`),
   KEY `id_user` (`id_user`),
   KEY `id_task` (`id_task`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
 
 --
 -- Dumping data for table `comment`
 --
 
 INSERT INTO `comment` (`id_komentar`, `timestamp`, `komentar`, `id_user`, `id_task`) VALUES
-(1, '2013-04-22 09:50:09', 'asd', 14, 33),
-(2, '2013-04-22 09:50:16', 'asdasd', 14, 33),
-(3, '2013-04-22 09:50:19', 'adasd', 14, 33),
-(4, '2013-04-22 09:50:22', 'asdas', 14, 33),
-(5, '2013-04-22 09:50:26', 'asdsa', 14, 33),
-(6, '2013-04-22 09:50:28', 'aswdasd', 14, 33),
-(7, '2013-04-22 09:50:31', 'sasadas', 14, 33),
-(8, '2013-04-22 09:50:35', 'sadasd', 14, 33),
-(9, '2013-04-22 09:50:38', 'dasdas', 14, 33),
-(10, '2013-04-22 09:50:41', 'sadsada', 14, 33),
-(11, '2013-04-22 09:50:45', 'asdasdas', 14, 33);
+(12, '2013-04-29 11:52:10', 'lalal', 14, 37);
 
 -- --------------------------------------------------------
 
@@ -141,8 +133,6 @@ CREATE TABLE IF NOT EXISTS `have_tags` (
 INSERT INTO `have_tags` (`id_task`, `id_tag`) VALUES
 (37, 2),
 (38, 2),
-(33, 13),
-(35, 14),
 (36, 19),
 (39, 20);
 
@@ -236,10 +226,8 @@ CREATE TABLE IF NOT EXISTS `task` (
 --
 
 INSERT INTO `task` (`id_task`, `nama_task`, `status`, `deadline`, `id_kategori`, `id_user`) VALUES
-(33, 'baru lagi abcd', 0, '2013-04-19', 37, 14),
-(35, 'baru lagi abcd', 0, '2013-04-19', 37, 14),
 (36, 'baru lagi abcd', 0, '2013-04-19', 37, 14),
-(37, 'baru lagi abcd', 0, '2013-04-19', 37, 14),
+(37, 'haha', 0, '2010-04-19', 37, 14),
 (38, 'hellothere', 0, '2013-04-10', 37, 14),
 (39, 'hellothere 2', 0, '2013-04-26', 37, 14);
 
@@ -260,21 +248,36 @@ CREATE TABLE IF NOT EXISTS `task_attachment` (
 --
 
 INSERT INTO `task_attachment` (`id_task`, `attachment`) VALUES
-(33, '02755266F84C5BD7C046FA57E28169E5.jpg'),
-(33, '587EBFB75A0F7C3AB2477438399C49FE.jpg'),
-(33, '9AA53007115236051AC0DBE535487A74.jpg'),
-(33, 'BEBBF55D71D25BCC9742B78F190735BA.jpg'),
-(33, 'CA395312CB167B0C010A8A690A7D1B39.jpg'),
-(33, 'D4BDB3C8078C71E3E0F074C1C58EF68C.mp4'),
-(33, 'DB71433886025D9C0DD8C0D136A12833.'),
-(33, 'DBD0CAC101873C2A2A969D91834E5FFD.jpg'),
-(33, 'EB975E49A16582B4C225B80AB4E60400.jpg'),
-(35, '1FB384395E7EC6BB9A26C495D007964E.jpg'),
 (36, '52CF7869C029B3332098607D6327E72C.'),
 (36, 'D5D8BFE5D15540254115EF1DC7273C96.'),
 (37, 'EB95EFCCE12C4AA4842E65A082C53122.'),
 (38, '30520FA01A72186C12709B35B2F1BDA5.'),
 (39, '757432B3270F22D3F971CFB967E0D6D5.');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tokens`
+--
+
+CREATE TABLE IF NOT EXISTS `tokens` (
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `token` varchar(200) NOT NULL,
+  `id_user` int(11) NOT NULL,
+  `id_app` int(11) NOT NULL,
+  PRIMARY KEY (`id_user`,`id_app`),
+  UNIQUE KEY `UNIQUE_token` (`token`),
+  KEY `id_app` (`id_app`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `tokens`
+--
+
+INSERT INTO `tokens` (`timestamp`, `token`, `id_user`, `id_app`) VALUES
+('2013-04-29 12:30:59', 'f5dc66645864a97b5efcfd06dd92de2f', 3, 1),
+('2013-04-29 13:12:01', '3e6bb5eb98351c41e2137f098ee6ec01', 14, 1),
+('2013-04-29 14:00:41', '45af64f5afb08c71c2c21d628a89f60f', 14, 6);
 
 -- --------------------------------------------------------
 
@@ -357,6 +360,13 @@ ALTER TABLE `task`
 --
 ALTER TABLE `task_attachment`
   ADD CONSTRAINT `task_attachment_ibfk_2` FOREIGN KEY (`id_task`) REFERENCES `task` (`id_task`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `tokens`
+--
+ALTER TABLE `tokens`
+  ADD CONSTRAINT `tokens_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `tokens_ibfk_2` FOREIGN KEY (`id_app`) REFERENCES `applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

@@ -134,16 +134,40 @@ public class AuthorizationServlet extends HttpServlet
 		    			String token = DBSimpleRecord.MD5(user.getUsername() + UUID.randomUUID());
 		    			
 		    			conn = DBConnection.getConnection();
-		    			prep = conn.prepareStatement("INSERT INTO `tokens` (timestamp, token, id_user, id_app) " +
-		    								"VALUES (NOW(), ?, ?, ?)");
-		    			prep.setString(1, token);
-		    			prep.setInt(2, user.getId_user());
-		    			prep.setInt(3, id_app);
+		    			prep = conn.prepareStatement("SELECT * FROM `tokens` WHERE id_user = ? AND id_app = ?");
+		    			prep.setInt(1, user.getId_user());
+		    			prep.setInt(2, id_app);
+		    			rs = prep.executeQuery();
 		    			
-		    			int affected = prep.executeUpdate();
-		    			if (affected == 1)
+		    			if ((rs.last()) && (rs.getRow()==1))
 		    			{
-		    				response.sendRedirect(redirect_url+"?token="+token);
+		    				conn = DBConnection.getConnection();
+			    			prep = conn.prepareStatement("UPDATE `tokens` set timestamp = NOW(), token = ? WHERE id_user = ? AND id_app = ?");
+			    			prep.setString(1, token);
+			    			prep.setInt(2, user.getId_user());
+			    			prep.setInt(3, id_app);
+			    			
+			    			int affected = prep.executeUpdate();
+			    			if (affected == 1)
+			    			{
+			    				response.sendRedirect(redirect_url+"?token="+token);
+			    			}
+		    			}
+		    			else if (rs.getRow()==0)
+		    			{
+			    			conn = DBConnection.getConnection();
+			    			prep = conn.prepareStatement("INSERT INTO `tokens` (timestamp, token, id_user, id_app) " +
+			    								"VALUES (NOW(), ?, ?, ?)");
+			    			prep.setString(1, token);
+			    			prep.setInt(2, user.getId_user());
+			    			prep.setInt(3, id_app);
+			    			
+			    			int affected = prep.executeUpdate();
+			    			if (affected == 1)
+			    			{
+			    				response.sendRedirect(redirect_url+"?token="+token);
+			    			}
+
 		    			}
 		    		}
 				}
@@ -153,6 +177,7 @@ public class AuthorizationServlet extends HttpServlet
 				}
 			} catch (Exception e) 
 			{
+				e.printStackTrace();
 				request.getRequestDispatcher("pages/error.jsp").forward(request, response);
 			}
 		}

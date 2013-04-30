@@ -4,6 +4,7 @@
  */
 package models;
 
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -12,8 +13,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import controllers.MainApp;
 
 /**
  * 
@@ -167,8 +175,23 @@ public class User extends DBSimpleRecord
     	setPassword(DBSimpleRecord.MD5(getPassword()));
     }
     
-    public Task[] getCreatedTasks()
+    public Task[] getCreatedTasks(String token)
     {
+    	try {
+			TreeMap<String, String> parameter = new TreeMap<String,String>();
+			parameter.put("token", token);
+			parameter.put("app_id", MainApp.appId);
+			String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_created_tasks", parameter, "", 0);
+			JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+			for (Object obj : resp_obj)
+			{
+				JSONObject js_obj = (JSONObject) obj;
+				Task t = new Task();
+				t.setNama_task((String)js_obj.get("nama_task"));
+			}
+		}catch(Exception exc){
+			
+		}
     	List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("id_task IN (SELECT id_task FROM have_task WHERE id_user=?)", new Object[]{getId_user()}, new String[]{"integer"}, null));
     	return list.toArray(new Task[list.size()]);
     }
