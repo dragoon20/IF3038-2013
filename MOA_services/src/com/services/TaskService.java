@@ -5,8 +5,12 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -193,8 +197,10 @@ public class TaskService extends BasicServlet
 							new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null);
 					boolean success = !task.isEmpty();
 					
-					JSONObject ret = new JSONObject();
-					ret.put("success", success);
+					HashMap<String, Object> map = new HashMap<String, Object>();
+					map.put("success", success);
+
+					JSONObject ret = new JSONObject(map);
 					PrintWriter pw = response.getWriter();
 					pw.print(ret.toJSONString());
 					pw.close();
@@ -211,10 +217,11 @@ public class TaskService extends BasicServlet
 		} catch(Exception e)
 		{
 			e.printStackTrace();
-			List<Map<String, String>> tags_val = new ArrayList<Map<String, String>>();
 			
-			JSONObject ret = new JSONObject();
-			ret.put("success", false);
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put("success", false);
+			
+			JSONObject ret = new JSONObject(map);
 			PrintWriter pw = response.getWriter();
 			pw.print(ret.toJSONString());
 			pw.close();
@@ -677,6 +684,294 @@ public class TaskService extends BasicServlet
 			
 			PrintWriter pw = response.getWriter();
 			pw.print(JSONValue.toJSONString(ret));
+		}
+	}
+	
+	public void fetch_latest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		try
+		{
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				if ((request.getParameter("id_task")!=null) && 
+					(!((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).isEmpty()))
+				{
+					Task[] ret = null;
+					
+					if (request.getParameter("id_category")!=null)
+					{
+						ret = (Task[])Task.getModel().findAll("task_id > ? AND EXISTS (SELECT * FROM "+Category.getTableName()+
+								"WHERE category_id = ? AND task_id = task.id)", 
+								new Object[]{request.getParameter("id_task"), request.getParameter("id_category")}, 
+								new String[]{"integer", "integer"}, null);
+					}
+					else
+					{
+						ret = (Task[])Task.getModel().findAll("task_id > ?", new Object[]{request.getParameter("id_task")}, new String[]{"integer"}, null);
+					}
+					
+					PrintWriter pw = response.getWriter();
+					pw.println(JSONValue.toJSONString(Arrays.asList(ret)));
+					pw.close();
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+
+			PrintWriter pw = response.getWriter();
+			pw.print("[]");
+			pw.close();
+		}
+	}
+	
+	public void retrieve_tasks(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		try
+		{
+			int id_user;
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				PrintWriter pw = response.getWriter();
+				HashMap<String, Object> ret = new HashMap<String, Object>();
+				if (request.getParameter("category_id")!=null)
+				{
+					Category cat = (Category)Category.getModel().find("id_kategori = ?", new Object[]{Integer.parseInt(request.getParameter("category_id"))}, new String[]{"integer"}, null);
+		
+					if (!cat.isEmpty()) 
+					{
+						int categoryId = cat.getId_kategori();
+						String categoryName = cat.getNama_kategori();
+						boolean canDeleteCategory = (cat.getId_user()==id_user);
+						boolean canEditCategory = ((canDeleteCategory) || (cat.getEditable(id_user)));
+						
+						ret.put("success", true);
+						ret.put("categoryID", categoryId);
+						ret.put("categoryName", categoryName);
+						ret.put("canDeleteCategory", canDeleteCategory);
+						ret.put("canEditCategory", canEditCategory);
+						
+						List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("id_kategori = ?", new Object[]{request.getParameter("category_id")}, new String[]{"string"}, null));
+						Task[] tasks = list.toArray(new Task[list.size()]);
+						
+						SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM YYYY");
+						List<Map<String, Object>> maps = new LinkedList<Map<String, Object>>();
+						for (int i=0;i<tasks.length;++i)
+						{
+							Map<String, Object> map = new LinkedHashMap<String, Object>();
+							map.put("name", tasks[i].getNama_task());
+							map.put("id", tasks[i].getId_task());
+							map.put("done", tasks[i].isStatus());
+							map.put("deadline", sdf.format(tasks[i].getDeadline()));
+							map.put("deletable", tasks[i].getDeletable(id_user));
+							
+							Tag[] tags = tasks[i].getTags();
+							List<String> str_tags = new ArrayList<String>();
+							for (Tag t : tags)
+							{
+								str_tags.add(t.getTag_name());
+							}
+							map.put("tags", str_tags);
+							
+							maps.add(map);
+						}
+						ret.put("tasks", maps);
+						
+						pw.println(new JSONObject(ret).toJSONString());
+					}
+					else 
+					{
+						// not found
+						ret.put("success", false);
+						pw.println(new JSONObject(ret).toJSONString());
+					}
+				}
+				else 
+				{
+					ret.put("success", true);
+					int id = id_user;
+					List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("id_kategori IN (SELECT id_kategori FROM "+Category.getTableName()+" WHERE id_user = ? "+
+							"OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user = ?) "+
+							"OR id_kategori IN (SELECT id_kategori FROM "+Task.getTableName()+" AS t LEFT OUTER JOIN assign AS a "+
+							"ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ?))", 
+							new Object[]{id, id, id, id}, new String[]{"integer", "integer", "integer", "integer"}, null));
+					Task[] tasks = list.toArray(new Task[list.size()]);
+					
+					SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM YYYY");
+					List<Map<String, Object>> maps = new ArrayList<Map<String,Object>>();
+					for (int i=0;i<tasks.length;++i)
+					{
+						Map<String, Object> map = new HashMap<String, Object>();
+						map.put("name", tasks[i].getNama_task());
+						map.put("id", tasks[i].getId_task());
+						map.put("done", tasks[i].isStatus());
+						map.put("deadline", sdf.format(tasks[i].getDeadline()));
+						map.put("deletable", tasks[i].getDeletable(id_user));
+						
+						Tag[] tags = tasks[i].getTags();
+						List<String> str_tags = new ArrayList<String>();
+						for (Tag t : tags)
+						{
+							str_tags.add(t.getTag_name());
+						}
+						map.put("tags", str_tags);
+						
+						maps.add(map);
+					}
+					ret.put("tasks", maps);
+					pw.println(new JSONObject(ret).toJSONString());
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+
+			PrintWriter pw = response.getWriter();
+			pw.print("{}");
+			pw.close();
+		}
+	}
+	
+	public void mark_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		try
+		{
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				if ((request.getParameter("taskID")!=null) && (request.getParameter("completed")!=null))
+				{
+					PrintWriter pw = response.getWriter();
+					HashMap<String, Object> ret = new HashMap<String, Object>();
+					
+					int id_task = Integer.parseInt(request.getParameter("taskID"));
+					int completed = ("true".equals(request.getParameter("completed"))) ? 1 : 0;
+					
+					String update = "UPDATE "+Task.getTableName()+" SET status = ? WHERE id_task = ?";
+					Connection conn = DBConnection.getConnection();
+					PreparedStatement statement;
+					
+					statement = conn.prepareStatement(update);
+					statement.setInt(1, completed);
+					statement.setInt(2, id_task);
+					int affectedrows = statement.executeUpdate();
+					
+					if (affectedrows >= 1)
+					{
+						ret.put("success", true);
+						ret.put("taskId", id_task);
+						ret.put("done", completed);
+					}
+					else
+					{
+						ret.put("success", false);
+					}
+					pw.println(new JSONObject(ret).toJSONString());
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+
+			PrintWriter pw = response.getWriter();
+			pw.print("{success : false}");
+			pw.close();
+		}
+	}
+	
+	public void search_suggestions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		try
+		{
+			int id_user;
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				if ((request.getParameter("type")!=null) && (request.getParameter("q")!=null))
+				{
+					String type = request.getParameter("type");
+					String q = request.getParameter("q");
+					
+					if (!"".equals(q))
+					{
+						PrintWriter pw = response.getWriter();
+						
+						boolean all = ("all".equals(type));
+						
+						List<String> suggestion = new ArrayList<String>();
+						if (("task".equals(type)) || (all))
+						{
+							Task[] tasks  = ((User)User.getModel().find("id_user = ?", new Object[]{id_user}, new String[]{"integer"}, null)).getTasksLike(q);
+							for (Task task : tasks)
+							{
+								if (!suggestion.contains(task.getNama_task()))
+								{
+									suggestion.add(task.getNama_task());
+								}
+							}
+						}
+						
+						if (("category".equals(type)) || (all))
+						{
+							Category[] categories  = ((User)User.getModel().find("id_user = ?", new Object[]{id_user}, new String[]{"integer"}, null)).getCategoriesLike(q);
+							for (Category category : categories)
+							{
+								if (!suggestion.contains(category.getNama_kategori()))
+								{
+									suggestion.add(category.getNama_kategori());
+								}
+							}
+						}
+						
+						if (("user".equals(type)) || (all))
+						{
+							User[] users  = User.getModel().findAllLike(q);
+							for (User user : users)
+							{
+								if (!suggestion.contains(user.getUsername()))
+								{
+									suggestion.add(user.getUsername());
+								}
+							}
+						}
+						
+						pw.println(JSONValue.toJSONString(suggestion));
+					}
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+
+			PrintWriter pw = response.getWriter();
+			pw.print("{success : false}");
+			pw.close();
 		}
 	}
 }

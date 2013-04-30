@@ -74,16 +74,21 @@ public class CommentService extends BasicServlet
 			int id_user;
 			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
-                            PrintWriter pw = response.getWriter();
-                            JSONObject ret = new JSONObject();
+                PrintWriter pw = response.getWriter();
+                HashMap<String, Object> map = new HashMap<String, Object>();
+        		
 				if (("POST".equals(request.getMethod())) && (request.getParameter("id")!=null))
 				{
-					if (Comment.getModel().delete("id_komentar = ? AND id_user = ? ", new Object[]{Integer.parseInt(request.getParameter("id")),id_user}, new String[]{"integer","integer"})==1){
-                        ret.put("status", "success");
-                    }else{
-                        ret.put("status", "fail");
+					if (Comment.getModel().delete("id_komentar = ? AND id_user = ? ", new Object[]{Integer.parseInt(request.getParameter("id")),id_user}, new String[]{"integer","integer"})==1)
+					{
+                        map.put("status", true);
+                    }else
+                    {
+                        map.put("status", false);
                     }
+	        		JSONObject ret = new JSONObject(map);
                     pw.println(ret.toJSONString());
+                    pw.close();
 				}
 				else
 				{
@@ -127,28 +132,28 @@ public class CommentService extends BasicServlet
 	
                    PrintWriter pw = response.getWriter();
                    pw.print(ret.toJSONString());
-                       
+                   pw.close();
                 }
                 else
                 {
-                        throw new Exception();
+                	throw new Exception();
                 }
             }
             else
             {
-                    throw new Exception();
+                throw new Exception();
             }
         } catch(Exception e)
         {
-                Map<String, String> map = new HashMap<String, String>();
-                map.put("id_user", "");
-                map.put("user_name", "");
-                map.put("fullname","");
-                map.put("avatar","");
-                JSONObject ret = new JSONObject(map);
-		
-                PrintWriter pw = response.getWriter();
-                pw.print(ret.toJSONString());
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("id_user", "");
+            map.put("user_name", "");
+            map.put("fullname","");
+            map.put("avatar","");
+            JSONObject ret = new JSONObject(map);
+	
+            PrintWriter pw = response.getWriter();
+            pw.print(ret.toJSONString());
         }
     }
    
@@ -156,52 +161,52 @@ public class CommentService extends BasicServlet
     {
         try
         {
-                if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+            if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+            {
+                if ((request.getParameter("id_komentar")!=null))
                 {
-                        if ((request.getParameter("id_komentar")!=null))
-                        {
-                               Comment komentar = (Comment)Comment.getModel().find("id_komentar = ?", new Object[]{Integer.parseInt(request.getParameter("id_komentar"))}, new String[]{"integer"}, null);
-                               Task task = komentar.getTask();
-                               Map<String, String> map = new HashMap<String,String>();
-                               
-                               map.put("id_task", Integer.toString(task.getId_task()));
-                               map.put("nama_task", task.getNama_task());
-                               if (task.isStatus()){
-                                   map.put("task_status", "selesai");
-                               }else{
-                                   map.put("task_status", "belum selesai");
-                               }
-                               map.put("deadline",task.getDeadline().toString());
-                               map.put("id_kategori", Integer.toString(task.getId_kategori()));
-                               map.put("id_task", Integer.toString(task.getId_task()));
-                               JSONObject ret = new JSONObject(map);
-				
-                               PrintWriter pw = response.getWriter();
-                               pw.print(ret.toJSONString());
-                               
-                        }
-                        else
-                        {
-                                throw new Exception();
-                        }
+                   Comment komentar = (Comment)Comment.getModel().find("id_komentar = ?", new Object[]{Integer.parseInt(request.getParameter("id_komentar"))}, new String[]{"integer"}, null);
+                   Task task = komentar.getTask();
+                   Map<String, String> map = new HashMap<String,String>();
+                   
+                   map.put("id_task", Integer.toString(task.getId_task()));
+                   map.put("nama_task", task.getNama_task());
+                   if (task.isStatus()){
+                       map.put("task_status", "selesai");
+                   }else{
+                       map.put("task_status", "belum selesai");
+                   }
+                   map.put("deadline",task.getDeadline().toString());
+                   map.put("id_kategori", Integer.toString(task.getId_kategori()));
+                   map.put("id_task", Integer.toString(task.getId_task()));
+                   JSONObject ret = new JSONObject(map);
+	
+                   PrintWriter pw = response.getWriter();
+                   pw.print(ret.toJSONString());
+                       
                 }
                 else
                 {
-                        throw new Exception();
+                    throw new Exception();
                 }
+            }
+            else
+            {
+                throw new Exception();
+            }
         } catch(Exception e)
         {
-                Map<String, String> map = new HashMap<String, String>();
-                map.put("id_task", "");
-                map.put("nama_task","");
-                map.put("task_status", "");
-                map.put("deadline","");
-                map.put("id_kategori", "");
-                map.put("id_task", "");
-                JSONObject ret = new JSONObject(map);
-		
-                PrintWriter pw = response.getWriter();
-                pw.print(ret.toJSONString());
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("id_task", "");
+            map.put("nama_task","");
+            map.put("task_status", "");
+            map.put("deadline","");
+            map.put("id_kategori", "");
+            map.put("id_task", "");
+            JSONObject ret = new JSONObject(map);
+	
+            PrintWriter pw = response.getWriter();
+            pw.print(ret.toJSONString());
         }
     }
     
@@ -258,48 +263,47 @@ public class CommentService extends BasicServlet
     {
         try
         {
-                if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+            if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+            {
+                if ((request.getParameter("id_task")!=null)&&(request.getParameter("timestamp")!=null))
                 {
-                        if ((request.getParameter("id_task")!=null)&&(request.getParameter("timestamp")!=null))
-                        {
-                               Comment[] komentarlatest = Comment.getModel().getOlder(Integer.parseInt(request.getParameter("id_task")), request.getParameter("timestamp").toString());
-                               
-                               List<Map<String, String>> komentar_val = new ArrayList<Map<String, String>>();
-                               for(Comment comment : komentarlatest){
-                                   Map<String, String> map = new HashMap<String,String>();
-                                   
-                                   map.put("id_komentar", comment.getKomentar());
-                                   map.put("timestamp", comment.getTimestamp().toString());
-                                   map.put("komentar", comment.getKomentar());
-                                   map.put("id_user",Integer.toString(comment.getId_user()));
-                                   User user = comment.getUser();
-                                   map.put("username",user.getUsername());
-                                   map.put("username",user.getFullname());
-                                   map.put("avatar", user.getAvatar());
-                                   komentar_val.add(map);
-                               }
-				
-                               PrintWriter pw = response.getWriter();
-                               pw.print(JSONValue.toJSONString(komentar_val));
-                               
-                        }
-                        else
-                        {
-                                throw new Exception();
-                        }
+                   Comment[] komentarlatest = Comment.getModel().getOlder(Integer.parseInt(request.getParameter("id_task")), request.getParameter("timestamp").toString());
+                   
+                   List<Map<String, String>> komentar_val = new ArrayList<Map<String, String>>();
+                   for(Comment comment : komentarlatest){
+                       Map<String, String> map = new HashMap<String,String>();
+                       
+                       map.put("id_komentar", comment.getKomentar());
+                       map.put("timestamp", comment.getTimestamp().toString());
+                       map.put("komentar", comment.getKomentar());
+                       map.put("id_user",Integer.toString(comment.getId_user()));
+                       User user = comment.getUser();
+                       map.put("username",user.getUsername());
+                       map.put("username",user.getFullname());
+                       map.put("avatar", user.getAvatar());
+                       komentar_val.add(map);
+                   }
+	
+                   PrintWriter pw = response.getWriter();
+                   pw.print(JSONValue.toJSONString(komentar_val));
+                       
                 }
                 else
                 {
-                        throw new Exception();
+                    throw new Exception();
                 }
+            }
+            else
+            {
+                throw new Exception();
+            }
         } catch(Exception e)
         {
-                e.printStackTrace();
-                List<Map<String, String>> komentar_val = new ArrayList<Map<String, String>>();
-                
-                
-                PrintWriter pw = response.getWriter();
-                pw.print(JSONValue.toJSONString(komentar_val));
+            e.printStackTrace();
+            List<Map<String, String>> komentar_val = new ArrayList<Map<String, String>>();
+            
+            PrintWriter pw = response.getWriter();
+            pw.print(JSONValue.toJSONString(komentar_val));
         }
     }
 }

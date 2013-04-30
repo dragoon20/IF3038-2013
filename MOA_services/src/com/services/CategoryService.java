@@ -5,7 +5,12 @@
 package com.services;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -17,6 +22,8 @@ import org.json.simple.JSONValue;
 
 import com.helper.GeneralHelper;
 import com.models.Category;
+import com.models.DBConnection;
+import com.models.User;
 import com.template.BasicServlet;
 
 /**
@@ -177,13 +184,14 @@ public class CategoryService extends BasicServlet
 				{
 					Category kategori = (Category)Category.getModel().find("id_kategori = ?", new Object[]{Integer.parseInt(request.getParameter("id_kategori"))}, new String[]{"integer"}, null);
 					
-                                        Map<String, Object> map = new HashMap<String, Object>();
-                                        boolean success = kategori.getDeletable(id_user);
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    boolean success = kategori.getDeletable(id_user);
 					map.put("success", success);
 					JSONObject ret = new JSONObject(map);
 					
 					PrintWriter pw = response.getWriter();
 					pw.print(JSONValue.toJSONString(ret));
+					pw.close();
 				}
 				else
 				{
@@ -198,11 +206,50 @@ public class CategoryService extends BasicServlet
 		{
 			e.printStackTrace();
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("success", "");
+			map.put("success", false);
 			JSONObject ret = new JSONObject(map);
 			PrintWriter pw = response.getWriter();
 			pw.print(JSONValue.toJSONString(ret));
+			pw.close();
 		}
 	}
-        
+    
+    public void retrieve_categories(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+    	try
+		{
+			int id_user;
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				Category[] raw = ((User)User.getModel().find("id_user = ?", new Object[]{id_user}, new String[]{"integer"}, null)).getCategories();
+				
+				List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
+				for (Category cat : raw)
+				{
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("nama_kategori", cat.getNama_kategori());
+					map.put("id", cat.getId_kategori());
+					map.put("canDeleteCategory", cat.getDeletable(id_user));
+					map.put("canEditCategory", cat.getEditable(id_user));
+					
+					result.add(map);
+				}
+				
+				PrintWriter pw = response.getWriter();
+				pw.println(JSONValue.toJSONString(result));
+				pw.close();
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+			
+			PrintWriter pw = response.getWriter();
+			pw.print("[]");
+			pw.close();
+		}
+    }
 }

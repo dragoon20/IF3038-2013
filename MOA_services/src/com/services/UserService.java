@@ -2,7 +2,11 @@ package com.services;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,15 +15,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.helper.GeneralHelper;
 import com.models.Category;
+import com.models.DBSimpleRecord;
 import com.models.Task;
 import com.models.User;
 import com.template.BasicServlet;
@@ -39,39 +41,6 @@ public class UserService extends BasicServlet
         super();
     }
     
-    public void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-    {
-    	boolean success = false;        
-        
-    	if (("POST".equals(request.getMethod())) &&
-    		(request.getParameter("username")!=null) && (request.getParameter("email")!=null) && 
-    		(request.getParameter("fullname")!=null) && (request.getParameter("avatar")!=null) &&
-    		(request.getParameter("password")!=null) && (request.getParameter("birthdate")!=null))
-		{
-                    User new_user = new User();
-                    new_user.addData(request.getParameterMap());
-                    
-                    // DO THIS !!!!
-                    //new_user.setPassword(DBSimpleRecord.MD5(null));
-                    
-                    if (!new_user.checkValidity())
-                    {
-                            success = new_user.save();
-                    }
-		}
-        
-		try {
-			MessageFactory msgfactory = MessageFactory.newInstance();
-			SOAPMessage out_message = msgfactory.createMessage();
-		} catch (SOAPException e) {
-			e.printStackTrace();
-			request.getRequestDispatcher("pages/error.jsp").forward(request, response);
-		}
-                PrintWriter pw = response.getWriter();
-		pw.println(JSONValue.toJSONString("No Problem"));
-    	// return SOAP response
-    }
-    
     public void update_user(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
        try
@@ -80,22 +49,94 @@ public class UserService extends BasicServlet
 			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if (("POST".equals(request.getMethod())) &&
-    		(request.getParameter("username")!=null) && (request.getParameter("email")!=null) && 
-    		(request.getParameter("fullname")!=null) && (request.getParameter("avatar")!=null) &&
-    		(request.getParameter("password")!=null) && (request.getParameter("birthdate")!=null))
+	    		(request.getParameter("username")!=null) && (request.getParameter("email")!=null) && 
+	    		(request.getParameter("fullname")!=null) && (request.getParameter("avatar")!=null) &&
+	    		(request.getParameter("password")!=null) && (request.getParameter("birthdate")!=null))
 				{
-					 User new_user = new User();
-                                         new_user.addData(request.getParameterMap());
-                                        
-					if ((!new_user.checkValidity()) && (new_user.save()))
+					User new_user = (User)User.getModel().find("id_user = ?", new Object[]{id_user}, new String[]{"integer"}, null);
+                    new_user.addData(request.getParameterMap());
+                    new_user.putData("confirm_password", new_user.getPassword());
+                    
+					if (!new_user.checkValidity())
 					{
-						Map<String, Boolean> map = new HashMap<String, Boolean>();
-						map.put("success", true);
-						JSONObject ret = new JSONObject(map);
-						
-						PrintWriter pw = response.getWriter();
-						pw.print(ret.toJSONString());
-						pw.close();
+						new_user.hashPassword();
+						if (new_user.save())
+						{
+							Map<String, Boolean> map = new HashMap<String, Boolean>();
+							map.put("success", true);
+							JSONObject ret = new JSONObject(map);
+							
+							PrintWriter pw = response.getWriter();
+							pw.print(ret.toJSONString());
+							pw.close();
+						}
+					}
+					else
+					{
+						throw new Exception();
+					}
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+			Map<String, Boolean> map = new HashMap<String, Boolean>();
+			map.put("success", false);
+			JSONObject ret = new JSONObject(map);
+			
+			PrintWriter pw = response.getWriter();
+			pw.print(ret.toJSONString());
+			pw.close();
+		}
+    }
+    
+    public void update_password(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+       try
+		{
+			int id_user;
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				if (("POST".equals(request.getMethod())) &&
+	    		(request.getParameter("password")!=null) && (request.getParameter("new_password")!=null) && (request.getParameter("confirm_password")!=null))
+				{
+					User new_user = (User)User.getModel().find("id_user = ?", new Object[]{id_user}, new String[]{"integer"}, null);
+					
+					if (new_user.getPassword()==DBSimpleRecord.MD5(request.getParameter("password")))
+					{
+	                    new_user.addData(request.getParameterMap());
+	                    new_user.setPassword(request.getParameter("new_password"));
+	                    
+						if (!new_user.checkValidity())
+						{
+							new_user.hashPassword();
+							if (new_user.save())
+							{
+								Map<String, Boolean> map = new HashMap<String, Boolean>();
+								map.put("success", true);
+								JSONObject ret = new JSONObject(map);
+								
+								PrintWriter pw = response.getWriter();
+								pw.print(ret.toJSONString());
+								pw.close();
+							}
+							else
+							{
+								throw new Exception();
+							}
+						}
+						else
+						{
+							throw new Exception();
+						}
 					}
 					else
 					{
@@ -478,15 +519,115 @@ public class UserService extends BasicServlet
 			}
 		} catch(Exception e)
 		{
-                    e.printStackTrace();
-                    Map<String, Boolean> map = new HashMap<String, Boolean>();
-                    map.put("success", false);
-                    JSONObject ret = new JSONObject(map);
-
-                    PrintWriter pw = response.getWriter();
-                    pw.print(ret.toJSONString());
-                }
+	        e.printStackTrace();
+	        Map<String, Boolean> map = new HashMap<String, Boolean>();
+	        map.put("success", false);
+	        JSONObject ret = new JSONObject(map);
+	
+	        PrintWriter pw = response.getWriter();
+	        pw.print(ret.toJSONString());
+        }
     }
+    
+    public void get_username(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+    	try
+		{
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+                if((request.getParameter("username")!=null))
+                {
+        			String[] users = request.getParameter("username").split(",");
+        			StringBuilder not_query = new StringBuilder();
+        			
+        			List<Object> param = new ArrayList<Object>();
+        			List<String> paramTypes = new ArrayList<String>();
+        			param.add(users[users.length-1]+"%");
+        			paramTypes.add("string");
+        			for (int i=0;i<users.length-1;++i)
+        			{
+        				not_query.append(" AND ");
+        				not_query.append(" username <> ? ");
+        				param.add(users[i]);
+        				paramTypes.add("string");
+        			}
+        			
+        			List<DBSimpleRecord> list = Arrays.asList(User.getModel().findAll(" username LIKE ? "+not_query+" LIMIT 10", param.toArray(), paramTypes.toArray(new String[paramTypes.size()]), null));
+        			User[] ret = list.toArray(new User[list.size()]);
+        			List<String> result = new ArrayList<String>();
+        			for (int i=0;i<ret.length;++i)
+        			{
+        				result.add(ret[i].getUsername());
+        			}
+        			
+                	PrintWriter pw = response.getWriter();
+        			pw.println(JSONValue.toJSONString(result));
+        			pw.close();
+                } else {
+                    throw new Exception();
+                }
+			}
+			else
+			{
+                throw new Exception();
+			}
+		} catch(Exception e)
+		{
+	        e.printStackTrace();
+	        Map<String, Boolean> map = new HashMap<String, Boolean>();
+	        map.put("success", false);
+	        JSONObject ret = new JSONObject(map);
+	
+	        PrintWriter pw = response.getWriter();
+	        pw.print(ret.toJSONString());
+        }
+    }
+    
+    public void register_check(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+    	HashMap<String, Object> ret = new HashMap<String, Object>();
+		if (("POST".equals(request.getMethod().toUpperCase())) && (request.getParameter("username")!=null) &&
+				(request.getParameter("email")!=null) && (request.getParameter("password")!=null) && 
+				(request.getParameter("confirm_password")!=null) && (request.getParameter("fullname")!=null) && 
+				(request.getParameter("birthdate")!=null) && (request.getParameter("avatar")!=null))
+		{
+			String status = "success";
+			List<String> errors = new ArrayList<String>();
+			
+			User user = new User();
+			user.addData(request.getParameterMap());
+			SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+			try {
+				user.setBirthdate(new Date(sdf.parse(request.getParameter("birthdate")).getTime()));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			boolean temperror = user.checkValidity();
+			
+			if (temperror)
+			{
+				status = "fail";
+				errors.add("Data-data yang dimasukkan tidak valid.");
+			}
+			
+			if (!User.getModel().find("username = ? OR email = ? ", new Object[]{request.getParameter("username"), request.getParameter("email")}, new String[]{"string", "string"}, null).isEmpty())
+			{
+				status = "fail";
+				errors.add("Username/email sudah digunakan.");
+			}
+			ret.put("status", status);
+			ret.put("error", errors);
+		}
+		else
+		{
+			ret.put("status", "fail");
+		}
+
+		PrintWriter pw = response.getWriter();
+		pw.println(new JSONObject(ret).toJSONString());
+		pw.close();
+	}
     
     public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{

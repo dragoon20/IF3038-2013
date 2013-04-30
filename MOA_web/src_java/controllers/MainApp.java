@@ -15,8 +15,6 @@ import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.sql.Date;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import models.DBSimpleRecord;
-import models.Task;
 import models.User;
 
 import org.apache.cxf.interceptor.LoggingInInterceptor;
@@ -44,7 +41,6 @@ import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
 
 /**
  * Servlet implementation class MainApp
@@ -118,45 +114,29 @@ public class MainApp extends HttpServlet
     	return ((String)session.getAttribute("full_path"));
     }
     
+    public static String appUrl(HttpSession session)
+    {
+    	return ((String)session.getAttribute("app_url"));
+    }
+    
     /**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
-		String page = ("".equals((String)request.getAttribute("page")))? "index" : (String)request.getAttribute("page");
-		Class<?>[] param_handler = new Class[2];
-		param_handler[0] = HttpServletRequest.class;
-		param_handler[1] = HttpServletResponse.class;
-		
-		try {
-			Method method;
-			method = this.getClass().getMethod(page, param_handler);				
-			method.invoke(this, request, response);			
-		} catch (NoSuchMethodException e) {
-			// TODO Redirect to error page
-			System.out.println("-----------------");
-			System.out.println(page);
-			System.out.println("-----------------");
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
+		proccessRequest(request, response);
 	}
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		proccessRequest(request, response);
+	}
+
+	private void proccessRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
 		String page = ("".equals((String)request.getAttribute("page")))? "index" : (String)request.getAttribute("page");
+		
 		Class<?>[] param_handler = new Class[2];
 		param_handler[0] = HttpServletRequest.class;
 		param_handler[1] = HttpServletResponse.class;
@@ -164,7 +144,7 @@ public class MainApp extends HttpServlet
 		try {
 			Method method;
 			method = this.getClass().getMethod(page, param_handler);				
-			method.invoke(this, request, response);			
+			method.invoke(this, request, response);
 		} catch (NoSuchMethodException e) {
 			// TODO Redirect to error page
 			System.out.println("-----------------");
@@ -183,7 +163,7 @@ public class MainApp extends HttpServlet
 		} catch (SecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	
+		}
 	}
 
 	public void index(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -263,8 +243,9 @@ public class MainApp extends HttpServlet
 						check = true;
 						avatar = fi;
 						String extension = avatar.getName().split("\\.")[avatar.getName().split("\\.").length-1];
-						String new_filename = MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
-						params.put("avatar", new_filename);
+						String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
+						params.put("avatar", MainApp.appUrl(request.getSession())+"upload/user_profile_pict/"+new_filename);
+						params.put("avatar_filename", new_filename);
 					}
 				}
 			}
@@ -282,7 +263,7 @@ public class MainApp extends HttpServlet
 			if ((check) && (result))
 			{
 				InputStream in = avatar.getInputStream();
-				FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+params.get("avatar")));
+				FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+params.get("avatar_filename")));
 				
 				int read = 0;
 				byte[] bytes = new byte[1024];
@@ -365,9 +346,9 @@ public class MainApp extends HttpServlet
 					Map<String, Object> tempmap = new HashMap<String, Object>();
 					String extension = fi.getName().split("\\.")[fi.getName().split("\\.").length-1]; 
 					String name = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
-					tempmap.put("attachment", name);
+					tempmap.put("attachment", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
 					tempmap.put("temp", fi.getInputStream());
-					tempmap.put("location", request.getServletContext().getRealPath("/")+"upload/attachments/"+name);
+					tempmap.put("location", MainApp.appUrl(request.getSession())+"upload/attachments/"+name);
 					attachments.add(tempmap);
 				}
 			}
@@ -470,9 +451,9 @@ public class MainApp extends HttpServlet
 					Map<String, Object> tempmap = new HashMap<String, Object>();
 					String extension = fi.getName().split("\\.")[fi.getName().split("\\.").length-1]; 
 					String name = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
-					tempmap.put("attachment", name);
+					tempmap.put("attachment", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
 					tempmap.put("temp", fi.getInputStream());
-					tempmap.put("location", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
+					tempmap.put("location", MainApp.appUrl(request.getSession())+"upload/attachments/"+name);
 					attachments.add(tempmap);
 				}
 			}
@@ -615,9 +596,7 @@ public class MainApp extends HttpServlet
 
 		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
-			User user = (User)User.getModel().find("id_user = ?", new Object[]{MainApp.currentUserId(request.getSession())}, new String[]{"integer"}, null);
-			user.putData("confirm_password", user.getPassword());
-			
+			HashMap<String, String> params = new HashMap<String, String>();
 			FileItem avatar = null;
 			boolean check = false;
 			FileItemFactory factory = new DiskFileItemFactory();
@@ -635,19 +614,7 @@ public class MainApp extends HttpServlet
 			{
 				if (fi.isFormField())
 				{
-					if ("birthdate".equals(fi.getFieldName()))
-					{
-						try {
-							user.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					else
-					{
-						user.putData(fi.getFieldName(), fi.getString());
-					}
+					params.put(fi.getFieldName(), fi.getString());
 				}
 				else
 				{
@@ -655,41 +622,55 @@ public class MainApp extends HttpServlet
 					{
 						check = true;
 						avatar = fi;
+						String extension = avatar.getName().split("\\.")[avatar.getName().split("\\.").length-1];
+						String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
+						params.put("avatar", MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+new_filename);
+						params.put("avatar_filename", new_filename);
 					}
 				}
 			}
 			
-			boolean temperror = user.checkValidity();
+			boolean success = false;
+			try {
+				HashMap<String, String> parameter = new HashMap<String,String>();
+				parameter.put("token", token(request.getSession()));
+				parameter.put("app_id", appId);
+				parameter.put("id_task", (String)params.get("id_task"));
+				parameter.put("username", (String)params.get("username"));
+				parameter.put("email", (String)params.get("email"));
+				parameter.put("fullname", (String)params.get("fullname"));
+				parameter.put("avatar", (String)params.get("avatar"));
+				parameter.put("password", (String)params.get("password"));
+				parameter.put("birthdate", (String)params.get("birthdate"));
+				
+				String responseString = callRestfulWebService(serviceURL+"task/update_user", parameter, "", 0);
+				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+				success = (Boolean)ret.get("success");
+			} catch(Exception exc) {
+				exc.printStackTrace();
+			}
 			
-			if (temperror)
+			if (success)
 			{
-				// TODO go to error page
-				System.out.println("error 1");
+				if (check)
+				{
+					InputStream in = avatar.getInputStream();
+					FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+params.get("avatar_filename")));
+					
+					int read = 0;
+					byte[] bytes = new byte[1024];
+					while ((read = in.read(bytes)) != -1)
+					{
+						out.write(bytes, 0, read);
+					}
+					out.close();
+				}
+				response.sendRedirect("index");
 			}
 			else
 			{
-				if (user.save())
-				{
-					if (check)
-					{
-						InputStream in = avatar.getInputStream();
-						FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+user.getAvatar()));
-						
-						int read = 0;
-						byte[] bytes = new byte[1024];
-						while ((read = in.read(bytes)) != -1)
-						{
-							out.write(bytes, 0, read);
-						}
-						out.close();
-					}
-					response.sendRedirect("index");
-				}
-				else
-				{
-					// TODO go to error page
-					System.out.println("error 2");
-				}
+				// TODO go to error page
+				System.out.println("error 2");
 			}
 		}
 		else
@@ -708,30 +689,29 @@ public class MainApp extends HttpServlet
 
 		if ("POST".equals(request.getMethod().toUpperCase()))
 		{
-			User user = (User)User.getModel().find("id_user = ?", new Object[]{MainApp.currentUserId(request.getSession())}, new String[]{"integer"}, null);
-			
-			if (user.getPassword().equals(DBSimpleRecord.MD5((request.getParameter("current_password")!=null ? request.getParameter("current_password"): ""))))
-			{
-				user.setPassword(request.getParameter("new_password"));
-				user.putData("confirm_password", request.getParameter("confirm_password"));
+			boolean success = false;
+			try {
+				HashMap<String, String> parameter = new HashMap<String,String>();
+				parameter.put("token", token(request.getSession()));
+				parameter.put("app_id", appId);
+				parameter.put("password", request.getParameter("current_password"));
+				parameter.put("new_password", request.getParameter("new_password"));
+				parameter.put("confirm_password", request.getParameter("confirm_password"));
 				
-				boolean temperror = user.checkValidity();
-				if (temperror)
-				{
-					// TODO print error screen
-				}
-				else
-				{
-					user.hashPassword();
-					if (user.save())
-					{
-						response.sendRedirect("index");
-					}
-					else
-					{
-						// TODO print error page
-					}
-				}
+				String responseString = callRestfulWebService(serviceURL+"task/update_user", parameter, "", 0);
+				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+				success = (Boolean)ret.get("success");
+			} catch(Exception exc) {
+				exc.printStackTrace();
+			}
+
+			if (success)
+			{
+				response.sendRedirect("index");
+			}
+			else
+			{
+				// TODO print error page
 			}
 		}
 		else
@@ -851,7 +831,7 @@ public class MainApp extends HttpServlet
 	public void test2(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		PrintWriter pw = response.getWriter();
-		pw.println(request.getServletContext().getRealPath("/"));
+		pw.println("http://"+request.getServerName()+":"+request.getServerPort()+request.getServletContext().getContextPath()+"/");
 		pw.close();
 	}
         

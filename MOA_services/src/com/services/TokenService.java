@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.HashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -30,8 +31,10 @@ public class TokenService extends BasicServlet
 			status = (GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")) != -1);
 		}
 		
-		JSONObject ret = new JSONObject();
-		ret.put("status", status);
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("status", status);
+		
+		JSONObject ret = new JSONObject(map);
 		PrintWriter pw = response.getWriter();
 		pw.println(ret.toJSONString());
 		pw.close();
@@ -60,8 +63,10 @@ public class TokenService extends BasicServlet
 			}
 		}
 		
-		JSONObject ret = new JSONObject();
-		ret.put("status", status);
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("status", status);
+		
+		JSONObject ret = new JSONObject(map);
 		PrintWriter pw = response.getWriter();
 		pw.println(ret.toJSONString());
 		pw.close();
