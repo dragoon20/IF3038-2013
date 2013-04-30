@@ -231,7 +231,7 @@ public class RestApi extends HttpServlet
 			
 			String id_task = request.getParameter("task_id");
 			boolean success = false;
-			if (((Task)(Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(id_task)}, new String[]{"integer"}, null))).getDeletable(MainApp.currentUserId(session)) && (MainApp.LoggedIn(session)))
+			if (((Task)(Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(id_task)}, new String[]{"integer"}, null))).getDeletable("TOKEN",0))
 			{
 				if (Task.getModel().delete("id_task = ?", new Object[]{Integer.parseInt(id_task)}, new String[]{"integer"})==1)
 				{
@@ -288,9 +288,9 @@ public class RestApi extends HttpServlet
 						map.put("id", tasks[i].getId_task());
 						map.put("done", tasks[i].isStatus());
 						map.put("deadline", sdf.format(tasks[i].getDeadline()));
-						map.put("deletable", tasks[i].getDeletable(MainApp.currentUserId(session)));
+						map.put("deletable", tasks[i].getDeletable("TOKEN", 0));
 						
-						Tag[] tags = tasks[i].getTags();
+						Tag[] tags = tasks[i].getTags("TOKEN",1);
 						List<String> str_tags = new ArrayList<String>();
 						for (Tag t : tags)
 						{
@@ -331,9 +331,9 @@ public class RestApi extends HttpServlet
 					map.put("id", tasks[i].getId_task());
 					map.put("done", tasks[i].isStatus());
 					map.put("deadline", sdf.format(tasks[i].getDeadline()));
-					map.put("deletable", tasks[i].getDeletable(MainApp.currentUserId(session)));
+					map.put("deletable", tasks[i].getDeletable("TOKEN", 0));
 					
-					Tag[] tags = tasks[i].getTags();
+					Tag[] tags = tasks[i].getTags("TOKEN",0);
 					List<String> str_tags = new ArrayList<String>();
 					for (Tag t : tags)
 					{
@@ -357,7 +357,7 @@ public class RestApi extends HttpServlet
 			int id_task = Integer.parseInt(request.getParameter("id_task"));
 			//$task = array();
 			Task task = (Task)Task.getModel().find("id_task = ? ", new Object[]{id_task}, new String[]{"integer"}, new String[]{"id_task", "nama_task", "status", "deadline"});
-			User[] users = task.getAssignee();
+			User[] users = task.getAssignee("TOKEN", 0);
 			List<Map<String, Object>> temp = new ArrayList<Map<String,Object>>();
 			for (User user : users)
 			{
@@ -368,7 +368,7 @@ public class RestApi extends HttpServlet
 			}
 			task.putData("asignee", temp);
 			
-			Tag[] tags = task.getTags();
+			Tag[] tags = task.getTags("TOKEN",0);
 			
 			
 				/*$task = Task::model()->find("id_task=".$_GET['id_task'], array("id_task","nama_task","status","deadline"));
@@ -454,7 +454,7 @@ public class RestApi extends HttpServlet
 			PrintWriter pw = response.getWriter();
 			JSONObject res = new JSONObject();
 			
-			Category[] raw = MainApp.currentUser(session).getCategories();
+			Category[] raw = MainApp.currentUser(session).getCategories("TOKEN");
 			
 			List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
 			for (Category cat : raw)
@@ -528,7 +528,7 @@ public class RestApi extends HttpServlet
 					res.put("categoryName", category.getNama_kategori());
 					
 					
-					Category[] raw = MainApp.currentUser(session).getCategories();
+					Category[] raw = MainApp.currentUser(session).getCategories("TOKEN");
 					
 					List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
 					for (Category cat : raw)
@@ -833,7 +833,7 @@ public class RestApi extends HttpServlet
 				List<String> suggestion = new ArrayList<String>();
 				if (("task".equals(type)) || (all))
 				{
-					Task[] tasks  = MainApp.currentUser(session).getTasksLike(q);
+					Task[] tasks  = MainApp.currentUser(session).getTasksLike(q,"TOKEN");
 					for (Task task : tasks)
 					{
 						if (!suggestion.contains(task.getNama_task()))
@@ -845,7 +845,7 @@ public class RestApi extends HttpServlet
 				
 				if (("category".equals(type)) || (all))
 				{
-					Category[] categories  = MainApp.currentUser(session).getCategoriesLike(q);
+					Category[] categories  = MainApp.currentUser(session).getCategoriesLike(q,"TOKEN");
 					for (Category category : categories)
 					{
 						if (!suggestion.contains(category.getNama_kategori()))
@@ -857,7 +857,7 @@ public class RestApi extends HttpServlet
 				
 				if (("user".equals(type)) || (all))
 				{
-					User[] users  = User.getModel().findAllLike(q);
+					User[] users  = User.getModel().findAllLike(q,"TOKEN");
 					for (User user : users)
 					{
 						if (!suggestion.contains(user.getUsername()))

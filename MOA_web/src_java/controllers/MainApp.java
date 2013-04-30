@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import models.DBSimpleRecord;
+import models.Tag;
 import models.Task;
 import models.User;
 import models.Comment;
@@ -78,7 +79,9 @@ public class MainApp extends HttpServlet
 		    	
 		    	String response = callRestfulWebService(serviceURL+"token/check_token", map, "", 0);
 		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(response);
-		    	status = (Boolean)resp_obj.get("status");
+                        
+		    	status = (Boolean) resp_obj.get("status");
+                       
     		} catch (Exception e)
     		{
     			e.printStackTrace();
@@ -499,7 +502,7 @@ public class MainApp extends HttpServlet
 			
 			Task real_task = (Task)Task.getModel().find("id_task = ?", new Object[]{task.getId_task()}, new String[]{"integer"}, null);
 			
-			if ((!real_task.isEmpty()) && (real_task.getEditable(MainApp.currentUserId(request.getSession()))))
+			if ((!real_task.isEmpty()) && (real_task.getEditable("TOKEN",0)))
 			{				
 				real_task.replaceData(task);
 				real_task.putData("attachments", attachments);
@@ -701,7 +704,32 @@ public class MainApp extends HttpServlet
     		response.sendRedirect("error");
     	}
 	}
+	public void dashboard_fake(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		PrintWriter pw = response.getWriter();
+		pw.println(request.getSession().getAttribute("token"));
+		pw.close();
+	}
 	
+	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		try {
+                    PrintWriter pw = response.getWriter();
+                    String token = request.getSession().getAttribute("token").toString();
+                    int id_task = Integer.parseInt(request.getParameter("id_task"));
+                    Task task = new Task();
+                    Tag [] tags = task.getTags(token, id_task);
+                    for(Tag tag : tags){
+                        pw.println("--------------");
+                        pw.println(tag.getTag_name());
+                        pw.println(tag.getId_tag());
+                    }
+                    pw.close();
+		}catch(Exception exc){
+			exc.printStackTrace();
+		}
+	}
+        
     private static String buildWebQuery(Map<String, String> parameters) throws Exception {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : parameters.entrySet()) {
