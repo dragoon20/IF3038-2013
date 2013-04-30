@@ -181,6 +181,46 @@ public class TaskService extends BasicServlet
 		}
 	}
 	
+	public void check_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		try
+		{
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				if (request.getParameter("id_task")!=null)
+				{
+					Task task = (Task)Task.getModel().find("id_task = ?", 
+							new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null);
+					boolean success = !task.isEmpty();
+					
+					JSONObject ret = new JSONObject();
+					ret.put("success", success);
+					PrintWriter pw = response.getWriter();
+					pw.print(ret.toJSONString());
+					pw.close();
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+			List<Map<String, String>> tags_val = new ArrayList<Map<String, String>>();
+			
+			JSONObject ret = new JSONObject();
+			ret.put("success", false);
+			PrintWriter pw = response.getWriter();
+			pw.print(ret.toJSONString());
+			pw.close();
+		}
+	}
+	
 	public void get_tags(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		try
@@ -483,96 +523,6 @@ public class TaskService extends BasicServlet
 				{
 					boolean success = ((Task)Task.getModel().find("id_task = ?", 
 							new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getDeletable(id_user);
-					Map<String, Object> map = new HashMap<String, Object>();
-					map.put("success", success);
-					JSONObject ret = new JSONObject(map);
-					
-					PrintWriter pw = response.getWriter();
-					pw.print(JSONValue.toJSONString(ret));
-				}
-				else
-				{
-					throw new Exception();
-				}
-			}
-			else
-			{
-				throw new Exception();
-			}
-		} catch(Exception e)
-		{
-			e.printStackTrace();
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("success", false);
-			JSONObject ret = new JSONObject(map);
-			
-			PrintWriter pw = response.getWriter();
-			pw.print(JSONValue.toJSONString(ret));
-		}
-	}
-	
-	public void add_assignee(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		try
-		{
-			int id_user;
-			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
-			{
-				if ((request.getParameter("id_task")!=null) && (request.getParameter("id_user")!=null) && 
-					(((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getEditable(id_user)) && 
-					(!((User)User.getModel().find("id_user = ?", new Object[]{Integer.parseInt(request.getParameter("id_user"))}, new String[]{"integer"}, null)).isEmpty()))
-				{
-					Connection conn = DBConnection.getConnection();
-					PreparedStatement prep = conn.prepareStatement("INSERT INTO `assign` (id_user, id_task) VALUES(?, ?)");
-					prep.setInt(1, Integer.parseInt(request.getParameter("id_user")));
-					prep.setInt(2, Integer.parseInt(request.getParameter("id_task")));
-					
-					boolean success = (prep.executeUpdate()==1);
-					Map<String, Object> map = new HashMap<String, Object>();
-					map.put("success", success);
-					JSONObject ret = new JSONObject(map);
-					
-					PrintWriter pw = response.getWriter();
-					pw.print(JSONValue.toJSONString(ret));
-				}
-				else
-				{
-					throw new Exception();
-				}
-			}
-			else
-			{
-				throw new Exception();
-			}
-		} catch(Exception e)
-		{
-			e.printStackTrace();
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("success", false);
-			JSONObject ret = new JSONObject(map);
-			
-			PrintWriter pw = response.getWriter();
-			pw.print(JSONValue.toJSONString(ret));
-		}
-	}
-	
-	public void add_tag(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		try
-		{
-			int id_user;
-			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
-			{
-				if ((request.getParameter("id_task")!=null) && (request.getParameter("id_tag")!=null) && 
-					(((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getEditable(id_user)) && 
-					(!((Tag)Tag.getModel().find("id_tag = ?", new Object[]{Integer.parseInt(request.getParameter("id_tag"))}, new String[]{"integer"}, null)).isEmpty()))
-				{
-					Connection conn = DBConnection.getConnection();
-					PreparedStatement prep = conn.prepareStatement("INSERT INTO `have_tags` (id_task, id_tag) VALUES(?, ?)");
-					prep.setInt(1, Integer.parseInt(request.getParameter("id_task")));
-					prep.setInt(2, Integer.parseInt(request.getParameter("id_tag")));
-					
-					boolean success = (prep.executeUpdate()==1);
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("success", success);
 					JSONObject ret = new JSONObject(map);

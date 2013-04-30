@@ -30,45 +30,7 @@ public class CategoryService extends BasicServlet
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public void add_new_category(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		try
-		{
-			int id_user;
-			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
-			{
-				if (("POST".equals(request.getMethod())) && (request.getParameter("nama_kategori")!=null))
-				{
-                                        Category kategori = new Category();
-                                        kategori.setNama_kategori(request.getParameter("nama_kategori"));
-                                        kategori.setId_user(id_user);
-                                        
-					if ((!kategori.checkValidity()) && (kategori.save()))
-					{
-						// return SOAP response
-					}
-					else
-					{
-						throw new Exception();
-					}
-				}
-				else
-				{
-					throw new Exception();
-				}
-			}
-			else
-			{
-				throw new Exception();
-			}
-		} catch(Exception e)
-		{
-			e.printStackTrace();
-			request.getRequestDispatcher("pages/error.jsp").forward(request, response);
-		}
-	}
-	
-        public void edit_category(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    public void edit_category(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		try
 		{
@@ -118,7 +80,7 @@ public class CategoryService extends BasicServlet
 		}
 	}
         
-      	public void delete_category(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    public void delete_category(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		try
 		{
@@ -204,7 +166,7 @@ public class CategoryService extends BasicServlet
 		}
 	}
      
-        public void get_deletable(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    public void get_deletable(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		try
 		{

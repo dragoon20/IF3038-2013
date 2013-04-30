@@ -57,13 +57,13 @@ public class User extends DBSimpleRecord
     
     public boolean save() 
     {
-    	Connection connection = DBConnection.getConnection();
         if (!this.data.containsKey("id_user"))
         {
             // new user
         	if (User.getModel().find("username = ? or email = ?", new Object[]{getUsername(), getEmail()}, new String[]{"string", "string"}, null).isEmpty())
             {
                 try {
+                	Connection connection = DBConnection.getConnection();
                     PreparedStatement statement = connection.prepareStatement
                     ("INSERT INTO `"+ User.getModel().GetTableName()+"` (username, email, fullname, avatar, birthdate, password) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                     // Parameters start with 1
@@ -112,6 +112,7 @@ public class User extends DBSimpleRecord
         	else
         	{
         		try {
+        			Connection connection = DBConnection.getConnection();
         			PreparedStatement statement = connection.prepareStatement
                         ("UPDATE `"+ User.getModel().GetTableName()+"` SET username = ?, email = ?, fullname = ?, avatar = ?, birthdate = ?, password = ? WHERE id_user = ?");
 	                // Parameters start with 1
