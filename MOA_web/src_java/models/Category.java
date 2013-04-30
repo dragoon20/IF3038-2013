@@ -4,13 +4,18 @@
  */
 package models;
 
+import controllers.MainApp;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 /**
  *
@@ -85,15 +90,40 @@ public class Category extends DBSimpleRecord{
         return false;
     }
     
-    public boolean getEditable(int id_user)
+    public boolean getEditable(int id_user, String token, String id_kategori)
     {
-    	return (!User.getModel().find("id_user IN (SELECT id_user FROM edit_kategori WHERE id_kategori = ? AND id_user = ? )", 
-    						new Object[]{getId_kategori(), id_user}, new String[]{"integer", "integer"}, null).isEmpty());
+            boolean editable = false;
+            try {
+			TreeMap<String, String> parameter = new TreeMap<String,String>();
+			parameter.put("token", token);
+			parameter.put("app_id", MainApp.appId);
+                        parameter.put("id_kategori", id_kategori);
+			String response = MainApp.callRestfulWebService(MainApp.serviceURL+"category/get_editable", parameter, "", 0);
+			Object obj = JSONValue.parse(response);
+                        JSONObject js_obj = (JSONObject) obj;
+                        editable = (Boolean)(js_obj.get("success"));
+            }catch(Exception exc){
+                  exc.printStackTrace();
+            }
+          return editable;  
     }
     
-    public boolean getDeletable(int id_user)
+    public boolean getDeletable(int id_user, String token, String id_kategori)
     {
-    	return (getId_user() == id_user);
+    	boolean deletable = false;
+            try {
+			TreeMap<String, String> parameter = new TreeMap<String,String>();
+			parameter.put("token", token);
+			parameter.put("app_id", MainApp.appId);
+                        parameter.put("id_kategori", id_kategori);
+			String response = MainApp.callRestfulWebService(MainApp.serviceURL+"category/get_deletable", parameter, "", 0);
+			Object obj = JSONValue.parse(response);
+                        JSONObject js_obj = (JSONObject) obj;
+                        deletable = (Boolean)(js_obj.get("success"));
+            }catch(Exception exc){
+                  exc.printStackTrace();
+            }
+          return deletable;  
     }
     
     public int getId_kategori() {

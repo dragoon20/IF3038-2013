@@ -35,5 +35,6 @@ form_login.onsubmit = function(e)
 	request.open("POST", "api/login", true);
 	request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	request.send(data);
+        
 	return false;
 };
