@@ -111,33 +111,33 @@ public class CommentService extends BasicServlet
     {
         try
         {
-                if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+            if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+            {
+                if ((request.getParameter("id_komentar")!=null))
                 {
-                        if ((request.getParameter("id_komentar")!=null))
-                        {
-                               Comment komentar = (Comment)Comment.getModel().find("id_komentar = ?", new Object[]{Integer.parseInt(request.getParameter("id_komentar"))}, new String[]{"integer"}, null);
-                               User user = komentar.getUser();
-                               Map<String, String> map = new HashMap<String,String>();
-                               
-                               map.put("id_user", Integer.toString(user.getId_user()));
-                               map.put("user_name", user.getUsername());
-                               map.put("fullname",user.getFullname());
-                               map.put("avatar",user.getAvatar());
-                               JSONObject ret = new JSONObject(map);
-				
-                               PrintWriter pw = response.getWriter();
-                               pw.print(ret.toJSONString());
-                               
-                        }
-                        else
-                        {
-                                throw new Exception();
-                        }
+                   Comment komentar = (Comment)Comment.getModel().find("id_komentar = ?", new Object[]{Integer.parseInt(request.getParameter("id_komentar"))}, new String[]{"integer"}, null);
+                   User user = komentar.getUser();
+                   Map<String, String> map = new HashMap<String,String>();
+                   
+                   map.put("id_user", Integer.toString(user.getId_user()));
+                   map.put("user_name", user.getUsername());
+                   map.put("fullname",user.getFullname());
+                   map.put("avatar",user.getAvatar());
+                   JSONObject ret = new JSONObject(map);
+	
+                   PrintWriter pw = response.getWriter();
+                   pw.print(ret.toJSONString());
+                       
                 }
                 else
                 {
                         throw new Exception();
                 }
+            }
+            else
+            {
+                    throw new Exception();
+            }
         } catch(Exception e)
         {
                 Map<String, String> map = new HashMap<String, String>();

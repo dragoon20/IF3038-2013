@@ -34,6 +34,9 @@ import models.DBSimpleRecord;
 import models.Task;
 import models.User;
 
+import org.apache.cxf.interceptor.LoggingInInterceptor;
+import org.apache.cxf.interceptor.LoggingOutInterceptor;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileItemFactory;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
@@ -41,6 +44,7 @@ import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
 
 /**
  * Servlet implementation class MainApp
@@ -62,6 +66,11 @@ public class MainApp extends HttpServlet
         super();
     }
 
+    public static String token(HttpSession session)
+    {
+    	return (String)session.getAttribute("token");
+    }
+    
     public static boolean LoggedIn(HttpSession session)
 	{
     	boolean status = false;
@@ -226,7 +235,7 @@ public class MainApp extends HttpServlet
 	{
 		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
-			User user = new User();
+			HashMap<String, String> params = new HashMap<String, String>();
 			
 			FileItem avatar = null;
 			boolean check = false;
@@ -245,79 +254,52 @@ public class MainApp extends HttpServlet
 			{
 				if (fi.isFormField())
 				{
-					if ("birthdate".equals(fi.getFieldName()))
-					{
-						try {
-							user.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					else
-					{
-						user.putData(fi.getFieldName(), fi.getString());
-					}
+					params.put(fi.getFieldName(), fi.getString());
 				}
 				else
 				{
 					if ("avatar".equals(fi.getFieldName()))
 					{
 						check = true;
-						user.setAvatar(fi.getName());
 						avatar = fi;
+						String extension = avatar.getName().split("\\.")[avatar.getName().split("\\.").length-1];
+						String new_filename = MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
+						params.put("avatar", new_filename);
 					}
 				}
 			}
 			
-			boolean temperror = user.checkValidity();
+			JaxWsProxyFactoryBean fb = new JaxWsProxyFactoryBean();
+
+			fb.setServiceClass(com.soap.AddService.class);
+	        fb.setAddress(serviceURL+"services/AddService?wsdl");
+	        fb.getInInterceptors().add(new LoggingInInterceptor());
+	        fb.getOutInterceptors().add(new LoggingOutInterceptor());
+	        com.soap.AddService client = (com.soap.AddService) fb.create();
+	        boolean result = client.add_new_user(params.get("username"), params.get("email"), params.get("password"), 
+	        									params.get("fullname"), params.get("avatar"), params.get("birthdate"));
 			
-			if ((temperror) || (!check))
+			if ((check) && (result))
 			{
-				// TODO print error screen
-				PrintWriter pw = response.getWriter();
-				pw.println("error1");
-				pw.close();
+				InputStream in = avatar.getInputStream();
+				FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+params.get("avatar")));
+				
+				int read = 0;
+				byte[] bytes = new byte[1024];
+				while ((read = in.read(bytes)) != -1)
+				{
+					out.write(bytes, 0, read);
+				}
+				out.close();
+				
+				response.sendRedirect("dashboard_fake");
 			}
 			else
 			{
-				String extension = avatar.getName().split("\\.")[avatar.getName().split("\\.").length-1];
-				String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
-				user.setAvatar(new_filename);
-				user.hashPassword();
-				if (user.save())
-				{
-					InputStream in = avatar.getInputStream();
-					FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+new_filename));
-					
-					int read = 0;
-					byte[] bytes = new byte[1024];
-					while ((read = in.read(bytes)) != -1)
-					{
-						out.write(bytes, 0, read);
-					}
-					out.close();
-					
-					HttpSession session = request.getSession();
-					session.setAttribute("user_id", user.getId_user());
-					
-					User u = new User();
-					u.setId_user(user.getId_user());
-					u.setFullname(user.getFullname());
-					u.setUsername(user.getUsername());
-					u.setEmail(user.getEmail());
-					u.setAvatar(user.getAvatar());
-					session.setAttribute("current_user", u);
-					
-					response.sendRedirect("dashboard_fake");
-				}
-				else
-				{
-					// TODO print error screen
-					PrintWriter pw = response.getWriter();
-					pw.println("error2");
-					pw.close();
-				}
+				// TODO print error screen
+				PrintWriter pw = response.getWriter();
+				pw.println("error2");
+				pw.close();
 			}
 		}
 		else
@@ -352,9 +334,7 @@ public class MainApp extends HttpServlet
 
 		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
-			Task task = new Task();
-			task.setId_user(MainApp.currentUserId(request.getSession()));
-			
+			HashMap<String, Object> params = new HashMap<String, Object>();
 			List<Map<String, Object>> attachments = new ArrayList<Map<String,Object>>();
 			FileItemFactory factory = new DiskFileItemFactory();
 			ServletFileUpload upload = new ServletFileUpload(factory);
@@ -370,27 +350,14 @@ public class MainApp extends HttpServlet
 			for (FileItem fi : items)
 			{
 				if (fi.isFormField())
-				{/**
-				     * @deprecated
-				     * @param session
-				     * @return
-				     */
-					if ("deadline".equals(fi.getFieldName()))
+				{
+					if ("id_kategori".equals(fi.getFieldName()))
 					{
-						try {
-							task.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					else if ("id_kategori".equals(fi.getFieldName()))
-					{
-						task.putData(fi.getFieldName(), Integer.parseInt(fi.getString()));
+						params.put(fi.getFieldName(), Integer.parseInt(fi.getString()));
 					}
 					else
 					{
-						task.putData(fi.getFieldName(), fi.getString());
+						params.put(fi.getFieldName(), fi.getString());
 					}
 				}
 				else
@@ -400,30 +367,56 @@ public class MainApp extends HttpServlet
 					String name = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
 					tempmap.put("attachment", name);
 					tempmap.put("temp", fi.getInputStream());
-					tempmap.put("location", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
+					tempmap.put("location", request.getServletContext().getRealPath("/")+"upload/attachments/"+name);
 					attachments.add(tempmap);
 				}
 			}
-			task.putData("attachments", attachments);
-			task.setId_user(MainApp.currentUserId(request.getSession()));
 			
-			boolean temperror = task.checkValidity();
-			if (temperror)
+			JaxWsProxyFactoryBean fb = new JaxWsProxyFactoryBean();
+
+			fb.setServiceClass(com.soap.AddService.class);
+	        fb.setAddress(serviceURL+"services/AddService?wsdl");
+	        fb.getInInterceptors().add(new LoggingInInterceptor());
+	        fb.getOutInterceptors().add(new LoggingOutInterceptor());
+	        com.soap.AddService client = (com.soap.AddService) fb.create();
+	        int result = client.add_new_task(token(request.getSession()), appId, (String)params.get("nama_task"), 
+	        									(String)params.get("deadline"), (Integer)params.get("id_kategori"));
+			
+			if (result!=-1)
 			{
-				// TODO go to error page
-				System.out.println("error1");
+				String[] assignees = ((String)params.get("assignee")).split(",");
+				for (String assignee : assignees)
+				{
+					client.add_assignee(token(request.getSession()), appId, result, assignee);
+				}
+				String[] tags = ((String)params.get("tag")).split(",");
+				for (String tag : tags)
+				{
+					client.add_tag(token(request.getSession()), appId, result, tag);
+				}
+				
+				for (Map<String, Object> attachment : attachments)
+				{
+					if (client.add_new_attachment(token(request.getSession()), appId, result, MainApp.fullPath(request.getSession())+"upload/attachments/"+attachment.get("attachment")))
+					{
+						FileOutputStream out = new FileOutputStream(new File((String)attachment.get("location")));
+						
+						InputStream in = (InputStream)attachment.get("temp");
+						int read = 0;
+						byte[] bytes = new byte[1024];
+						while ((read = in.read(bytes)) != -1)
+						{
+							out.write(bytes, 0, read);
+						}
+						out.close();
+					}
+				}
+				response.sendRedirect("tugas?id="+result);
 			}
 			else
 			{
-				if (task.save())
-				{
-					response.sendRedirect("tugas?id="+task.getId_task());
-				}
-				else
-				{
-					// TODO got to error page
-					System.out.println("error2");
-				}
+				// TODO got to error page
+				System.out.println("error2");
 			}
 		}
 		else
@@ -442,8 +435,7 @@ public class MainApp extends HttpServlet
 
 		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
-			Task task = new Task();
-			
+			HashMap<String, Object> params = new HashMap<String, Object>();
 			List<Map<String, Object>> attachments = new ArrayList<Map<String,Object>>();
 			FileItemFactory factory = new DiskFileItemFactory();
 			ServletFileUpload upload = new ServletFileUpload(factory);
@@ -460,26 +452,17 @@ public class MainApp extends HttpServlet
 			{
 				if (fi.isFormField())
 				{
-					if ("deadline".equals(fi.getFieldName()))
+					if ("id_task".equals(fi.getFieldName()))
 					{
-						try {
-							task.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					else if ("id_task".equals(fi.getFieldName()))
-					{
-						task.putData(fi.getFieldName(), Integer.parseInt(fi.getString()));
+						params.put(fi.getFieldName(), Integer.parseInt(fi.getString()));
 					}
 					else if ("id_kategori".equals(fi.getFieldName()))
 					{
-						task.putData(fi.getFieldName(), Integer.parseInt(fi.getString()));
+						params.put(fi.getFieldName(), Integer.parseInt(fi.getString()));
 					}
 					else
 					{
-						task.putData(fi.getFieldName(), fi.getString());
+						params.put(fi.getFieldName(), fi.getString());
 					}
 				}
 				else
@@ -494,30 +477,120 @@ public class MainApp extends HttpServlet
 				}
 			}
 			
-			Task real_task = (Task)Task.getModel().find("id_task = ?", new Object[]{task.getId_task()}, new String[]{"integer"}, null);
 			
-			if ((!real_task.isEmpty()) && (real_task.getEditable(MainApp.currentUserId(request.getSession()))))
-			{				
-				real_task.replaceData(task);
-				real_task.putData("attachments", attachments);
+			boolean check_task = false;
+			try {
+				HashMap<String, String> parameter = new HashMap<String,String>();
+				parameter.put("token", token(request.getSession()));
+				parameter.put("app_id", appId);
+				parameter.put("id_task", (String)params.get("id_task"));
+				String responseString = callRestfulWebService(serviceURL+"task/check_task", parameter, "", 0);
+				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+				check_task = (Boolean)ret.get("success");
+			} catch(Exception exc) {
+				exc.printStackTrace();
+			}
+			
+			boolean editable = false;
+			try {
+				HashMap<String, String> parameter = new HashMap<String,String>();
+				parameter.put("token", token(request.getSession()));
+				parameter.put("app_id", appId);
+				parameter.put("id_task", (String)params.get("id_task"));
+				String responseString = callRestfulWebService(serviceURL+"task/get_editable", parameter, "", 0);
+				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+				editable = (Boolean)ret.get("success");
+			} catch(Exception exc) {
+				exc.printStackTrace();
+			}
+			
+			if ((check_task) && (editable))
+			{
+				boolean success = false;
+				try {
+					HashMap<String, String> parameter = new HashMap<String,String>();
+					parameter.put("token", token(request.getSession()));
+					parameter.put("app_id", appId);
+					parameter.put("id_task", (String)params.get("id_task"));
+					parameter.put("nama_task", (String)params.get("nama_task"));
+					parameter.put("deadline", (String)params.get("deadline"));
+					parameter.put("id_kategori", (String)params.get("id_kategori"));
+					
+					String responseString = callRestfulWebService(serviceURL+"task/update_task", parameter, "", 0);
+					JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+					success = (Boolean)ret.get("success");
+				} catch(Exception exc) {
+					exc.printStackTrace();
+				}
 				
-				boolean temperror = real_task.checkValidity();
-				if (temperror)
+				if (success)
 				{
-					// TODO go to error page
-					System.out.println("error1");
+					JaxWsProxyFactoryBean fb = new JaxWsProxyFactoryBean();
+
+					fb.setServiceClass(com.soap.AddService.class);
+			        fb.setAddress(serviceURL+"services/AddService?wsdl");
+			        fb.getInInterceptors().add(new LoggingInInterceptor());
+			        fb.getOutInterceptors().add(new LoggingOutInterceptor());
+			        com.soap.AddService client = (com.soap.AddService) fb.create();
+					
+			        try {
+						HashMap<String, String> parameter = new HashMap<String,String>();
+						parameter.put("token", token(request.getSession()));
+						parameter.put("app_id", appId);
+						parameter.put("id_task", (String)params.get("id_task"));
+						
+						String responseString = callRestfulWebService(serviceURL+"task/delete_assignees", parameter, "", 0);
+						JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+						success = (Boolean)ret.get("success");
+					} catch(Exception exc) {
+						exc.printStackTrace();
+					}
+					String[] assignees = ((String)params.get("assignee")).split(",");
+					for (String assignee : assignees)
+					{
+						client.add_assignee(token(request.getSession()), appId, (Integer)params.get("id_task"), assignee);
+					}
+					
+					try {
+						HashMap<String, String> parameter = new HashMap<String,String>();
+						parameter.put("token", token(request.getSession()));
+						parameter.put("app_id", appId);
+						parameter.put("id_task", (String)params.get("id_task"));
+						
+						String responseString = callRestfulWebService(serviceURL+"task/delete_tags", parameter, "", 0);
+						JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+						success = (Boolean)ret.get("success");
+					} catch(Exception exc) {
+						exc.printStackTrace();
+					}
+					String[] tags = ((String)params.get("tag")).split(",");
+					for (String tag : tags)
+					{
+						client.add_tag(token(request.getSession()), appId, (Integer)params.get("id_task"), tag);
+					}
+					
+					for (Map<String, Object> attachment : attachments)
+					{
+						if (client.add_new_attachment(token(request.getSession()), appId, (Integer)params.get("id_task"), MainApp.fullPath(request.getSession())+"upload/attachments/"+attachment.get("attachment")))
+						{
+							FileOutputStream out = new FileOutputStream(new File((String)attachment.get("location")));
+							
+							InputStream in = (InputStream)attachment.get("temp");
+							int read = 0;
+							byte[] bytes = new byte[1024];
+							while ((read = in.read(bytes)) != -1)
+							{
+								out.write(bytes, 0, read);
+							}
+							out.close();
+						}
+					}
+					response.sendRedirect("tugas?id="+(Integer)params.get("id_task"));
 				}
 				else
 				{
-					if (real_task.save())
-					{
-						response.sendRedirect("tugas?id="+real_task.getId_task());
-					}
-					else
-					{
-						// TODO got to error page
-						System.out.println("error2");
-					}
+					// TODO got to error page
+					System.out.println("error2");
 				}
 			}
 			else
@@ -699,30 +772,7 @@ public class MainApp extends HttpServlet
     	}
 	}
 	
-	public void dashboard_fake(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		PrintWriter pw = response.getWriter();
-		pw.println(request.getSession().getAttribute("token"));
-		pw.close();
-	}
-	
-	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		try {
-			String token = request.getParameter("token");
-			TreeMap<String, String> parameter = new TreeMap<String,String>();
-			parameter.put("token", token);
-			parameter.put("app_id", MainApp.appId);
-			String responseString = callRestfulWebService("http://localhost:8080/MOA_services/user/get_created_tasks", parameter, "", 0);
-			PrintWriter pw = response.getWriter();
-			pw.println(responseString);
-			pw.close();
-		}catch(Exception exc){
-			exc.printStackTrace();
-		}
-	}
-        
-    private static String buildWebQuery(Map<String, String> parameters) throws Exception {
+	private static String buildWebQuery(Map<String, String> parameters) throws Exception {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : parameters.entrySet()) {
             String key = URLEncoder.encode(entry.getKey(), "UTF-8");
@@ -774,4 +824,35 @@ public class MainApp extends HttpServlet
 
         return response;
     }
+    
+    public void dashboard_fake(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		PrintWriter pw = response.getWriter();
+		pw.println(request.getSession().getAttribute("token"));
+		pw.close();
+	}
+	
+	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		try {
+			String token = request.getParameter("token");
+			TreeMap<String, String> parameter = new TreeMap<String,String>();
+			parameter.put("token", token);
+			parameter.put("app_id", MainApp.appId);
+			String responseString = callRestfulWebService("http://localhost:8080/MOA_services/user/get_created_tasks", parameter, "", 0);
+			PrintWriter pw = response.getWriter();
+			pw.println(responseString);
+			pw.close();
+		}catch(Exception exc){
+			exc.printStackTrace();
+		}
+	}
+	
+	public void test2(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		PrintWriter pw = response.getWriter();
+		pw.println(request.getServletContext().getRealPath("/"));
+		pw.close();
+	}
+        
 }

@@ -24,36 +24,6 @@ import com.template.BasicServlet;
 public class TagService extends BasicServlet 
 {
 	private static final long serialVersionUID = 1L;
-       
-	public void add_new_tag(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		try
-		{
-			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
-			{
-				if (request.getParameter("tag_name")!=null)
-				{
-					Connection conn = DBConnection.getConnection();
-					PreparedStatement prep = conn.prepareStatement("INSERT INTO `tag` (tag_name) VALUES(?)");
-					prep.setString(1, request.getParameter("tag_name"));
-					
-					// return SOAP messages
-				}
-				else
-				{
-					throw new Exception();
-				}
-			}
-			else
-			{
-				throw new Exception();
-			}
-		} catch(Exception e)
-		{
-			e.printStackTrace();
-			// return SOAP messages
-		}
-	}
 	
 	public void delete_tag(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{

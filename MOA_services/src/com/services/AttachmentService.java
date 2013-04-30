@@ -26,39 +26,6 @@ public class AttachmentService extends BasicServlet
 {
 	private static final long serialVersionUID = 1L;
     
-	public void add_new_attachment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		try
-		{
-			int id_user;
-			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
-			{
-				if ((request.getParameter("id_task")!=null) && (request.getParameter("attachment")!=null) && 
-					(((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getEditable(id_user)))
-				{
-					Connection conn = DBConnection.getConnection();
-					PreparedStatement prep = conn.prepareStatement("INSERT INTO `task_attachment` (id_task, attachment) VALUES(?, ?)");
-					prep.setInt(1, Integer.parseInt(request.getParameter("id_task")));
-					prep.setString(2, request.getParameter("attachment"));
-					
-					// return SOAP messages
-				}
-				else
-				{
-					throw new Exception();
-				}
-			}
-			else
-			{
-				throw new Exception();
-			}
-		} catch(Exception e)
-		{
-			e.printStackTrace();
-			// return SOAP messages
-		}
-	}
-	
 	public void delete_attachment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		try

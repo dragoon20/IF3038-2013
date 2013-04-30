@@ -5,8 +5,7 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
-    
-    <jaxws:endpoint id="hello"
-        implementor="com.test.HelloImpl" address="/Hello" />
+	<jaxws:endpoint id="add_service"
+        implementor="com.soap.AddServiceImpl" address="/AddService" />
 
 </beans>
