@@ -672,35 +672,53 @@ public class MainApp extends HttpServlet
 	
 	public void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		boolean status = false;
-		HttpSession session = request.getSession();
-    	if (session.getAttribute("token")!=null)
-    	{
-    		try
-    		{
-		    	HashMap<String, String> map = new HashMap<String, String>();
-		    	map.put("token", (String)session.getAttribute("token"));
-		    	map.put("app_id", appId);
-		    	
-		    	String resp = callRestfulWebService(serviceURL+"token/logout", map, "", 0);
-		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(resp);
-		    	status = (Boolean)resp_obj.get("status");
-    		} catch (Exception e)
-    		{
-    			e.printStackTrace();
-    		}
-    	}
-		
-    	if (status)
-    	{
-			session.removeAttribute("token");
-			response.sendRedirect("index");
-    	}
-    	else
-    	{
-    		response.sendRedirect("error");
-    	}
+            boolean status = false;
+            HttpSession session = request.getSession();
+            if (session.getAttribute("token")!=null)
+            {
+                    try
+                    {
+                            HashMap<String, String> map = new HashMap<String, String>();
+                            map.put("token", (String)session.getAttribute("token"));
+                            map.put("app_id", appId);
+
+                            String resp = callRestfulWebService(serviceURL+"token/logout", map, "", 0);
+                            JSONObject resp_obj = (JSONObject)JSONValue.parse(resp);
+                            status = (Boolean)resp_obj.get("status");
+                    } catch (Exception e)
+                    {
+                            e.printStackTrace();
+                    }
+            }
+
+            if (status)
+            {
+                            session.removeAttribute("token");
+                            response.sendRedirect("index");
+            }
+            else
+            {
+                    response.sendRedirect("error");
+            }
 	}
+        
+        public void dashboard_fake(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+      {
+        PrintWriter pw = response.getWriter();
+        pw.println(request.getSession().getAttribute("token"));
+        pw.close();
+      }
+
+      public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+      {
+                Comment komen = new Comment();
+                Comment[] arraykomen = komen.getLatest(request.getParameter("id_task"), request.getParameter("timestamp"),request.getParameter("token"));
+                PrintWriter pw = response.getWriter();
+                for (int i = 0; i< arraykomen.length; i++){
+                    pw.print(arraykomen[i].getId_komentar());
+                }
+                pw.close();
+      }
 	
     private static String buildWebQuery(Map<String, String> parameters) throws Exception {
         StringBuilder sb = new StringBuilder();

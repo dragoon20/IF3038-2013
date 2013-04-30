@@ -462,7 +462,7 @@ public class RestApi extends HttpServlet
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("nama_kategori", cat.getNama_kategori());
 				map.put("id", cat.getId_kategori());
-				map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
+				//map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
 				//map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
 				
 				result.add(map);
@@ -536,7 +536,7 @@ public class RestApi extends HttpServlet
 						Map<String, Object> map = new HashMap<String, Object>();
 						map.put("nama_kategori", cat.getNama_kategori());
 						map.put("id", cat.getId_kategori());
-						map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
+						//map.put("canDeleteCategory", cat.getDeletable(MainApp.currentUserId(session)));
 						//map.put("canEditCategory", cat.getEditable(MainApp.currentUserId(session)));
 						
 						result.add(map);
@@ -568,13 +568,13 @@ public class RestApi extends HttpServlet
 				int id_kategori = Integer.parseInt(request.getParameter("category_id"));
 				boolean success = false;
 				
-				if (((Category)Category.getModel().find("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"}, null)).getDeletable(MainApp.currentUserId(session)))
+				/*if (((Category)Category.getModel().find("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"}, null)).getDeletable(MainApp.currentUserId(session)))
 				{
 					if (Category.getModel().delete("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"})==1)
 					{
 						success = true;
 					}
-				}
+				}*/
 				
 				res.put("success", success);
 				pw.println(res.toJSONString());
