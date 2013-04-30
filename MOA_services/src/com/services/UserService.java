@@ -192,7 +192,7 @@ public class UserService extends BasicServlet
                                 }
 
                             PrintWriter pw = response.getWriter();
-                            pw.println(listOfTask);
+                            pw.println(JSONValue.toJSONString(listOfTask));
                             pw.close();
 			}
 			else
@@ -233,7 +233,7 @@ public class UserService extends BasicServlet
                                 }
 
                             PrintWriter pw = response.getWriter();
-                            pw.println(listOfCategorys);
+                            pw.println(JSONValue.toJSONString(listOfCategorys));
                             pw.close();
 			}
 			else
@@ -282,7 +282,7 @@ public class UserService extends BasicServlet
                                     }
 
                                 PrintWriter pw = response.getWriter();
-                                pw.println(listOfTask);
+                                pw.println(JSONValue.toJSONString(listOfTask));
                                 pw.close();
 			}
 			else
@@ -327,7 +327,7 @@ public class UserService extends BasicServlet
                                     }
 
                                 PrintWriter pw = response.getWriter();
-                                pw.println(listOfTask);
+                                pw.println(JSONValue.toJSONString(listOfTask));
                                 pw.close();
                             }else{
                                 throw new Exception();
@@ -372,7 +372,7 @@ public class UserService extends BasicServlet
                                     }
 
                                 PrintWriter pw = response.getWriter();
-                                pw.println(listOfCategorys);
+                                pw.println(JSONValue.toJSONString(listOfCategorys));
                                 pw.close();
                             }else{
                                 throw new Exception();
@@ -417,12 +417,13 @@ public class UserService extends BasicServlet
                                             map.put("fullname",""+usr.getFullname());
                                             map.put("avatar",""+usr.getAvatar());
                                             map.put("birthdate",""+usr.getBirthdate());
+                                            map.put("password",""+usr.getPassword());
                                             
                                             listOfUser.add(map);
                                     }
 
                                 PrintWriter pw = response.getWriter();
-                                pw.println(listOfUser);
+                                pw.println(JSONValue.toJSONString(listOfUser));
                                 pw.close();
                             }else{
                                 throw new Exception();
@@ -466,7 +467,7 @@ public class UserService extends BasicServlet
                                 map.put("birthdate",""+usr.getBirthdate());
 
                                 PrintWriter pw = response.getWriter();
-                                pw.println(map);
+                                pw.println(JSONValue.toJSONString(map));
                                 pw.close();
                             }else{
                                 throw new Exception();

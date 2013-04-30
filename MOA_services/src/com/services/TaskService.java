@@ -245,12 +245,12 @@ public class TaskService extends BasicServlet
 				}
 				else
 				{
-					throw new Exception();
+					throw new Exception("ID task tidak ada");
 				}
 			}
 			else
 			{
-				throw new Exception();
+				throw new Exception("token / app id tidak ada");
 			}
 		} catch(Exception e)
 		{
@@ -409,6 +409,7 @@ public class TaskService extends BasicServlet
 						
 						map.put("user", map_user);
 						map.put("comment", comment.getKomentar());
+                                                map.put("timestamp", comment.getTimestamp());
 						comments_val.add(map);
 					}
 					

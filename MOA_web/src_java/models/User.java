@@ -22,6 +22,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import controllers.MainApp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 /**
  * 
@@ -178,101 +180,305 @@ public class User extends DBSimpleRecord
     public Task[] getCreatedTasks(String token)
     {
     	try {
-			TreeMap<String, String> parameter = new TreeMap<String,String>();
-			parameter.put("token", token);
-			parameter.put("app_id", MainApp.appId);
-			String response = MainApp.callRestfulWebService("http://localhost:8088/MOA_services/user/get_created_tasks", parameter, "", 0);
-			JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
-			for (Object obj : resp_obj)
-			{
-				JSONObject js_obj = (JSONObject) obj;
-				Task t = new Task();
-				t.setNama_task((String)js_obj.get("nama_task"));
-			}
-		}catch(Exception exc){
-			
-		}
-    	List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("id_task IN (SELECT id_task FROM have_task WHERE id_user=?)", new Object[]{getId_user()}, new String[]{"integer"}, null));
-    	return list.toArray(new Task[list.size()]);
+            TreeMap<String, String> parameter = new TreeMap<String,String>();
+            parameter.put("token", token);
+            parameter.put("app_id", MainApp.appId);
+            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_created_tasks", parameter, "", 0);
+            JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+            ArrayList<Task> listOfTask = new ArrayList<Task>();
+            for (Object obj : resp_obj)
+            {
+                    JSONObject js_obj = (JSONObject) obj;
+                    Task tsk = new Task();
+                    tsk.setNama_task(js_obj.get("nama_task").toString());
+                    tsk.setDeadline(Date.valueOf(js_obj.get("deadline").toString()));
+                    tsk.setId_kategori(Integer.valueOf(js_obj.get("id_kategori").toString()));
+                    tsk.setId_task(Integer.valueOf(js_obj.get("id_task").toString()));
+                    tsk.setId_user(Integer.valueOf(js_obj.get("id_User").toString()));
+                    tsk.setStatus(Boolean.valueOf(js_obj.get("status").toString()));
+                    listOfTask.add(tsk);
+            }
+            Task [] tasks = new Task[listOfTask.size()];
+            int i = 0;
+            for(Task tsk : listOfTask){
+                tasks[i] = tsk;
+                i++;
+            }
+            return  tasks;
+        }catch(Exception exc){
+            exc.printStackTrace();
+            return null;
+        }
     }
     
-    public Task[] getAssignedTasks()
+    public Task[] getAssignedTasks(String token)
     {
-    	List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("id_task IN (SELECT id_task FROM assign WHERE id_user=?) OR id_user=?", new Object[]{getId_user(), getId_user()}, new String[]{"integer", "integer"}, null));
-    	return list.toArray(new Task[list.size()]);
+    	try {
+            TreeMap<String, String> parameter = new TreeMap<String,String>();
+            parameter.put("token", token);
+            parameter.put("app_id", MainApp.appId);
+            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_assigned_tasks", parameter, "", 0);
+            JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+            ArrayList<Task> listOfTask = new ArrayList<Task>();
+            for (Object obj : resp_obj)
+            {
+                    JSONObject js_obj = (JSONObject) obj;
+                    Task tsk = new Task();
+                    tsk.setNama_task((String)js_obj.get("nama_task"));
+                    tsk.setDeadline(Date.valueOf(js_obj.get("deadline").toString()));
+                    tsk.setId_kategori(Integer.parseInt(js_obj.get("id_kategori").toString()));
+                    tsk.setId_task(Integer.parseInt(js_obj.get("id_task").toString()));
+                    tsk.setId_user(Integer.parseInt(js_obj.get("id_user").toString()));
+                    tsk.setStatus(Boolean.parseBoolean(js_obj.get("status").toString()));
+                    listOfTask.add(tsk);
+            }
+            
+            Task [] tasks = new Task[listOfTask.size()];
+            int i = 0;
+            for(Task tsk : listOfTask){
+                tasks[i] = tsk;
+                i++;
+            }
+            return  tasks;
+        }catch(Exception exc){
+            exc.printStackTrace();
+            return null;
+        }
     }
         
-    public Category[] getCategories()
+    public Category[] getCategories(String token)
     {
-    	List<DBSimpleRecord> list = Arrays.asList(Category.getModel().findAll(
-			"(id_user=? OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user=?) "+
-			"OR id_kategori IN (SELECT id_kategori FROM "+Task.getTableName()+" AS t LEFT OUTER JOIN assign AS a "+
-			"ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? ))", 
-			new Object[]{getId_user(), getId_user(), getId_user(), getId_user()}, 
-			new String[]{"integer", "integer", "integer", "integer"}, null));
-		return list.toArray(new Category[list.size()]);
+    	try {
+            TreeMap<String, String> parameter = new TreeMap<String,String>();
+            parameter.put("token", token);
+            parameter.put("app_id", MainApp.appId);
+            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_categories", parameter, "", 0);
+            JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+            ArrayList<Category> listOfCategory = new ArrayList<Category>();
+            for (Object obj : resp_obj)
+            {
+                    JSONObject js_obj = (JSONObject) obj;
+                    Category ctg = new Category();
+                    ctg.setId_kategori(Integer.valueOf(js_obj.get("id_kategori").toString()));
+                    ctg.setId_user(Integer.valueOf(js_obj.get("id_user").toString()));
+                    ctg.setNama_kategori(String.valueOf(js_obj.get("nama_kategori")));
+                    listOfCategory.add(ctg);
+            }
+            Category [] ctgs = new Category[listOfCategory.size()];
+            int i = 0;
+            for(Category ctg : listOfCategory){
+                ctgs[i] = ctg;
+                i++;
+            }
+            return  ctgs;
+        }catch(Exception exc){
+            exc.printStackTrace();
+            return null;
+        }
     }
     
-    public Task[] getTasks()
+    public Task[] getTasks(String token)
     {
-    	List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("(id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+
-    			" WHERE id_user=? OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user=?) "+
-    			"OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
-    			"ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? )))", 
-    			new Object[]{getId_user(), getId_user(), getId_user(), getId_user()}, 
-    			new String[]{"integer", "integer", "integer", "integer"}, null));
-    	return list.toArray(new Task[list.size()]);
+    	try {
+            TreeMap<String, String> parameter = new TreeMap<String,String>();
+            parameter.put("token", token);
+            parameter.put("app_id", MainApp.appId);
+            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_tasks", parameter, "", 0);
+            JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+            ArrayList<Task> listOfTask = new ArrayList<Task>();
+            for (Object obj : resp_obj)
+            {
+                    JSONObject js_obj = (JSONObject) obj;
+                    Task tsk = new Task();
+                    tsk.setNama_task((String)js_obj.get("nama_task"));
+                    tsk.setDeadline(Date.valueOf(js_obj.get("deadline").toString()));
+                    tsk.setId_kategori(Integer.parseInt(js_obj.get("id_kategori").toString()));
+                    tsk.setId_task(Integer.parseInt(js_obj.get("id_task").toString()));
+                    tsk.setId_user(Integer.parseInt(js_obj.get("id_user").toString()));
+                    tsk.setStatus(Boolean.parseBoolean(js_obj.get("status").toString()));
+                    listOfTask.add(tsk);
+            }
+            
+            Task [] tasks= new Task[listOfTask.size()];
+            int i = 0;
+            for(Task tsk : listOfTask){
+                tasks[i] = tsk;
+                i++;
+            }
+            return  tasks;
+        }catch(Exception exc){
+            exc.printStackTrace();
+            return null;
+        }
     }
     
-    public Task[] getTasks(int status, int category_id)
+    public Task[] getTasks(String token, int status, int category_id)
     {
-    	List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("(id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+
-    			" WHERE id_user=? OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user=?) "+
-    			"OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
-    			"ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? ))) AND status = ? AND (id_kategori = ? OR 0=?)", 
-    			new Object[]{getId_user(), getId_user(), getId_user(), getId_user(), status, category_id, category_id}, 
-    			new String[]{"integer", "integer", "integer", "integer", "integer", "integer", "integer"}, null));
-    	return list.toArray(new Task[list.size()]);
+    	try {
+            TreeMap<String, String> parameter = new TreeMap<String,String>();
+            parameter.put("token", token);
+            parameter.put("app_id", MainApp.appId);
+            parameter.put("status", ""+status);
+            parameter.put("id_kategori", ""+category_id);
+            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_tasks", parameter, "", 0);
+            JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+            ArrayList<Task> listOfTask = new ArrayList<Task>();
+            for (Object obj : resp_obj)
+            {
+                    JSONObject js_obj = (JSONObject) obj;
+                    Task tsk = new Task();
+                    tsk.setNama_task((String)js_obj.get("nama_task"));
+                    tsk.setDeadline(Date.valueOf(js_obj.get("deadline").toString()));
+                    tsk.setId_kategori(Integer.parseInt(js_obj.get("id_kategori").toString()));
+                    tsk.setId_task(Integer.parseInt(js_obj.get("id_task").toString()));
+                    tsk.setId_user(Integer.parseInt(js_obj.get("id_user").toString()));
+                    tsk.setStatus(Boolean.parseBoolean(js_obj.get("status").toString()));
+                    listOfTask.add(tsk);
+            }
+            
+            Task [] tasks = new Task[listOfTask.size()];
+            int i = 0;
+            for(Task tsk : listOfTask){
+                tasks[i] = tsk;
+                i++;
+            }
+            return  tasks;
+        }catch(Exception exc){
+            exc.printStackTrace();
+            return null;
+        }
     }
     
-    public Task[] getTasksLike(String q)
+    public Task[] getTasksLike(String q,String token)
     {
-    	q = "%"+q.replaceAll(" ", "%")+"%";
-    	
-    	List<DBSimpleRecord> list = Arrays.asList(Task.getModel().findAll("(id_kategori IN ( SELECT id_kategori FROM "+Category.getTableName()+
-    			" WHERE id_user=? OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user=?) "+
-    			"OR id_kategori IN (SELECT id_kategori FROM "+ Task.getTableName() +" AS t LEFT OUTER JOIN assign AS a "+
-    			"ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? ))) AND nama_task LIKE ?", 
-    			new Object[]{getId_user(), getId_user(), getId_user(), getId_user(), q}, 
-    			new String[]{"integer", "integer", "integer", "integer", "string"}, null));
-    	return list.toArray(new Task[list.size()]);
+    	try {
+            TreeMap<String, String> parameter = new TreeMap<String,String>();
+            parameter.put("token", token);
+            parameter.put("app_id", MainApp.appId);
+            parameter.put("key", q);
+            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_tasks_like", parameter, "", 0);
+            JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+            ArrayList<Task> listOfTask = new ArrayList<Task>();
+            for (Object obj : resp_obj)
+            {
+                    JSONObject js_obj = (JSONObject) obj;
+                    Task tsk = new Task();
+                    tsk.setNama_task((String)js_obj.get("nama_task"));
+                    tsk.setDeadline(Date.valueOf(js_obj.get("deadline").toString()));
+                    tsk.setId_kategori(Integer.parseInt(js_obj.get("id_kategori").toString()));
+                    tsk.setId_task(Integer.parseInt(js_obj.get("id_task").toString()));
+                    tsk.setId_user(Integer.parseInt(js_obj.get("id_user").toString()));
+                    tsk.setStatus(Boolean.parseBoolean(js_obj.get("status").toString()));
+                    listOfTask.add(tsk);
+            }
+            
+             Task [] tasks = new Task[listOfTask.size()];
+            int i = 0;
+            for(Task tsk : listOfTask){
+                tasks[i] = tsk;
+                i++;
+            }
+            return  tasks;
+        }catch(Exception exc){
+            exc.printStackTrace();
+            return null;
+        }
     }
     
-    public Category[] getCategoriesLike(String q)
+    public Category[] getCategoriesLike(String q,String token)
     {
-    	q = "%"+q.replaceAll(" ", "%")+"%";
-    	
-    	List<DBSimpleRecord> list = Arrays.asList(Category.getModel().findAll(
-    			"(id_user=? OR id_kategori IN (SELECT id_kategori FROM edit_kategori WHERE id_user=?) "+
-    			"OR id_kategori IN (SELECT id_kategori FROM "+Task.getTableName()+" AS t LEFT OUTER JOIN assign AS a "+
-    			"ON t.id_task=a.id_task WHERE t.id_user = ? OR a.id_user = ? )) AND nama_kategori LIKE ?", 
-    			new Object[]{getId_user(), getId_user(), getId_user(), getId_user(), q}, 
-    			new String[]{"integer", "integer", "integer", "integer", "string"}, null));
-    	return list.toArray(new Category[list.size()]);
+    	try {
+            TreeMap<String, String> parameter = new TreeMap<String,String>();
+            parameter.put("token", token);
+            parameter.put("app_id", MainApp.appId);
+            parameter.put("key", q);
+            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/get_categories_like", parameter, "", 0);
+            JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+            ArrayList<Category> listOfCategory = new ArrayList<Category>();
+            for (Object obj : resp_obj)
+            {
+                    JSONObject js_obj = (JSONObject) obj;
+                    Category ctg = new Category();
+                    ctg.setId_kategori(Integer.valueOf(js_obj.get("id_kategori").toString()));
+                    ctg.setId_user(Integer.valueOf(js_obj.get("id_user").toString()));
+                    ctg.setNama_kategori(String.valueOf(js_obj.get("nama_kategori")));
+                    listOfCategory.add(ctg);
+            }
+            Category [] ctgs = new Category[listOfCategory.size()];
+            int i = 0;
+            for(Category ctg : listOfCategory){
+                ctgs[i] = ctg;
+                i++;
+            }
+            return  ctgs;
+        }catch(Exception exc){
+            exc.printStackTrace();
+            return null;
+        }
     }
     
-    public User[] findAllLike(String q)
+    public User[] findAllLike(String q,String token)
     {
-    	q = "%"+q.replaceAll(" ", "%")+"%";
-    	
-    	List<DBSimpleRecord> list = Arrays.asList(User.getModel().findAll("username LIKE ? OR fullname LIKE ? OR email LIKE ? OR birthdate LIKE ? LIMIT 0, 10", 
-				new Object[]{q, q, q, q}, new String[]{"string", "string", "string", "string"}, null));
-    	return list.toArray(new User[list.size()]);
+    	try {
+            TreeMap<String, String> parameter = new TreeMap<String,String>();
+            parameter.put("token", token);
+            parameter.put("app_id", MainApp.appId);
+            parameter.put("key", q);
+            String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/find_all_like", parameter, "", 0);
+            JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+            ArrayList<User> listOfUser = new ArrayList<User>();
+            for (Object obj : resp_obj)
+            {
+                    JSONObject js_obj = (JSONObject) obj;
+                    
+                    User usr = new User();
+                    usr.setAvatar(String.valueOf(js_obj.get("avatar")));
+                    usr.setBirthdate(Date.valueOf(js_obj.get("birthdate").toString()));
+                    usr.setEmail(String.valueOf(js_obj.get("email")));
+                    usr.setFullname(String.valueOf(js_obj.get("fullname")));
+                    usr.setId_user(Integer.valueOf(js_obj.get("id_user").toString()));
+                    usr.setPassword(String.valueOf(js_obj.get("password")));
+                    usr.setUsername(String.valueOf(js_obj.get("username")));
+                    
+                    listOfUser.add(usr);
+            }
+            User [] usrs = new User[listOfUser.size()];
+            int i = 0;
+            for(User usr : listOfUser){
+                usrs[i] = usr;
+                i++;
+            }
+            return  usrs;
+        }catch(Exception exc){
+            exc.printStackTrace();
+            return null;
+        }
     }
 	
-	public User findByUsername(String username)
+	public User findByUsername(String username,String token)
 	{
-		return (User)User.getModel().find("username = ?", new Object[]{username}, new String[]{"string"}, null);
+            try {
+                TreeMap<String, String> parameter = new TreeMap<String,String>();
+                parameter.put("token", token);
+                parameter.put("app_id", MainApp.appId);
+                parameter.put("username", username);
+                String response = MainApp.callRestfulWebService("http://localhost:8080/MOA_services/user/find_by_username", parameter, "", 0);
+                JSONObject resp_obj = (JSONObject) JSONValue.parse(response);
+
+                User usr = new User();
+                usr.setAvatar(String.valueOf(resp_obj.get("avatar")));
+                usr.setBirthdate(Date.valueOf(resp_obj.get("birthdate").toString()));
+                usr.setEmail(String.valueOf(resp_obj.get("email")));
+                usr.setFullname(String.valueOf(resp_obj.get("fullname")));
+                usr.setId_user(Integer.valueOf(resp_obj.get("id_user").toString()));
+                usr.setPassword(String.valueOf(resp_obj.get("password")));
+                usr.setUsername(String.valueOf(resp_obj.get("username")));
+
+                return usr;
+            }catch(Exception exc){
+                exc.printStackTrace();
+                return null;
+            }
 	}
 	    
     /**

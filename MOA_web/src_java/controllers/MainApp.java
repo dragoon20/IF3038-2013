@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import models.DBSimpleRecord;
+import models.Tag;
 import models.Task;
 import models.User;
 import models.Comment;
@@ -78,7 +79,9 @@ public class MainApp extends HttpServlet
 		    	
 		    	String response = callRestfulWebService(serviceURL+"token/check_token", map, "", 0);
 		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(response);
-		    	status = (Boolean)resp_obj.get("status");
+                        
+		    	status = (Boolean) resp_obj.get("status");
+                       
     		} catch (Exception e)
     		{
     			e.printStackTrace();
@@ -498,8 +501,7 @@ public class MainApp extends HttpServlet
 			}
 			
 			Task real_task = (Task)Task.getModel().find("id_task = ?", new Object[]{task.getId_task()}, new String[]{"integer"}, null);
-			
-			if ((!real_task.isEmpty()) && (real_task.getEditable(MainApp.currentUserId(request.getSession()))))
+			if ((!real_task.isEmpty()) && (real_task.getEditable("TOKEN",0)))
 			{				
 				real_task.replaceData(task);
 				real_task.putData("attachments", attachments);
@@ -672,35 +674,7 @@ public class MainApp extends HttpServlet
 	
 	public void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-            boolean status = false;
-            HttpSession session = request.getSession();
-            if (session.getAttribute("token")!=null)
-            {
-                    try
-                    {
-                            HashMap<String, String> map = new HashMap<String, String>();
-                            map.put("token", (String)session.getAttribute("token"));
-                            map.put("app_id", appId);
-
-                            String resp = callRestfulWebService(serviceURL+"token/logout", map, "", 0);
-                            JSONObject resp_obj = (JSONObject)JSONValue.parse(resp);
-                            status = (Boolean)resp_obj.get("status");
-                    } catch (Exception e)
-                    {
-                            e.printStackTrace();
-                    }
-            }
-
-            if (status)
-            {
-                            session.removeAttribute("token");
-                            response.sendRedirect("index");
-            }
-            else
-            {
-                    response.sendRedirect("error");
-            }
-	}
+    	}
         
         public void dashboard_fake(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
       {

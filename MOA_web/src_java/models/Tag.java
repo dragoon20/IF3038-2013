@@ -75,7 +75,6 @@ public class Tag extends DBSimpleRecord{
         {
         	return false;
         }
-        
     }
     
     public boolean checkValidity() 

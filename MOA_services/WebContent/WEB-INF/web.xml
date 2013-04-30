@@ -38,7 +38,6 @@
     <url-pattern>/comment/*</url-pattern>
   </servlet-mapping>
   <servlet>
-    <description></description>
     <display-name>Task</display-name>
     <servlet-name>Task</servlet-name>
     <servlet-class>com.services.TaskService</servlet-class>
@@ -48,7 +47,6 @@
     <url-pattern>/task/*</url-pattern>
   </servlet-mapping>
   <servlet>
-    <description></description>
     <display-name>Attachment</display-name>
     <servlet-name>Attachment</servlet-name>
     <servlet-class>com.services.AttachmentService</servlet-class>
@@ -58,7 +56,6 @@
     <url-pattern>/attachment/*</url-pattern>
   </servlet-mapping>
   <servlet>
-    <description></description>
     <display-name>Token</display-name>
     <servlet-name>Token</servlet-name>
     <servlet-class>com.services.TokenService</servlet-class>
@@ -66,6 +63,15 @@
   <servlet-mapping>
     <servlet-name>Token</servlet-name>
     <url-pattern>/token/*</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <display-name>Tag</display-name>
+    <servlet-name>Tag</servlet-name>
+    <servlet-class>com.services.TagService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Tag</servlet-name>
+    <url-pattern>/tag/*</url-pattern>
   </servlet-mapping>
   <servlet>
     <description></description>
