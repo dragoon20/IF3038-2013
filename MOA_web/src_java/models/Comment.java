@@ -4,23 +4,22 @@
  */
 package models;
 
-import controllers.MainApp;
-import java.sql.Date;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+
+import controllers.MainApp;
 
 /**
  *
@@ -136,16 +135,16 @@ public class Comment extends DBSimpleRecord{
             return task;
 	}
     
-    public Comment[] getLatest(String id_task, String timestamp, String token)
+    public Comment[] getLatest(Integer id_task, String timestamp, String token)
     {
         List<Comment> commentlist = new ArrayList<Comment>();
         try {
 			TreeMap<String, String> parameter = new TreeMap<String,String>();
 			parameter.put("token", token);
 			parameter.put("app_id", MainApp.appId);
-                        parameter.put("id_task", id_task);
-                        parameter.put("timestamp", timestamp);
-			String response = MainApp.callRestfulWebService("http://localhost:8088/MOA_services/comment/get_latest", parameter, "", 0);
+            parameter.put("id_task", ""+id_task);
+            parameter.put("timestamp", timestamp);
+			String response = MainApp.callRestfulWebService(MainApp.serviceURL+"comment/get_latest", parameter, "", 0);
                         
 			JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
 			for (Object obj : resp_obj)
@@ -164,16 +163,16 @@ public class Comment extends DBSimpleRecord{
         return commentlist.toArray(new Comment[commentlist.size()]);
     }
     
-    public Comment[] getOlder(String id_task, String timestamp, String token)
+    public Comment[] getOlder(Integer id_task, String timestamp, String token)
     {
     	List<Comment> commentlist = new ArrayList<Comment>();
         try {
 			TreeMap<String, String> parameter = new TreeMap<String,String>();
 			parameter.put("token", token);
 			parameter.put("app_id", MainApp.appId);
-                        parameter.put("id_task", id_task);
-                        parameter.put("timestamp", timestamp);
-			String response = MainApp.callRestfulWebService("http://localhost:8088/MOA_services/comment/get_older", parameter, "", 0);
+            parameter.put("id_task", ""+id_task);
+            parameter.put("timestamp", timestamp);
+			String response = MainApp.callRestfulWebService(MainApp.serviceURL+"comment/get_older", parameter, "", 0);
                         
 			JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
 			for (Object obj : resp_obj)

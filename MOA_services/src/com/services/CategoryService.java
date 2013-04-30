@@ -5,9 +5,6 @@
 package com.services;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +19,6 @@ import org.json.simple.JSONValue;
 
 import com.helper.GeneralHelper;
 import com.models.Category;
-import com.models.DBConnection;
 import com.models.User;
 import com.template.BasicServlet;
 
@@ -178,7 +174,7 @@ public class CategoryService extends BasicServlet
 		try
 		{
 			int id_user;
-			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			if ((request.getParameter("token")!=null) && (request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if (request.getParameter("id_kategori")!=null)
 				{
@@ -252,4 +248,39 @@ public class CategoryService extends BasicServlet
 			pw.close();
 		}
     }
+    
+    public void get_category(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+    	try
+		{
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				if (request.getParameter("id_kategori")!=null)
+				{
+					Category currentCat = (Category)Category.getModel().find("id_kategori = ?", new Object[]{Integer.parseInt(request.getParameter("id_kategori"))}, new String[]{"integer"}, null);
+					
+					HashMap<String, Object> map = new HashMap<String, Object>();
+					map.put("nama_kategori", currentCat.getNama_kategori());
+					PrintWriter pw = response.getWriter();
+					pw.println(new JSONObject(map).toJSONString());
+					pw.close();
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+			
+			PrintWriter pw = response.getWriter();
+			pw.print("{}");
+			pw.close();
+		}
+	}
 }

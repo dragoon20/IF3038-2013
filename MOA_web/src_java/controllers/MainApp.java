@@ -15,6 +15,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,21 +30,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import models.DBSimpleRecord;
-<<<<<<< HEAD
-=======
-import models.Tag;
-import models.Task;
->>>>>>> ee3cc0b4d97340f4a8f86cada8e1d1a20a399122
 import models.User;
-import models.Comment;
-import models.Category;
 
+import org.apache.cxf.interceptor.LoggingInInterceptor;
+import org.apache.cxf.interceptor.LoggingOutInterceptor;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.apache.tomcat.util.http.fileupload.FileItemFactory;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -53,11 +49,11 @@ import org.json.simple.JSONValue;
 public class MainApp extends HttpServlet 
 {
     private static final long serialVersionUID = 1L;
-	
+
     public static final String appId = "0d2d2a7531376b3b05ff4203aeaa6b41";
     public static final String appName = "MOA";
     public static final String appTagline = "Multiuser Online Agenda";
-    public static final String serviceURL = "http://localhost:8088/MOA_services/";
+    public static final String serviceURL = "http://localhost:8080/MOA_services/";
     
     /**
      * @see HttpServlet#HttpServlet()
@@ -67,6 +63,11 @@ public class MainApp extends HttpServlet
         super();
     }
 
+    public static String token(HttpSession session)
+    {
+    	return (String)session.getAttribute("token");
+    }
+    
     public static boolean LoggedIn(HttpSession session)
 	{
     	boolean status = false;
@@ -77,12 +78,10 @@ public class MainApp extends HttpServlet
 		    	HashMap<String, String> map = new HashMap<String, String>();
 		    	map.put("token", (String)session.getAttribute("token"));
 		    	map.put("app_id", appId);
-		    	
+
 		    	String response = callRestfulWebService(serviceURL+"token/check_token", map, "", 0);
 		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(response);
-                        
-		    	status = (Boolean) resp_obj.get("status");
-                       
+		    	status = (boolean)resp_obj.get("status");
     		} catch (Exception e)
     		{
     			e.printStackTrace();
@@ -91,21 +90,6 @@ public class MainApp extends HttpServlet
 		return status;
 	}
     
-    /**
-     * @deprecated
-     * @param session
-     * @return
-     */
-    public static Integer currentUserId(HttpSession session)
-    {
-    	return ((Integer)session.getAttribute("user_id"));
-    }
-    
-    /**
-     * @deprecated
-     * @param session
-     * @return
-     */
     public static User currentUser(HttpSession session)
     {
     	return ((User)session.getAttribute("current_user"));
@@ -128,7 +112,7 @@ public class MainApp extends HttpServlet
 	{
 		proccessRequest(request, response);
 	}
-	
+
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -138,11 +122,11 @@ public class MainApp extends HttpServlet
 	private void proccessRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		String page = ("".equals((String)request.getAttribute("page")))? "index" : (String)request.getAttribute("page");
-		
+
 		Class<?>[] param_handler = new Class[2];
 		param_handler[0] = HttpServletRequest.class;
 		param_handler[1] = HttpServletResponse.class;
-		
+
 		try {
 			Method method;
 			method = this.getClass().getMethod(page, param_handler);				
@@ -172,7 +156,7 @@ public class MainApp extends HttpServlet
 	{
 		request.getRequestDispatcher("pages/index.jsp").forward(request, response);
 	}
-	
+
 	public void dashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		request.getRequestDispatcher("pages/dashboard.jsp").forward(request, response);
@@ -182,43 +166,43 @@ public class MainApp extends HttpServlet
 	{
 		request.getRequestDispatcher("pages/profile.jsp").forward(request, response);
 	}
-	
+
 	public void edit_profile(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		request.getRequestDispatcher("pages/edit_profile.jsp").forward(request, response);
 	}
-	
+
 	public void change_password(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		request.getRequestDispatcher("pages/change_password.jsp").forward(request, response);
 	}
-	
+
 	public void new_work(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		request.getRequestDispatcher("pages/new_work.jsp").forward(request, response);
 	}
-	
+
 	public void tugas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		request.getRequestDispatcher("pages/tugas.jsp").forward(request, response);
 	}
-	
+
 	public void search(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		request.getRequestDispatcher("pages/search.jsp").forward(request, response);
 	}
-	
+
 	public void search_partial(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		request.getRequestDispatcher("pages/search_partial.jsp").forward(request, response);
 	}
-	
+
 	public void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
-			User user = new User();
-			
+			HashMap<String, String> params = new HashMap<String, String>();
+
 			FileItem avatar = null;
 			boolean check = false;
 			FileItemFactory factory = new DiskFileItemFactory();
@@ -236,46 +220,37 @@ public class MainApp extends HttpServlet
 			{
 				if (fi.isFormField())
 				{
-					if ("birthdate".equals(fi.getFieldName()))
-					{
-						try {
-							user.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					else
-					{
-						user.putData(fi.getFieldName(), fi.getString());
-					}
+					params.put(fi.getFieldName(), fi.getString());
 				}
 				else
 				{
 					if ("avatar".equals(fi.getFieldName()))
 					{
 						check = true;
-						user.setAvatar(fi.getName());
 						avatar = fi;
-<<<<<<< HEAD
 						String extension = avatar.getName().split("\\.")[avatar.getName().split("\\.").length-1];
 						String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
 						params.put("avatar", MainApp.appUrl(request.getSession())+"upload/user_profile_pict/"+new_filename);
 						params.put("avatar_filename", new_filename);
-=======
->>>>>>> ee3cc0b4d97340f4a8f86cada8e1d1a20a399122
 					}
 				}
 			}
-			
-			boolean temperror = user.checkValidity();
-			
-<<<<<<< HEAD
+
+			JaxWsProxyFactoryBean fb = new JaxWsProxyFactoryBean();
+
+			fb.setServiceClass(com.soap.AddService.class);
+	        fb.setAddress(serviceURL+"services/AddService?wsdl");
+	        fb.getInInterceptors().add(new LoggingInInterceptor());
+	        fb.getOutInterceptors().add(new LoggingOutInterceptor());
+	        com.soap.AddService client = (com.soap.AddService) fb.create();
+	        boolean result = client.add_new_user(params.get("username"), params.get("email"), params.get("password"), 
+	        									params.get("fullname"), params.get("avatar"), params.get("birthdate"));
+
 			if ((check) && (result))
 			{
 				InputStream in = avatar.getInputStream();
 				FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+params.get("avatar_filename")));
-				
+
 				int read = 0;
 				byte[] bytes = new byte[1024];
 				while ((read = in.read(bytes)) != -1)
@@ -283,58 +258,15 @@ public class MainApp extends HttpServlet
 					out.write(bytes, 0, read);
 				}
 				out.close();
-				
+
 				response.sendRedirect("dashboard_fake");
 			}
 			else
-=======
-			if ((temperror) || (!check))
->>>>>>> ee3cc0b4d97340f4a8f86cada8e1d1a20a399122
 			{
 				// TODO print error screen
 				PrintWriter pw = response.getWriter();
-				pw.println("error1");
+				pw.println("error2");
 				pw.close();
-			}
-			else
-			{
-				String extension = avatar.getName().split("\\.")[avatar.getName().split("\\.").length-1];
-				String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
-				user.setAvatar(new_filename);
-				user.hashPassword();
-				if (user.save())
-				{
-					InputStream in = avatar.getInputStream();
-					FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+new_filename));
-					
-					int read = 0;
-					byte[] bytes = new byte[1024];
-					while ((read = in.read(bytes)) != -1)
-					{
-						out.write(bytes, 0, read);
-					}
-					out.close();
-					
-					HttpSession session = request.getSession();
-					session.setAttribute("user_id", user.getId_user());
-					
-					User u = new User();
-					u.setId_user(user.getId_user());
-					u.setFullname(user.getFullname());
-					u.setUsername(user.getUsername());
-					u.setEmail(user.getEmail());
-					u.setAvatar(user.getAvatar());
-					session.setAttribute("current_user", u);
-					
-					response.sendRedirect("dashboard_fake");
-				}
-				else
-				{
-					// TODO print error screen
-					PrintWriter pw = response.getWriter();
-					pw.println("error2");
-					pw.close();
-				}
 			}
 		}
 		else
@@ -345,21 +277,41 @@ public class MainApp extends HttpServlet
 			pw.close();
 		}
 	}
-	
+
 	public void login_check(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if (request.getParameter("token")!=null)
 		{
 			HttpSession session = request.getSession();
 			session.setAttribute("token", request.getParameter("token"));
-			response.sendRedirect("dashboard_fake");
+			
+			try {
+				HashMap<String, String> parameter = new HashMap<String,String>();
+				parameter.put("token", token(request.getSession()));
+				parameter.put("app_id", appId);
+				String responseString = callRestfulWebService(serviceURL+"user/get_user_data", parameter, "", 0);
+				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+
+				User user = new User();
+				user.setUsername((String)ret.get("username"));
+				user.setAvatar((String)ret.get("avatar"));
+				user.setBirthdate(new Date(DBSimpleRecord.sdf.parse((String)ret.get("birthdate")).getTime()));
+				user.setEmail((String)ret.get("email"));
+				user.setFullname((String)ret.get("fullname"));
+				request.getSession().setAttribute("current_user", user);
+				
+			} catch(Exception exc) {
+				exc.printStackTrace();
+			}
+			
+			response.sendRedirect("dashboard");
 		}
 		else
 		{
 			response.sendRedirect("error");
 		}
 	}
-	
+
 	public void new_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if (!MainApp.LoggedIn(request.getSession()))
@@ -369,9 +321,7 @@ public class MainApp extends HttpServlet
 
 		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
-			Task task = new Task();
-			task.setId_user(MainApp.currentUserId(request.getSession()));
-			
+			HashMap<String, Object> params = new HashMap<String, Object>();
 			List<Map<String, Object>> attachments = new ArrayList<Map<String,Object>>();
 			FileItemFactory factory = new DiskFileItemFactory();
 			ServletFileUpload upload = new ServletFileUpload(factory);
@@ -387,27 +337,14 @@ public class MainApp extends HttpServlet
 			for (FileItem fi : items)
 			{
 				if (fi.isFormField())
-				{/**
-				     * @deprecated
-				     * @param session
-				     * @return
-				     */
-					if ("deadline".equals(fi.getFieldName()))
+				{
+					if ("id_kategori".equals(fi.getFieldName()))
 					{
-						try {
-							task.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					else if ("id_kategori".equals(fi.getFieldName()))
-					{
-						task.putData(fi.getFieldName(), Integer.parseInt(fi.getString()));
+						params.put(fi.getFieldName(), Integer.parseInt(fi.getString()));
 					}
 					else
 					{
-						task.putData(fi.getFieldName(), fi.getString());
+						params.put(fi.getFieldName(), fi.getString());
 					}
 				}
 				else
@@ -417,34 +354,56 @@ public class MainApp extends HttpServlet
 					String name = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
 					tempmap.put("attachment", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
 					tempmap.put("temp", fi.getInputStream());
-<<<<<<< HEAD
 					tempmap.put("location", MainApp.appUrl(request.getSession())+"upload/attachments/"+name);
-=======
-					tempmap.put("location", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
->>>>>>> ee3cc0b4d97340f4a8f86cada8e1d1a20a399122
 					attachments.add(tempmap);
 				}
 			}
-			task.putData("attachments", attachments);
-			task.setId_user(MainApp.currentUserId(request.getSession()));
-			
-			boolean temperror = task.checkValidity();
-			if (temperror)
+
+			JaxWsProxyFactoryBean fb = new JaxWsProxyFactoryBean();
+
+			fb.setServiceClass(com.soap.AddService.class);
+	        fb.setAddress(serviceURL+"services/AddService?wsdl");
+	        fb.getInInterceptors().add(new LoggingInInterceptor());
+	        fb.getOutInterceptors().add(new LoggingOutInterceptor());
+	        com.soap.AddService client = (com.soap.AddService) fb.create();
+	        int result = client.add_new_task(token(request.getSession()), appId, (String)params.get("nama_task"), 
+	        									(String)params.get("deadline"), (Integer)params.get("id_kategori"));
+
+			if (result!=-1)
 			{
-				// TODO go to error page
-				System.out.println("error1");
+				String[] assignees = ((String)params.get("assignee")).split(",");
+				for (String assignee : assignees)
+				{
+					client.add_assignee(token(request.getSession()), appId, result, assignee);
+				}
+				String[] tags = ((String)params.get("tag")).split(",");
+				for (String tag : tags)
+				{
+					client.add_tag(token(request.getSession()), appId, result, tag);
+				}
+
+				for (Map<String, Object> attachment : attachments)
+				{
+					if (client.add_new_attachment(token(request.getSession()), appId, result, MainApp.fullPath(request.getSession())+"upload/attachments/"+attachment.get("attachment")))
+					{
+						FileOutputStream out = new FileOutputStream(new File((String)attachment.get("location")));
+
+						InputStream in = (InputStream)attachment.get("temp");
+						int read = 0;
+						byte[] bytes = new byte[1024];
+						while ((read = in.read(bytes)) != -1)
+						{
+							out.write(bytes, 0, read);
+						}
+						out.close();
+					}
+				}
+				response.sendRedirect("tugas?id="+result);
 			}
 			else
 			{
-				if (task.save())
-				{
-					response.sendRedirect("tugas?id="+task.getId_task());
-				}
-				else
-				{
-					// TODO got to error page
-					System.out.println("error2");
-				}
+				// TODO got to error page
+				System.out.println("error2");
 			}
 		}
 		else
@@ -453,7 +412,7 @@ public class MainApp extends HttpServlet
 			System.out.println("error3");
 		}
 	}
-	
+
 	public void edit_tugas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if (!MainApp.LoggedIn(request.getSession()))
@@ -463,8 +422,7 @@ public class MainApp extends HttpServlet
 
 		if (("POST".equals(request.getMethod().toUpperCase())) && (ServletFileUpload.isMultipartContent(request)))
 		{
-			Task task = new Task();
-			
+			HashMap<String, Object> params = new HashMap<String, Object>();
 			List<Map<String, Object>> attachments = new ArrayList<Map<String,Object>>();
 			FileItemFactory factory = new DiskFileItemFactory();
 			ServletFileUpload upload = new ServletFileUpload(factory);
@@ -481,26 +439,17 @@ public class MainApp extends HttpServlet
 			{
 				if (fi.isFormField())
 				{
-					if ("deadline".equals(fi.getFieldName()))
+					if ("id_task".equals(fi.getFieldName()))
 					{
-						try {
-							task.putData(fi.getFieldName(), new Date(DBSimpleRecord.sdf.parse(fi.getString()).getTime()));
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					else if ("id_task".equals(fi.getFieldName()))
-					{
-						task.putData(fi.getFieldName(), Integer.parseInt(fi.getString()));
+						params.put(fi.getFieldName(), Integer.parseInt(fi.getString()));
 					}
 					else if ("id_kategori".equals(fi.getFieldName()))
 					{
-						task.putData(fi.getFieldName(), Integer.parseInt(fi.getString()));
+						params.put(fi.getFieldName(), Integer.parseInt(fi.getString()));
 					}
 					else
 					{
-						task.putData(fi.getFieldName(), fi.getString());
+						params.put(fi.getFieldName(), fi.getString());
 					}
 				}
 				else
@@ -514,30 +463,121 @@ public class MainApp extends HttpServlet
 					attachments.add(tempmap);
 				}
 			}
-			
-			Task real_task = (Task)Task.getModel().find("id_task = ?", new Object[]{task.getId_task()}, new String[]{"integer"}, null);
-			if ((!real_task.isEmpty()) && (real_task.getEditable("TOKEN",0)))
-			{				
-				real_task.replaceData(task);
-				real_task.putData("attachments", attachments);
-				
-				boolean temperror = real_task.checkValidity();
-				if (temperror)
+
+
+			boolean check_task = false;
+			try {
+				HashMap<String, String> parameter = new HashMap<String,String>();
+				parameter.put("token", token(request.getSession()));
+				parameter.put("app_id", appId);
+				parameter.put("id_task", (String)params.get("id_task"));
+				String responseString = callRestfulWebService(serviceURL+"task/check_task", parameter, "", 0);
+				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+				check_task = (Boolean)ret.get("success");
+			} catch(Exception exc) {
+				exc.printStackTrace();
+			}
+
+			boolean editable = false;
+			try {
+				HashMap<String, String> parameter = new HashMap<String,String>();
+				parameter.put("token", token(request.getSession()));
+				parameter.put("app_id", appId);
+				parameter.put("id_task", (String)params.get("id_task"));
+				String responseString = callRestfulWebService(serviceURL+"task/get_editable", parameter, "", 0);
+				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+				editable = (Boolean)ret.get("success");
+			} catch(Exception exc) {
+				exc.printStackTrace();
+			}
+
+			if ((check_task) && (editable))
+			{
+				boolean success = false;
+				try {
+					HashMap<String, String> parameter = new HashMap<String,String>();
+					parameter.put("token", token(request.getSession()));
+					parameter.put("app_id", appId);
+					parameter.put("id_task", (String)params.get("id_task"));
+					parameter.put("nama_task", (String)params.get("nama_task"));
+					parameter.put("deadline", (String)params.get("deadline"));
+					parameter.put("id_kategori", (String)params.get("id_kategori"));
+
+					String responseString = callRestfulWebService(serviceURL+"task/update_task", parameter, "", 0);
+					JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+					success = (Boolean)ret.get("success");
+				} catch(Exception exc) {
+					exc.printStackTrace();
+				}
+
+				if (success)
 				{
-					// TODO go to error page
-					System.out.println("error1");
+					JaxWsProxyFactoryBean fb = new JaxWsProxyFactoryBean();
+
+					fb.setServiceClass(com.soap.AddService.class);
+			        fb.setAddress(serviceURL+"services/AddService?wsdl");
+			        fb.getInInterceptors().add(new LoggingInInterceptor());
+			        fb.getOutInterceptors().add(new LoggingOutInterceptor());
+			        com.soap.AddService client = (com.soap.AddService) fb.create();
+
+			        try {
+						HashMap<String, String> parameter = new HashMap<String,String>();
+						parameter.put("token", token(request.getSession()));
+						parameter.put("app_id", appId);
+						parameter.put("id_task", (String)params.get("id_task"));
+
+						String responseString = callRestfulWebService(serviceURL+"task/delete_assignees", parameter, "", 0);
+						JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+						success = (Boolean)ret.get("success");
+					} catch(Exception exc) {
+						exc.printStackTrace();
+					}
+					String[] assignees = ((String)params.get("assignee")).split(",");
+					for (String assignee : assignees)
+					{
+						client.add_assignee(token(request.getSession()), appId, (Integer)params.get("id_task"), assignee);
+					}
+
+					try {
+						HashMap<String, String> parameter = new HashMap<String,String>();
+						parameter.put("token", token(request.getSession()));
+						parameter.put("app_id", appId);
+						parameter.put("id_task", (String)params.get("id_task"));
+
+						String responseString = callRestfulWebService(serviceURL+"task/delete_tags", parameter, "", 0);
+						JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+						success = (Boolean)ret.get("success");
+					} catch(Exception exc) {
+						exc.printStackTrace();
+					}
+					String[] tags = ((String)params.get("tag")).split(",");
+					for (String tag : tags)
+					{
+						client.add_tag(token(request.getSession()), appId, (Integer)params.get("id_task"), tag);
+					}
+
+					for (Map<String, Object> attachment : attachments)
+					{
+						if (client.add_new_attachment(token(request.getSession()), appId, (Integer)params.get("id_task"), MainApp.fullPath(request.getSession())+"upload/attachments/"+attachment.get("attachment")))
+						{
+							FileOutputStream out = new FileOutputStream(new File((String)attachment.get("location")));
+
+							InputStream in = (InputStream)attachment.get("temp");
+							int read = 0;
+							byte[] bytes = new byte[1024];
+							while ((read = in.read(bytes)) != -1)
+							{
+								out.write(bytes, 0, read);
+							}
+							out.close();
+						}
+					}
+					response.sendRedirect("tugas?id="+(Integer)params.get("id_task"));
 				}
 				else
 				{
-					if (real_task.save())
-					{
-						response.sendRedirect("tugas?id="+real_task.getId_task());
-					}
-					else
-					{
-						// TODO got to error page
-						System.out.println("error2");
-					}
+					// TODO got to error page
+					System.out.println("error2");
 				}
 			}
 			else
@@ -552,7 +592,7 @@ public class MainApp extends HttpServlet
 			System.out.println("error4");
 		}
 	}
-	
+
 	public void change_profile_data(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if (!MainApp.LoggedIn(request.getSession()))
@@ -595,7 +635,7 @@ public class MainApp extends HttpServlet
 					}
 				}
 			}
-			
+
 			boolean success = false;
 			try {
 				HashMap<String, String> parameter = new HashMap<String,String>();
@@ -608,21 +648,21 @@ public class MainApp extends HttpServlet
 				parameter.put("avatar", (String)params.get("avatar"));
 				parameter.put("password", (String)params.get("password"));
 				parameter.put("birthdate", (String)params.get("birthdate"));
-				
+
 				String responseString = callRestfulWebService(serviceURL+"task/update_user", parameter, "", 0);
 				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
 				success = (Boolean)ret.get("success");
 			} catch(Exception exc) {
 				exc.printStackTrace();
 			}
-			
+
 			if (success)
 			{
 				if (check)
 				{
 					InputStream in = avatar.getInputStream();
 					FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+params.get("avatar_filename")));
-					
+
 					int read = 0;
 					byte[] bytes = new byte[1024];
 					while ((read = in.read(bytes)) != -1)
@@ -645,7 +685,7 @@ public class MainApp extends HttpServlet
 			System.out.println("error 3");
 		}
 	}
-	
+
 	public void change_user_password(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if (!MainApp.LoggedIn(request.getSession()))
@@ -663,7 +703,7 @@ public class MainApp extends HttpServlet
 				parameter.put("password", request.getParameter("current_password"));
 				parameter.put("new_password", request.getParameter("new_password"));
 				parameter.put("confirm_password", request.getParameter("confirm_password"));
-				
+
 				String responseString = callRestfulWebService(serviceURL+"task/update_user", parameter, "", 0);
 				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
 				success = (Boolean)ret.get("success");
@@ -685,45 +725,40 @@ public class MainApp extends HttpServlet
 			// TODO print error page
 		}
 	}
-	
+
 	public void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
+		boolean status = false;
+		HttpSession session = request.getSession();
+    	if (session.getAttribute("token")!=null)
+    	{
+    		try
+    		{
+		    	HashMap<String, String> map = new HashMap<String, String>();
+		    	map.put("token", (String)session.getAttribute("token"));
+		    	map.put("app_id", appId);
+
+		    	String resp = callRestfulWebService(serviceURL+"token/logout", map, "", 0);
+		    	JSONObject resp_obj = (JSONObject)JSONValue.parse(resp);
+		    	status = (boolean)resp_obj.get("status");
+    		} catch (Exception e)
+    		{
+    			e.printStackTrace();
     		}
-		
-	public void dashboard_fake(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		PrintWriter pw = response.getWriter();
-		pw.println(request.getSession().getAttribute("token"));
-		pw.close();
+    	}
+
+    	if (status)
+    	{
+			session.removeAttribute("token");
+			response.sendRedirect("index");
+    	}
+    	else
+    	{
+    		response.sendRedirect("error");
+    	}
 	}
-	
-	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-                Comment komen = new Comment();
-                Comment[] arraykomen = komen.getLatest(request.getParameter("id_task"), request.getParameter("timestamp"),request.getParameter("token"));
-                    PrintWriter pw = response.getWriter();
-                    String token = request.getSession().getAttribute("token").toString();
-                    int id_task = Integer.parseInt(request.getParameter("id_task"));
-                    Task task = new Task();
-                    
-                    Tag [] tags = task.getTags(token, id_task);
-                    for(Tag tag : tags){
-                        pw.println("--------------");
-                        pw.println(tag.getTag_name());
-                        pw.println(tag.getId_tag());
-                for (int i = 0; i< arraykomen.length; i++){
-                    pw.print(arraykomen[i].getId_komentar());
-                        
-                        pw.println("");
-                    }
-                    
-                    Category cat = task.getCategory(token, id_task);
-                    
-                    pw.close();
-		}
-        }
-        
-    private static String buildWebQuery(Map<String, String> parameters) throws Exception {
+
+	private static String buildWebQuery(Map<String, String> parameters) throws Exception {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : parameters.entrySet()) {
             String key = URLEncoder.encode(entry.getKey(), "UTF-8");
@@ -775,7 +810,6 @@ public class MainApp extends HttpServlet
 
         return response;
     }
-<<<<<<< HEAD
     
     public void dashboard_fake(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
@@ -783,7 +817,7 @@ public class MainApp extends HttpServlet
 		pw.println(request.getSession().getAttribute("token"));
 		pw.close();
 	}
-	
+
 	public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		try {
@@ -799,7 +833,7 @@ public class MainApp extends HttpServlet
 			exc.printStackTrace();
 		}
 	}
-	
+
 	public void test2(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		PrintWriter pw = response.getWriter();
@@ -807,6 +841,4 @@ public class MainApp extends HttpServlet
 		pw.close();
 	}
         
-=======
->>>>>>> ee3cc0b4d97340f4a8f86cada8e1d1a20a399122
 }

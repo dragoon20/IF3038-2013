@@ -1,3 +1,6 @@
+<%@page import="org.json.simple.JSONValue"%>
+<%@page import="org.json.simple.JSONObject"%>
+<%@page import="java.util.HashMap"%>
 <%@page import="models.Task"%>
 <%@page import="models.Category"%>
 <%@page import="java.util.ArrayList"%>
@@ -31,20 +34,27 @@
 	Category currentCat = null;
 	if (cat != 0) 
 	{
-		currentCat = (Category)Category.getModel().find("id_kategori = ?", new Object[]{cat}, new String[]{"integer"}, null);
+		try {
+			HashMap<String, String> parameter = new HashMap<String,String>();
+			parameter.put("token", MainApp.token(session));
+			parameter.put("app_id", MainApp.appId);
+			parameter.put("id_category", ""+cat);
+			String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"task/check_task", parameter, "", 0);
+			JSONObject ret = (JSONObject)JSONValue.parse(responseString);
+			currentCat = new Category();
+			currentCat.setId_kategori(cat);
+			currentCat.setNama_kategori((String)ret.get("nama_kategori"));
+		} catch(Exception exc) {
+			exc.printStackTrace();
+		}
 		if (currentCat!=null)
 		{
-			canDelete = (currentCat.getId_user()==MainApp.currentUserId(session));
+			canDelete = currentCat.getDeletable(MainApp.token(session), ""+currentCat.getId_kategori());
 		}
-		/*
-		else {
-			unset($currentCat);
-			unset($cat);
-		}*/
 	}
         
-        User user = new User();
-        String tokenString = request.getSession().getAttribute("token").toString();
+    User user = new User();
+    String tokenString = MainApp.token(session);
 	Task[] tasks = user.getTasks(tokenString);
 	Task[] todo = user.getTasks(tokenString,0, cat);
 	Task[] done = user.getTasks(tokenString,1, cat);
@@ -135,7 +145,7 @@
 								for (Category cate : categories)
 								{
 							%> 
-                                                                        <li data-deletable="<%= cate.getDeletable(tokenString, ""+cat) ? "true" : "false" %>" id="categoryLi<%= cate.getId_kategori() %>"<%= ((currentCat!=null) && (currentCat.getId_kategori() == cate.getId_kategori()))? "class=\"active\"" : "" %>>
+                                    <li data-deletable="<%= cate.getDeletable(tokenString, ""+cate.getId_kategori()) ? "true" : "false" %>" id="categoryLi<%= cate.getId_kategori() %>"<%= ((currentCat!=null) && (currentCat.getId_kategori() == cate.getId_kategori()))? "class=\"active\"" : "" %>>
 										<a href="dashboard?cat=<%= cate.getId_kategori() %>" data-category-id="<%= cate.getId_kategori() %>">
 											<%= cate.getNama_kategori() %>
 										</a>

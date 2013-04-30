@@ -4,9 +4,7 @@
  */
 package models;
 
-import controllers.MainApp;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,8 +12,11 @@ import java.sql.Statement;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+
+import controllers.MainApp;
 
 /**
  *
@@ -111,18 +112,18 @@ public class Category extends DBSimpleRecord{
     public boolean getDeletable(String token, String id_kategori)
     {
     	boolean deletable = false;
-            try {
+        try {
 			TreeMap<String, String> parameter = new TreeMap<String,String>();
 			parameter.put("token", token);
 			parameter.put("app_id", MainApp.appId);
-                        parameter.put("id_kategori", id_kategori);
+            parameter.put("id_kategori", id_kategori);
 			String response = MainApp.callRestfulWebService(MainApp.serviceURL+"category/get_deletable", parameter, "", 0);
 			Object obj = JSONValue.parse(response);
                         JSONObject js_obj = (JSONObject) obj;
                         deletable = (Boolean)(js_obj.get("success"));
-            }catch(Exception exc){
-                  exc.printStackTrace();
-            }
+        }catch(Exception exc){
+              exc.printStackTrace();
+        }
           return deletable;  
     }
     

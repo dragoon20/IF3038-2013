@@ -630,6 +630,40 @@ public class UserService extends BasicServlet
 		pw.close();
 	}
     
+    public void get_user_data(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+    	try
+		{
+    		int id_user;
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+    			User user = (User)User.getModel().find("id_user = ?", new Object[]{id_user}, new String[]{"integer"}, null);
+    			
+    			HashMap<String, Object> map = new HashMap<String, Object>();
+    			map.put("username", user.getUsername());
+    			map.put("avatar", user.getAvatar());
+    			map.put("birthdate", DBSimpleRecord.sdf.format(user.getBirthdate()));
+    			map.put("email", user.getEmail());
+    			map.put("fullname", user.getFullname());
+    			
+            	PrintWriter pw = response.getWriter();
+    			pw.println(new JSONObject(map).toJSONString());
+    			pw.close();
+			}
+			else
+			{
+                throw new Exception();
+			}
+		} catch(Exception e)
+		{
+	        e.printStackTrace();
+	
+	        PrintWriter pw = response.getWriter();
+	        pw.print("{}");
+	        pw.close();
+        }
+	}
+    
     public void test(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		PrintWriter pw = response.getWriter();

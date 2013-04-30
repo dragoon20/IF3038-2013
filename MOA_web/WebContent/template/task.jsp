@@ -27,14 +27,14 @@
 								<p class="tags">
 									<span class="detail-label">Tag:</span>
 									<%
-										for (Tag tag : temptask.getTags())
+										for (Tag tag : temptask.getTags(MainApp.token(session), temptask.getId_task()))
 										{
 											out.println("<span class=\"tag\">"+tag.getTag_name()+"</span>");
 										}
 									%>
 								</p>
 								<%
-									if (temptask.getDeletable(MainApp.currentUserId(session)))
+									if (temptask.getDeletable(MainApp.token(session), temptask.getId_task()))
 									{
 								%>
 										<p class="delete">
