@@ -92,6 +92,7 @@
     <filter-name>BasicFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
+  <!--
   <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>WEB-INF/cxf-beans.xml</param-value>
@@ -112,5 +113,5 @@
   </servlet-mapping>
   <session-config>
     <session-timeout>43200</session-timeout>
-  </session-config>
+  </session-config> -->
 </web-app>

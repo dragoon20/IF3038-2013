@@ -191,6 +191,23 @@ public class Comment extends DBSimpleRecord{
         return commentlist.toArray(new Comment[commentlist.size()]);
     }
 
+    public Boolean getDeletable(Integer id_user, String token)
+    {
+        boolean deletable = false;
+        try {
+            TreeMap<String, String> parameter = new TreeMap<String,String>();
+            parameter.put("token", token);
+            parameter.put("app_id", MainApp.appId);
+            parameter.put("id_user", ""+id_user);
+            String response = MainApp.callRestfulWebService(MainApp.serviceURL+"comment/deletable", parameter, "", 0);
+            Object obj = JSONValue.parse(response);
+            JSONObject js_obj = (JSONObject) obj;
+            deletable = (Boolean)(js_obj.get("success"));
+        }catch(Exception exc){
+              exc.printStackTrace();
+        }
+          return deletable; 
+    }
     /**
      * @return the id_komentar
      */

@@ -14,6 +14,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.helper.GeneralHelper;
+import com.models.Category;
 import com.models.Comment;
 import com.models.Task;
 import com.models.User;
@@ -304,6 +305,48 @@ public class CommentService extends BasicServlet
             
             PrintWriter pw = response.getWriter();
             pw.print(JSONValue.toJSONString(komentar_val));
+        }
+    }
+    
+    public void deletable(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+        try
+        {
+                int id_user;
+                if ((request.getParameter("token")!=null) && (request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+                {
+                    if (request.getParameter("id_user")!=null)
+                    {
+                        Map<String, Object> map = new HashMap<String, Object>();
+                        boolean success = false;
+                        if(request.getParameter("id_user").equals(""+id_user)){
+                            success = true;
+                        }
+                        map.put("success", success);
+                        JSONObject ret = new JSONObject(map);
+
+                        PrintWriter pw = response.getWriter();
+                        pw.print(JSONValue.toJSONString(ret));
+                        pw.close();   
+                    }
+                    else
+                    {
+                        throw new Exception(">>>>>>>>no id user");
+                    }
+                }
+                else
+                {
+                        throw new Exception(">>>>>>>>no token / app id");
+                }
+        } catch(Exception e)
+        {
+                e.printStackTrace();
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("success", false);
+                JSONObject ret = new JSONObject(map);
+                PrintWriter pw = response.getWriter();
+                pw.print(JSONValue.toJSONString(ret));
+                pw.close();
         }
     }
 }

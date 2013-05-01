@@ -92,12 +92,11 @@ public class TaskService extends BasicServlet
 				Task task;
 				if (("POST".equals(request.getMethod())) && 
 					(request.getParameter("id_task")!=null) && (request.getParameter("nama_task")!=null) && 
-					(request.getParameter("deadline")!=null) && (request.getParameter("id_kategori")!=null) && 
+					(request.getParameter("deadline")!=null) && 
 					((task = (Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getEditable(id_user)))
 				{
 					task.setNama_task(request.getParameter("nama_task"));
 					task.setDeadline(new Date(DBSimpleRecord.sdf.parse(request.getParameter("deadline")).getTime()));
-					task.setId_kategori(Integer.parseInt(request.getParameter("id_kategori")));
 					task.setId_user(id_user);
 					
 					if ((!task.checkValidity()) && (task.save()))
@@ -144,7 +143,7 @@ public class TaskService extends BasicServlet
 			int id_user;
 			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
-				if (("POST".equals(request.getMethod())) && 
+				if (("POST".equals(request.getMethod()) ) && 
 					(request.getParameter("id_task")!=null) &&  
 					(((Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null)).getDeletable(id_user)))
 				{
@@ -366,6 +365,7 @@ public class TaskService extends BasicServlet
 					{
 						Map<String, String> map = new HashMap<String, String>();
 						map.put("assignee_name", assignee.getUsername());
+                                                map.put("assignee_id", ""+assignee.getId_user());
 						assignees_val.add(map);
 					}
 					
@@ -406,17 +406,11 @@ public class TaskService extends BasicServlet
 					for (Comment comment : comments)
 					{
 						Map<String, Object> map = new HashMap<String, Object>();
-						
-						User u = comment.getUser();
-						Map<String, String> map_user = new HashMap<String, String>();
-						map_user.put("id_user", ""+u.getId_user());
-						map_user.put("username", u.getUsername());
-						map_user.put("fullname", u.getFullname());
-						map_user.put("avatar", u.getAvatar());
-						
-						map.put("user", map_user);
+                                                map.put("id_comment", comment.getId_komentar());
 						map.put("comment", comment.getKomentar());
-                                                map.put("timestamp", comment.getTimestamp());
+                                                map.put("timestamp", comment.getTimestamp().toString());
+                                                
+                                                
 						comments_val.add(map);
 					}
 					
@@ -806,7 +800,7 @@ public class TaskService extends BasicServlet
 							new Object[]{id, id, id, id}, new String[]{"integer", "integer", "integer", "integer"}, null));
 					Task[] tasks = list.toArray(new Task[list.size()]);
 					
-					SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM YYYY");
+					SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
 					List<Map<String, Object>> maps = new ArrayList<Map<String,Object>>();
 					for (int i=0;i<tasks.length;++i)
 					{
@@ -1027,6 +1021,41 @@ public class TaskService extends BasicServlet
 			pw.close();
 		}
 	}
+        
+    public void get_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+            try
+            {
+                if ((request.getParameter("token")!=null) && (request.getParameter("app_id")!=null) && (GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1)
+                {
+                    Task task = (Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null);
+                    
+                    HashMap<String,String> hashMap = new HashMap<String, String>();
+                    hashMap.put("id_task", ""+task.getId_task());
+                    hashMap.put("nama_task", task.getNama_task());
+                    hashMap.put("deadline", DBSimpleRecord.sdf.format(task.getDeadline()));
+                    hashMap.put("nama_kategori", task.getCategory().getNama_kategori());
+                    
+                    JSONObject ret = new JSONObject(hashMap);
+                    PrintWriter pw = response.getWriter();
+                    pw.println(ret.toJSONString());
+                    pw.close();
+                }
+                else
+                {
+                    throw new Exception("Token tidak ada");
+                }
+            } catch(Exception e)
+            {
+                e.printStackTrace();
+                Map<String, Boolean> map = new HashMap<String, Boolean>();
+                map.put("Succes", false);
+                JSONObject ret = new JSONObject(map);
+
+                PrintWriter pw = response.getWriter();
+                pw.print(ret.toJSONString());
+            }
+        }
 }
 
 

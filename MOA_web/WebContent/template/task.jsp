@@ -13,7 +13,7 @@
 									<label>
 										<span class="task-checkbox"><input type="checkbox" class="task-checkbox" data-task-id="<%= temptask.getId_task() %>"
 											<%= (temptask.isStatus()) ? "checked" : "" %>></span>
-										<a href="tugas.php?id=<%= temptask.getId_task() %>"><%= temptask.getNama_task() %></a>
+										<a href="tugas?id=<%= temptask.getId_task() %>"><%= temptask.getNama_task() %></a>
 									</label>
 								</h1>
 							</header>

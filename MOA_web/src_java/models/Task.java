@@ -388,7 +388,8 @@ public class Task extends DBSimpleRecord {
             {
                     JSONObject js_obj = (JSONObject) obj;
                     User usr = new User();
-                    usr.setUsername(String.valueOf("assignee_name"));
+                    usr.setUsername(String.valueOf(js_obj.get("assignee_name")));
+                    usr.setId_user(Integer.parseInt(js_obj.get("assignee_id").toString()));
                     listOfUser.add(usr);
             }
             
@@ -415,6 +416,7 @@ public class Task extends DBSimpleRecord {
             
             String response = MainApp.callRestfulWebService(MainApp.serviceURL+"task/get_comments", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
+            
             ArrayList<Comment> listOfComment = new ArrayList<Comment>();
             for (Object obj : resp_obj)
             {
@@ -422,9 +424,7 @@ public class Task extends DBSimpleRecord {
                     Comment cmnt = new Comment();
                     cmnt.setKomentar(String.valueOf(js_obj.get("comment")));
                     cmnt.setTimestamp(Timestamp.valueOf(js_obj.get("timestamp").toString()));
-                    
-                    JSONObject js_user = (JSONObject) JSONValue.parse(js_obj.get("user").toString());
-                    cmnt.setId_user(Integer.valueOf(js_user.get("id_user").toString()));
+                    cmnt.setId_komentar(Integer.valueOf(js_obj.get("id_comment").toString()));
                     
                     listOfComment.add(cmnt);
             }
