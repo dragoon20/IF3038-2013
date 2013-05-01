@@ -4,13 +4,6 @@
  */
 package models;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -46,41 +39,6 @@ public class Tag extends DBSimpleRecord{
     	return "tag";
     }
     
-    public boolean save() 
-    {
-    	Connection connection = DBConnection.getConnection();
-        // check same tag_name
-        if (!this.data.containsKey("id_tag"))
-        {
-            // new tag
-            try {
-                PreparedStatement statement = connection.prepareStatement
-                ("INSERT INTO `"+ getTableName()+"` (tag_name) VALUES (?)", Statement.RETURN_GENERATED_KEYS); 
-                // Parameters start with 1
-                statement.setString(1, getTag_name());
-                statement.executeUpdate();
-                
-                ResultSet rs = statement.getGeneratedKeys();
-                if (rs.next())
-                {
-                	setId_tag(rs.getInt(1));
-                }
-                return true;
-            } catch (SQLException ex) {
-                Logger.getLogger(Tag.class.getName()).log(Level.SEVERE, null, ex);
-                return false;
-            }
-        }
-        else
-        {
-        	return false;
-        }
-    }
-    
-    public boolean checkValidity() 
-    {
-        return true;
-    }
     /**
      * @return the id_tag
      */

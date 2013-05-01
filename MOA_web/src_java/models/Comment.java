@@ -4,16 +4,11 @@
  */
 package models;
 
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -57,31 +52,6 @@ public class Comment extends DBSimpleRecord{
     public static String getTableName()
     {
         return "comment";
-    }
-    
-    public boolean save() 
-    {
-    	Connection connection = DBConnection.getConnection();
-    	if (!this.data.containsKey("id_komentar"))
-    	{
-	        try 
-	        {
-	            PreparedStatement statement = connection.prepareStatement
-	            ("INSERT INTO `"+ getTableName()+"` (komentar, id_user, id_task) VALUES (?, ?, ?)");
-	            // Parameters start with 1
-	            statement.setString(1, getKomentar());
-	            statement.setInt(2, getId_user());
-	            statement.setInt(3, getId_task());
-	            statement.executeUpdate();
-	        } catch (SQLException ex) {
-	            Logger.getLogger(Comment.class.getName()).log(Level.SEVERE, null, ex);
-	        }
-	        return true;
-    	}
-    	else
-    	{
-    		return false;
-    	}
     }
     
     public boolean checkValidity() 
@@ -151,11 +121,13 @@ public class Comment extends DBSimpleRecord{
 			{
 				JSONObject js_obj = (JSONObject) obj;
 				Comment komen = new Comment();
-                                komen.setId_komentar(Integer.valueOf((String)js_obj.get("id_komentar")));
-                                komen.setTimestamp(Timestamp.valueOf((String)js_obj.get("timestamp")));
-                                komen.setKomentar((String)js_obj.get("komentar"));
-                                komen.setId_user(Integer.valueOf((String)js_obj.get("id_user")));
-                                commentlist.add(komen);
+                komen.setId_komentar(Integer.valueOf((String)js_obj.get("id_komentar")));
+                komen.setTimestamp(Timestamp.valueOf((String)js_obj.get("timestamp")));
+                komen.setKomentar((String)js_obj.get("komentar"));
+                komen.putData("username", (String)js_obj.get("username"));
+                komen.putData("avatar", (String)js_obj.get("avatar"));
+                komen.putData("fullname", (String)js_obj.get("fullname"));
+                commentlist.add(komen);
 			}
         }catch(Exception exc){
 
@@ -179,11 +151,13 @@ public class Comment extends DBSimpleRecord{
 			{
 				JSONObject js_obj = (JSONObject) obj;
 				Comment komen = new Comment();
-                                komen.setId_komentar(Integer.valueOf((String)js_obj.get("id_komentar")));
-                                komen.setTimestamp(Timestamp.valueOf((String)js_obj.get("timestamp")));
-                                komen.setKomentar((String)js_obj.get("komentar"));
-                                komen.setId_user(Integer.valueOf((String)js_obj.get("id_user")));
-                                commentlist.add(komen);
+                komen.setId_komentar(Integer.valueOf((String)js_obj.get("id_komentar")));
+                komen.setTimestamp(Timestamp.valueOf((String)js_obj.get("timestamp")));
+                komen.setKomentar((String)js_obj.get("komentar"));
+                komen.putData("username", (String)js_obj.get("username"));
+                komen.putData("avatar", (String)js_obj.get("avatar"));
+                komen.putData("fullname", (String)js_obj.get("fullname"));
+                commentlist.add(komen);
 			}
         }catch(Exception exc){
 

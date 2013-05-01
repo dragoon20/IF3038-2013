@@ -27,6 +27,7 @@ public class DBConnection
         	if (connection != null) 
         	{
         		connection.close();
+        		//return connection;
         	}
             Properties prop = new Properties();
             if (deployment)

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 29, 2013 at 09:05 PM
+-- Generation Time: May 01, 2013 at 11:48 AM
 -- Server version: 5.5.31-0ubuntu0.13.04.1
 -- PHP Version: 5.4.9-4ubuntu2
 
@@ -66,7 +66,6 @@ CREATE TABLE IF NOT EXISTS `assign` (
 
 INSERT INTO `assign` (`id_user`, `id_task`) VALUES
 (13, 36),
-(4, 38),
 (6, 39);
 
 -- --------------------------------------------------------
@@ -84,14 +83,36 @@ CREATE TABLE IF NOT EXISTS `comment` (
   PRIMARY KEY (`id_komentar`),
   KEY `id_user` (`id_user`),
   KEY `id_task` (`id_task`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=39 ;
 
 --
 -- Dumping data for table `comment`
 --
 
 INSERT INTO `comment` (`id_komentar`, `timestamp`, `komentar`, `id_user`, `id_task`) VALUES
-(12, '2013-04-29 11:52:10', 'lalal', 14, 37);
+(12, '2013-04-29 11:52:10', 'lalal', 14, 37),
+(17, '2013-05-01 02:05:47', 'asdasd', 14, 36),
+(18, '2013-05-01 02:06:14', 'asdasdas', 14, 36),
+(19, '2013-05-01 02:06:29', 'asdasd', 14, 36),
+(20, '2013-05-01 02:20:44', 'asdasd', 14, 36),
+(21, '2013-05-01 02:22:40', 'asdasdasd', 14, 36),
+(22, '2013-05-01 02:24:21', 'asdasd', 14, 36),
+(23, '2013-05-01 02:25:44', 'asdasd', 14, 36),
+(24, '2013-05-01 02:30:31', 'asdasd', 14, 36),
+(25, '2013-05-01 02:30:31', 'asdasd', 14, 36),
+(26, '2013-05-01 02:30:31', 'asdasd', 14, 36),
+(27, '2013-05-01 02:30:53', 'adasda', 14, 36),
+(28, '2013-05-01 02:32:24', 'asdasda', 14, 40),
+(29, '2013-05-01 02:32:50', 'sadasd', 14, 40),
+(30, '2013-05-01 02:35:07', 'adssad', 14, 40),
+(31, '2013-05-01 02:37:02', 'adsad', 14, 40),
+(32, '2013-05-01 02:37:13', 'aa', 14, 40),
+(33, '2013-05-01 02:38:32', 'b', 14, 40),
+(34, '2013-05-01 02:39:49', 'adsa', 14, 40),
+(35, '2013-05-01 02:41:38', 'adsadas', 14, 40),
+(36, '2013-05-01 02:41:44', 'sadasd', 14, 40),
+(37, '2013-05-01 02:41:45', 'asdasd', 14, 40),
+(38, '2013-05-01 02:41:48', 'adsasd', 14, 40);
 
 -- --------------------------------------------------------
 
@@ -132,7 +153,6 @@ CREATE TABLE IF NOT EXISTS `have_tags` (
 
 INSERT INTO `have_tags` (`id_task`, `id_tag`) VALUES
 (37, 2),
-(38, 2),
 (36, 19),
 (39, 20);
 
@@ -219,7 +239,7 @@ CREATE TABLE IF NOT EXISTS `task` (
   PRIMARY KEY (`id_task`),
   KEY `id_kategori` (`id_kategori`),
   KEY `id_user` (`id_user`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=40 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=41 ;
 
 --
 -- Dumping data for table `task`
@@ -228,8 +248,8 @@ CREATE TABLE IF NOT EXISTS `task` (
 INSERT INTO `task` (`id_task`, `nama_task`, `status`, `deadline`, `id_kategori`, `id_user`) VALUES
 (36, 'baru lagi abcd', 0, '2013-04-19', 37, 14),
 (37, 'haha', 0, '2010-04-19', 37, 14),
-(38, 'hellothere', 0, '2013-04-10', 37, 14),
-(39, 'hellothere 2', 0, '2013-04-26', 37, 14);
+(39, 'hellothere 2', 0, '2013-04-26', 37, 14),
+(40, 'janice', 0, '2013-04-02', 37, 14);
 
 -- --------------------------------------------------------
 
@@ -239,7 +259,7 @@ INSERT INTO `task` (`id_task`, `nama_task`, `status`, `deadline`, `id_kategori`,
 
 CREATE TABLE IF NOT EXISTS `task_attachment` (
   `id_task` int(10) NOT NULL,
-  `attachment` varchar(100) NOT NULL,
+  `attachment` varchar(200) NOT NULL,
   PRIMARY KEY (`id_task`,`attachment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -251,7 +271,6 @@ INSERT INTO `task_attachment` (`id_task`, `attachment`) VALUES
 (36, '52CF7869C029B3332098607D6327E72C.'),
 (36, 'D5D8BFE5D15540254115EF1DC7273C96.'),
 (37, 'EB95EFCCE12C4AA4842E65A082C53122.'),
-(38, '30520FA01A72186C12709B35B2F1BDA5.'),
 (39, '757432B3270F22D3F971CFB967E0D6D5.');
 
 -- --------------------------------------------------------
@@ -276,8 +295,8 @@ CREATE TABLE IF NOT EXISTS `tokens` (
 
 INSERT INTO `tokens` (`timestamp`, `token`, `id_user`, `id_app`) VALUES
 ('2013-04-29 12:30:59', 'f5dc66645864a97b5efcfd06dd92de2f', 3, 1),
-('2013-04-29 13:12:01', '3e6bb5eb98351c41e2137f098ee6ec01', 14, 1),
-('2013-04-29 14:00:41', '45af64f5afb08c71c2c21d628a89f60f', 14, 6);
+('2013-05-01 04:37:30', '2438368a7f0717b8cd6662d8459cface', 14, 1),
+('2013-05-01 02:47:36', '2fae0d047c478f463a3bc7506569744b', 14, 6);
 
 -- --------------------------------------------------------
 
@@ -295,7 +314,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `password` varchar(50) NOT NULL,
   PRIMARY KEY (`id_user`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=16 ;
 
 --
 -- Dumping data for table `user`
@@ -308,7 +327,8 @@ INSERT INTO `user` (`id_user`, `username`, `email`, `fullname`, `avatar`, `birth
 (6, 'abraham', 'abraham@gmail.com', 'abraham krisnanda', '2E267CC7E1DB6A827FB822F378B2C1B9.jpg', '2013-01-14', 'tesdoang'),
 (11, 'dragoon20', 'fernandojordan.92@gmail.com', 'Jordan Fernando', '2147EF717843A5FB29052685D7A83420.jpg', '2012-01-01', '8637f9cb4045689929a1628a74db5d81'),
 (13, 'dronJaX', 'master_crusader20@hotmail.com', 'Jordan Fernando', '9BD8FCAAC9A4ACD3D1DC2757740D70C9.jpg', '1992-11-21', '4a5a19444716417f381a3dda2215da32'),
-(14, 'abraha', 'hahaha@gmail.com', 'abraham krisnanda', 'D398A0821C59E37E8035181BD8C54428.jpg', '2013-04-01', '1441f19754335ca4638bfdf1aea00c6d');
+(14, 'abraha', 'hahaha@gmail.com', 'abraham krisnanda', 'D398A0821C59E37E8035181BD8C54428.jpg', '2013-04-01', '1441f19754335ca4638bfdf1aea00c6d'),
+(15, 'janice', 'janice@gmail.com', 'Janice Laksana', 'http://localhost:8080/MOA_web/upload/user_profile_pict/67A50AED125DD733BB9472BDA0BECFD1.jpg', '3913-05-09', 'fc4b99be5c61a36e67be03c2db25f4bd');
 
 --
 -- Constraints for dumped tables

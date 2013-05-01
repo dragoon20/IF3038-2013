@@ -107,7 +107,7 @@ public abstract class DBSimpleRecord
     	return data;
     }
     
-    public DBSimpleRecord find(String query, Object[] params, String[] params_type , String[] selection)
+    /*public DBSimpleRecord find(String query, Object[] params, String[] params_type , String[] selection)
     {
     	Connection connection = DBConnection.getConnection();
     	try
@@ -338,5 +338,5 @@ public abstract class DBSimpleRecord
             Logger.getLogger(DBSimpleRecord.class.getName()).log(Level.SEVERE, null, ex);
         }
         return affected_row;
-    }
+    }*/
 }

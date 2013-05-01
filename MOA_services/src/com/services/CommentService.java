@@ -14,7 +14,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.helper.GeneralHelper;
-import com.models.Category;
 import com.models.Comment;
 import com.models.Task;
 import com.models.User;
@@ -221,24 +220,15 @@ public class CommentService extends BasicServlet
                         {
                                Comment[] komentarlatest = Comment.getModel().getLatest(Integer.parseInt(request.getParameter("id_task")), request.getParameter("timestamp").toString());
                                
-                               List<Map<String, String>> komentar_val = new ArrayList<Map<String, String>>();
-                               for(Comment comment : komentarlatest){
-                                   Map<String, String> map = new HashMap<String,String>();
-                                   
-                                   map.put("id_komentar", comment.getKomentar());
-                                   map.put("timestamp", comment.getTimestamp().toString());
-                                   map.put("komentar", comment.getKomentar());
-                                   map.put("id_user",Integer.toString(comment.getId_user()));
-                                   User user = comment.getUser();
-                                   map.put("username",user.getUsername());
-                                   map.put("fullname",user.getFullname());
-                                   map.put("avatar", user.getAvatar());
+                               List<Map<String, Object>> komentar_val = new ArrayList<Map<String, Object>>();
+                               for(Comment comment : komentarlatest)
+                               {
+                                   Map<String, Object> map = comment.getData();
                                    komentar_val.add(map);
                                }
-				
                                PrintWriter pw = response.getWriter();
                                pw.print(JSONValue.toJSONString(komentar_val));
-                               
+                               pw.close();
                         }
                         else
                         {
@@ -270,24 +260,16 @@ public class CommentService extends BasicServlet
                 {
                    Comment[] komentarlatest = Comment.getModel().getOlder(Integer.parseInt(request.getParameter("id_task")), request.getParameter("timestamp").toString());
                    
-                   List<Map<String, String>> komentar_val = new ArrayList<Map<String, String>>();
-                   for(Comment comment : komentarlatest){
-                       Map<String, String> map = new HashMap<String,String>();
-                       
-                       map.put("id_komentar", comment.getKomentar());
-                       map.put("timestamp", comment.getTimestamp().toString());
-                       map.put("komentar", comment.getKomentar());
-                       map.put("id_user",Integer.toString(comment.getId_user()));
-                       User user = comment.getUser();
-                       map.put("username",user.getUsername());
-                       map.put("username",user.getFullname());
-                       map.put("avatar", user.getAvatar());
-                       komentar_val.add(map);
+                   List<Map<String, Object>> komentar_val = new ArrayList<Map<String, Object>>();
+                   for(Comment comment : komentarlatest)
+                   {
+                	   Map<String, Object> map = comment.getData();
+                	   komentar_val.add(map);
                    }
 	
                    PrintWriter pw = response.getWriter();
                    pw.print(JSONValue.toJSONString(komentar_val));
-                       
+                   pw.close();
                 }
                 else
                 {

@@ -140,18 +140,18 @@
 								{
 						%>
 									<video class="atchmt" controls>
-									<source src="upload/attachments/<%= attachment.getAttachment() %>" type="video/mp4">
+									<source src="<%= attachment.getAttachment() %>" type="video/mp4">
 						<%		
 								}
 								else if ((atch[atch.length-1].toUpperCase().matches("JPG")) || ("PNG".equals(atch[atch.length-1].toUpperCase())) || ("GIF".equals(atch[atch.length-1].toUpperCase())))
 								{
 						%>
-									<img class="atchmt" src="upload/attachments/<%= attachment.getAttachment() %>" alt="Task Attachment">
+									<img class="atchmt" src="<%= attachment.getAttachment() %>" alt="Task Attachment">
 						<%
 								}
 								else
 								{
-									String file = "<a href=upload/attachments/"+attachment.getAttachment()+">Download attachment-"+i+" here</a>,";
+									String file = "<a href=\""+attachment.getAttachment()+"\">Download attachment-"+i+" here</a>,";
 								}
 								i++;
 							}
@@ -253,7 +253,7 @@
 								User user = comment.getUser(MainApp.token(session), ""+comment.getId_komentar());
 								out.println("<article id=\"comment_"+comment.getId_komentar()+"\" class=\"comment\">");
                                                                 out.println("<a href=\"profile?id="+user.getId_user()+"\">");
-										out.println("<img src=\"upload/user_profile_pict/"+user.getAvatar()+"\" alt=\""+user.getFullname()+"\" class=\"icon_pict\" >");
+										out.println("<img src=\""+user.getAvatar()+"\" alt=\""+user.getFullname()+"\" class=\"icon_pict\" >");
 									out.println("</a>");
 									out.println("<div class=\"right\">");
 										out.println(date_format4.format(comment.getTimestamp()));
@@ -281,7 +281,7 @@
 						<h3>Add Comment</h3>
 						<%
 							out.println("<a href=\"profile\">");
-								out.println("<img src=\"upload/user_profile_pict/"+MainApp.currentUser(session).getAvatar()+"\" alt=\""+MainApp.currentUser(session).getFullname()+"\" class=\"icon_pict\" >");
+								out.println("<img src=\""+MainApp.currentUser(session).getAvatar()+"\" alt=\""+MainApp.currentUser(session).getFullname()+"\" class=\"icon_pict\" >");
 							out.println("</a>");
 						%>
 						<form id="commentForm" action="#" method="post">
@@ -298,8 +298,8 @@
 			var id_task = <%= task.getId_task() %>;
 			var first_timestamp = "<%= firsttimestamp %>";
 			var timestamp = "<%= lasttimestamp %>";
+			var username = "<%= MainApp.currentUser(session).getUsername() %>"
 			var total_comment = <%= total_comment %>;
-			var id_user = <%= MainApp.token(session) %>;
 			var current_total_comment = <%= Math.min(10, total_comment) %>;
 		</script>
 <% 

@@ -53,7 +53,8 @@ public class MainApp extends HttpServlet
     public static final String appId = "0d2d2a7531376b3b05ff4203aeaa6b41";
     public static final String appName = "MOA";
     public static final String appTagline = "Multiuser Online Agenda";
-    public static final String serviceURL = "http://localhost:8080/MOA_services/";
+    //public static final String serviceURL = "http://localhost:8080/MOA_services/";
+    public static final String serviceURL = "http://moa-service.ap01.aws.af.cm/";
     
     /**
      * @see HttpServlet#HttpServlet()
@@ -374,9 +375,9 @@ public class MainApp extends HttpServlet
 					Map<String, Object> tempmap = new HashMap<String, Object>();
 					String extension = fi.getName().split("\\.")[fi.getName().split("\\.").length-1]; 
 					String name = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
-					tempmap.put("attachment", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
+					tempmap.put("attachment", MainApp.appUrl(request.getSession())+"upload/attachments/"+name);
 					tempmap.put("temp", fi.getInputStream());
-					tempmap.put("location", MainApp.appUrl(request.getSession())+"upload/attachments/"+name);
+					tempmap.put("location", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
 					attachments.add(tempmap);
 				}
 			}
@@ -406,7 +407,7 @@ public class MainApp extends HttpServlet
 
 				for (Map<String, Object> attachment : attachments)
 				{
-					if (client.add_new_attachment(token(request.getSession()), appId, result, MainApp.fullPath(request.getSession())+"upload/attachments/"+attachment.get("attachment")))
+					if (client.add_new_attachment(token(request.getSession()), appId, result, (String)attachment.get("attachment")))
 					{
 						FileOutputStream out = new FileOutputStream(new File((String)attachment.get("location")));
 
@@ -475,9 +476,9 @@ public class MainApp extends HttpServlet
 					Map<String, Object> tempmap = new HashMap<String, Object>();
 					String extension = fi.getName().split("\\.")[fi.getName().split("\\.").length-1]; 
 					String name = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
-					tempmap.put("attachment", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
+					tempmap.put("attachment", MainApp.appUrl(request.getSession())+"upload/attachments/"+name);
 					tempmap.put("temp", fi.getInputStream());
-					tempmap.put("location", MainApp.appUrl(request.getSession())+"upload/attachments/"+name);
+					tempmap.put("location", MainApp.fullPath(request.getSession())+"upload/attachments/"+name);
 					attachments.add(tempmap);
 				}
 			}
@@ -575,7 +576,7 @@ public class MainApp extends HttpServlet
 
 					for (Map<String, Object> attachment : attachments)
 					{
-						if (client.add_new_attachment(token(request.getSession()), appId, (Integer)params.get("id_task"), MainApp.fullPath(request.getSession())+"upload/attachments/"+attachment.get("attachment")))
+						if (client.add_new_attachment(token(request.getSession()), appId, (Integer)params.get("id_task"), (String)attachment.get("attachment")))
 						{
 							FileOutputStream out = new FileOutputStream(new File((String)attachment.get("location")));
 

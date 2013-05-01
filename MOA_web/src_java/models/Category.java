@@ -4,14 +4,7 @@
  */
 package models;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -54,41 +47,6 @@ public class Category extends DBSimpleRecord{
     public static String getTableName() 
     {
     	return "kategori";
-    }
-    
-    public boolean save() 
-    {
-    	Connection connection = DBConnection.getConnection();
-        if(!this.data.containsKey("id_kategori"))
-        {
-            try {
-                // new category
-                PreparedStatement statement = connection.prepareStatement
-                ("INSERT INTO `"+ Category.getModel().GetTableName()+"` (nama_kategori, id_user) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
-                // Parameters start with 1
-                statement.setString(1, getNama_kategori());
-                statement.setInt(2, getId_user());
-                
-                statement.executeUpdate();
-
-                ResultSet gen = statement.getGeneratedKeys();
-                gen.next();
-                setId_kategori(gen.getInt(1));
-            } catch (SQLException ex) {
-                Logger.getLogger(Category.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            return true;
-        }
-        else 
-        {
-            // username and email already used
-            return false;
-        }
-    }
-    
-    public boolean checkValidity() 
-    {
-        return false;
     }
     
     public boolean getEditable(String token, String id_kategori)

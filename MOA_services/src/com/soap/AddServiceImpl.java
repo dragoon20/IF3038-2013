@@ -63,7 +63,6 @@ public class AddServiceImpl implements AddService
 			int id_user;
 			if ((token!=null) &&(app_id!=null) && ((id_user = GeneralHelper.isLogin(token, app_id))!=-1))
 			{
-				System.out.println(id_kategori);
 				if ((nama_task!=null) && (deadline!=null) && (id_kategori!=null) && 
 					(((Category)Category.getModel().find("id_kategori = ?", new Object[]{id_kategori}, new String[]{"integer"}, null)).getEditable(id_user)))
 				{
@@ -199,7 +198,7 @@ public class AddServiceImpl implements AddService
 					PreparedStatement prep = conn.prepareStatement("INSERT INTO `task_attachment` (id_task, attachment) VALUES(?, ?)");
 					prep.setInt(1, id_task);
 					prep.setString(2, attachment);
-					
+					System.out.println(attachment);
 					success = (prep.executeUpdate()==1);
 				}
 				else

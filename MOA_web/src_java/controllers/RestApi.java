@@ -141,28 +141,51 @@ public class RestApi extends HttpServlet
 
 	/*** ----- START OF TASK MODULE -----***/
 
-	/**
-	 * Delete a task
-	 * @return string contains whether success or fail
-	 */
-	public void delete_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	public void get_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-            System.out.println(">>>>In There");
-		if ("POST".equals(request.getMethod().toUpperCase()))
+		if ((MainApp.LoggedIn(session)) && (request.getParameter("id_task")!=null))
 		{
 			try {
 				HashMap<String, String> parameter = new HashMap<String,String>();
 				parameter.put("token", MainApp.token(session));
 				parameter.put("app_id", MainApp.appId);
-				parameter.put("id_task", request.getParameter("task_id"));
+				parameter.put("id_task", request.getParameter("id_task"));
 
-				String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"task/delete_task", parameter, "", 0);
+				String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"task/get_task", parameter, "", 0);
 
 				PrintWriter pw = response.getWriter();
 				pw.println(responseString);
 				pw.close();
 			} catch(Exception exc) {
 				exc.printStackTrace();
+			}
+		}
+	}
+	
+	/**
+	 * Delete a task
+	 * @return string contains whether success or fail
+	 */
+	public void delete_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		if (MainApp.LoggedIn(session))
+		{
+			if ("POST".equals(request.getMethod().toUpperCase()))
+			{
+				try {
+					HashMap<String, String> parameter = new HashMap<String,String>();
+					parameter.put("token", MainApp.token(session));
+					parameter.put("app_id", MainApp.appId);
+					parameter.put("id_task", request.getParameter("task_id"));
+	
+					String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"task/delete_task", parameter, "", 0);
+	
+					PrintWriter pw = response.getWriter();
+					pw.println(responseString);
+					pw.close();
+				} catch(Exception exc) {
+					exc.printStackTrace();
+				}
 			}
 		}
 	}
@@ -295,7 +318,7 @@ public class RestApi extends HttpServlet
 					HashMap<String, String> parameter = new HashMap<String,String>();
 					parameter.put("token", MainApp.token(session));
 					parameter.put("app_id", MainApp.appId);
-					parameter.put("id_category", request.getParameter("category_id"));
+					parameter.put("id_kategori", request.getParameter("category_id"));
 
 					String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"category/delete_category", parameter, "", 0);
 

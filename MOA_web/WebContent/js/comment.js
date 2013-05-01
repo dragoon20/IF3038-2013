@@ -35,7 +35,7 @@ Rp(function()
 						for (var i in response.tag)
 						{
 							var tag = document.createElement("span");
-							tag.className = "tag"
+							tag.className = "tag";
 							tag.innerHTML = response.tag[i];
 							tagparent.appendChild(tag);
 						}
@@ -45,7 +45,7 @@ Rp(function()
 					}
 					break;
 			}
-		}
+		};
 		req.get('api/get_task?id_task=' + id_task);
 	}
 	
@@ -53,8 +53,8 @@ Rp(function()
 	{
 		var commentList = document.getElementById("commentsList");
 		var string = '<article id="comment_'+comment.id_komentar+'" class="comment">';
-			string += '<a href="profile?id='+comment.id_user+'">';
-				string += '<img src="upload/user_profile_pict/'+comment.avatar+'" alt="'+comment.fullname+'" class="icon_pict" >';
+			string += '<a href="profile?username='+comment.username+'">';
+				string += '<img src="'+comment.avatar+'" alt="'+comment.fullname+'" class="icon_pict" >';
 			string += '</a>';
 			string += '<div class="right">';
 				date = new Date(comment.timestamp.substr(0,4),(parseInt(comment.timestamp.substr(5,2)))-1,comment.timestamp.substr(8,2),
@@ -62,11 +62,11 @@ Rp(function()
 				var temphour = (date.getHours()>=10)? "" : "0";
 				var tempmin = (date.getMinutes()>=10)? "" : "0";
 				string += temphour + date.getHours()+":"+tempmin+date.getMinutes()+" - "+Day[date.getDay()]+"/"+Mon[date.getMonth()];
-				if (comment.id_user==id_user)
+				if (comment.username==username)
 					string += ' <a href="javascript:delete_comment('+comment.id_komentar+')">DELETE</a>';
 			string += '</div>';
 			string += '<header>';
-				string += '<a href="profile?id='+comment.id_user+'">';
+				string += '<a href="profile?id='+comment.username+'">';
 					string += '<h4>'+comment.username+'</h4>';
 				string += '</a>';
 			string += '</header>';
@@ -95,7 +95,7 @@ Rp(function()
 				case 4:
 					// Rp('#commentForm').removeClass('loading');
 					try {
-						response = Rp.parseJSON(req.responseText);
+						response = JSON.parse(req.responseText);
 						for (var i in response)
 						{
 							buildcomment(response[i]);
@@ -105,10 +105,11 @@ Rp(function()
 					}
 					catch (e) {
 						console.log(e);
+						console.log(e.toString());
 					}
 					break;
 			}
-		}
+		};
 		req.get('api/retrieve_comments?id_task=' + id_task+"&timestamp="+timestamp);
 	}
 	
@@ -141,7 +142,7 @@ Rp(function()
 					}
 					break;
 			}
-		}
+		};
 		req.post(serialized);
 	});
 	
@@ -151,7 +152,7 @@ Rp(function()
 		setInterval(function(){retrieve_detail_task();},10000);
 		// override onload function
 		datePicker.init(document.getElementById("calendar"), document.getElementById("new_tugas"), "deadline");
-	}
+	};
 });
 
 function delete_comment(id)
@@ -185,7 +186,7 @@ function delete_comment(id)
 				}
 				break;
 		}
-	}
+	};
 	req.post(serialized);
 }
 
@@ -193,8 +194,8 @@ function prepend_comment(comment)
 {
 	var commentList = document.getElementById("commentsList");
 	var string = '<article id="comment_'+comment.id_komentar+'" class="comment">';
-		string += '<a href="profile?id='+comment.id_user+'">';
-			string += '<img src="upload/user_profile_pict/'+comment.avatar+'" alt="'+comment.fullname+'" class="icon_pict" >';
+		string += '<a href="profile?username='+comment.username+'">';
+			string += '<img src="'+comment.avatar+'" alt="'+comment.fullname+'" class="icon_pict" >';
 		string += '</a>';
 		string += '<div class="right">';
 			date = new Date(comment.timestamp.substr(0,4),(parseInt(comment.timestamp.substr(5,2)))-1,comment.timestamp.substr(8,2),
@@ -203,11 +204,11 @@ function prepend_comment(comment)
 			var tempmin = (date.getMinutes()>=10)? "" : "0";
 			var tempstring = temphour + date.getHours()+":"+tempmin+date.getMinutes()+" - "+Day[date.getDay()]+"/"+Mon[date.getMonth()];
 			string += tempstring;
-			if (comment.id_user==id_user)
+			if (comment.username==username)
 				string += ' <a href="javascript:delete_comment('+comment.id_komentar+')">DELETE</a>';
 		string += '</div>';
 		string += '<header>';
-			string += '<a href="profile?id='+comment.id_user+'">';
+			string += '<a href="profile?username='+comment.username+'">';
 				string += '<h4>'+comment.username+'</h4>';
 			string += '</a>';
 		string += '</header>';
@@ -256,6 +257,6 @@ function more_comment()
 				}
 				break;
 		}
-	}
+	};
 	req.get('api/get_previous_comments?id_task=' + id_task+"&timestamp="+first_timestamp);
 }

@@ -4,11 +4,6 @@
  */
 package models;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -42,28 +37,6 @@ public class Attachment extends DBSimpleRecord {
     public static String getTableName()
     {
     	return "task_attachment";
-    }
-    
-    public boolean save() 
-    {
-    	Connection connection = DBConnection.getConnection();
-        // check same id_task and attachment
-        try {
-            PreparedStatement statement = connection.prepareStatement
-            ("INSERT INTO `"+ getTableName()+"` (id_task, attachment) VALUES (?, ?)");
-            // Parameters start with 1
-            statement.setInt(1, getId_task());
-            statement.setString(2, getAttachment());
-            statement.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return true;
-    }
-    
-    public boolean checkValidity() 
-    {
-        return true;
     }
     
     /**

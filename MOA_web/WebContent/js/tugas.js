@@ -1,10 +1,9 @@
 var Day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 var Mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Des"];
 
-Rp(function() 
-{
-	var delete_task = document.getElementById("removeTaskLink");
-	if (delete_task != undefined) delete_task.onclick = function()
+var delete_task = document.getElementById("removeTaskLink");
+if (delete_task != undefined) 
+	delete_task.onclick = function()
 	{
 		var serialized = "task_id="+id_task;
 		var req = Rp.ajaxRequest('api/delete_task');
@@ -23,20 +22,20 @@ Rp(function()
 						}
 					}
 					catch (e) {
-
+	
 					}
 					break;
 			}
-		}
+		};
 		req.post(serialized);
 		return false;
-	}
-	
-	window.onload = function()
-	{
-		datePicker.init(document.getElementById("calendar"), document.getElementById("new_tugas"), "deadline");
-	}
-});
+	};
+
+
+window.onload = function()
+{
+	datePicker.init(document.getElementById("calendar"), document.getElementById("new_tugas"), "deadline");
+};
 
 var asignee = document.getElementById("assignee");
 asignee.setAttribute('autocomplete', 'off');
@@ -76,9 +75,9 @@ asignee.onkeyup = function()
 				}
 				break;
 		}
-	}
+	};
 	req.get('api/get_username?username=' + value);
-}
+};
 
 function choose_assignee(username)
 {
@@ -127,9 +126,9 @@ tag.onkeyup = function()
 				}
 				break;
 		}
-	}
+	};
 	req.get('api/get_tag?tag=' + value);
-}
+};
 
 function choose_tag(temptag)
 {
@@ -163,6 +162,6 @@ handleTaskCheckbox = function(e) {
 		'taskID': taskID,
 		'completed': checked
 	});
-}
+};
 
 Rp('.task-checkbox input[data-task-id]').on('change', handleTaskCheckbox);

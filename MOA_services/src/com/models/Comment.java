@@ -61,12 +61,24 @@ public class Comment extends DBSimpleRecord{
 	        try 
 	        {
 	            PreparedStatement statement = connection.prepareStatement
-	            ("INSERT INTO `"+ getTableName()+"` (komentar, id_user, id_task) VALUES (?, ?, ?)");
+	            ("INSERT INTO `"+ getTableName()+"` (komentar, id_user, id_task) VALUES (?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
 	            // Parameters start with 1
 	            statement.setString(1, getKomentar());
 	            statement.setInt(2, getId_user());
 	            statement.setInt(3, getId_task());
-	            statement.executeUpdate();
+	            int affected_row = statement.executeUpdate();
+	            
+	            if (affected_row ==0) 
+                {
+                    throw new SQLException("Creating user failed, no rows affected");
+                }
+                
+                ResultSet generatedkeys = statement.getGeneratedKeys();
+                // get generated Id from last SQL Execution
+                if (generatedkeys.next()) 
+                {
+                	setId_komentar(generatedkeys.getInt(1));
+                }
 	        } catch (SQLException ex) {
 	            Logger.getLogger(Comment.class.getName()).log(Level.SEVERE, null, ex);
 	        }
@@ -117,7 +129,7 @@ public class Comment extends DBSimpleRecord{
 	    			for (int i=1;i<=column_count;++i)
 	    			{
 	    				String label = metadata.getColumnLabel(i);
-	    				c.putData(label, rs.getObject(i));
+	    				c.putData(label, rs.getObject(i).toString());
 	    			}
 	        		result.add(c);
 	    		}while (rs.next());
@@ -154,7 +166,7 @@ public class Comment extends DBSimpleRecord{
 	    			for (int i=1;i<=column_count;++i)
 	    			{
 	    				String label = metadata.getColumnLabel(i);
-	    				c.putData(label, rs.getObject(i));
+	    				c.putData(label, rs.getObject(i).toString());
 	    			}
 	        		result.add(c);
 	    		}while (rs.next());
