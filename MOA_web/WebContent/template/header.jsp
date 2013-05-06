@@ -1,102 +1,95 @@
-<!DOCTYPE html>
-
-<%@page import="java.util.ArrayList"%>
-<%@page import="models.User"%>
 <%@page import="controllers.MainApp"%>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title><%= request.getAttribute("title") %></title>
-		<base href="<%= session.getAttribute("base_url") %>">
-		<link rel="stylesheet" href="css/style.css">
-		<link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
-	</head>
-
-	<body>
-		<div class="site-container">
-			<header class="site-header">
-				<h1><a href="dashboard"><%= MainApp.appName %></a></h1>
-				<p><%= MainApp.appTagline %></p>
-
-				<% 
-					if (MainApp.LoggedIn(session))
+<%@page import="java.util.Map.Entry"%>
+<%@page import="java.util.HashMap"%>
+<%@page import="java.util.Map"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<header>
+	<div id="header_wrap" class="wrap">
+		<a href="index"> <img id="header_logo" src="images/logo.png" alt="Logo Produk" /> </a>
+		<div id="header_title">
+			<h1> <a href="index">MOA</a> </h1>
+			<h4>Multiuser Online Agenda</h4>
+		</div>
+		<div id="border_header"></div>
+		<div id="header_menu">
+			<nav>
+				<ul>
+					<%
+						Map<String, Map<String, String>> menu = (HashMap<String, Map<String, String>>) request.getAttribute("menu");
+						for (Entry<String, Map<String, String>> entry : menu.entrySet())
+						{
+							out.println("<li>");
+							out.println("<a");
+							for (Entry<String, String> entry2 : entry.getValue().entrySet())
+							{
+								out.println(entry2.getKey()+"=\""+entry2.getValue()+"\" ");
+							}
+							out.println(">"+entry.getKey()+"</a>");
+							out.println("</li>");
+						}
+					%>
+				</ul>
+			</nav>
+			<div id="login_area">
+				<%
+					if (!MainApp.LoggedIn(session))
 					{
 				%>
-					<nav>
-						<ul class="main-links">
-							<% 
-								ArrayList<String> keys = new ArrayList<String>();
-								ArrayList<String> values = new ArrayList<String>();
-								keys.add("dashboard");
-								keys.add("profile");
-								keys.add("logout");
-								values.add("Dashboard");
-								values.add(MainApp.currentUser(session).getFullname());
-								values.add("Logout");
-
-								int x = 0;
-								for (String key: keys)
-								{
-									String label = values.get(x);
-									x++;
-									boolean active = (key.equals(request.getAttribute("currentPage")));
-							%>	
-									<li class="<%= key %> -link<% if (active) out.print("active"); %>" id="<%= key %> Li">
-									<%
-										if ("profile".equals(key)) 
-										{
-									%>
-											<img src="<%= MainApp.currentUser(session).getAvatar() %>" alt="">
-									<%
-										}
-									%>
-									<a href="<%= key %>" id="<%= key %>>Link"><%= label %></a></li>
-							<%
-								}
-							%>
+					<nav id="login_button">
+						<ul>
+							<li> <a id="login_link" href="<%= MainApp.serviceURL %>login?app_id=<%= MainApp.appId %>">Masuk</a> </li>
 						</ul>
-	
-						<%
-							String q = "";
-							String type = "";
-							if ("search".equals(session.getAttribute("currentPage")))
-							{
-								q = request.getParameter("q");
-								type = request.getParameter("type");
-							}
-						%>
-						<div class="search-box">
-							<form action="search" method="get" id="searchForm">
-								<select name="type" id="searchType">
-								<%
-									ArrayList<String> types = new ArrayList<String>();
-									ArrayList<String> type_values = new ArrayList<String>();
-									types.add("all");
-									types.add("task");
-									types.add("user");
-									types.add("category");
-									type_values.add("All");
-									type_values.add("Tasks");
-									type_values.add("Users");
-									type_values.add("Categories");
-									
-									int y=0;
-									for (String k: types)
-									{
-										String v = type_values.get(y);
-										y++;
-										String selected = (k.equals(type)) ? " selected" : "";
-										out.println("<option value=\""+k+selected+"\">"+v+"</option>");
-									}
-								%>
-								</select>
-								<input type="search" name="q" placeholder="Search" value="<%= q %>" id="searchQuery">
-								<button type="submit">Search</button>
+					</nav>
+					<%
+						/*
+						<div class="clear"></div>
+						<div id="border_login"><div id="border_login_inner"></div></div>
+						<div id="login_form_wrap">
+							<form id="login_form" action="dashboard.html" method="post">
+								<div class="row">
+									<label for="login_username">Username</label> <br />
+									<input id="login_username" name="username" type="text" required /> <br />
+								</div>
+								<div class="row">
+									<label for="login_password">Sandi</label> <br />
+									<input id="login_password" name="password" type="password" required /> <br />
+								</div>
+								<input type="submit" value="Masuk" />
 							</form>
 						</div>
+						*/
+					%>
+				<%
+					}
+					else
+					{
+				%>
+					<nav id="login_button">
+						<ul>
+							<li> <a id="login_link" href="#">Keluar</a> </li>
+						</ul>
 					</nav>
-				<% 
+				<%
 					}
 				%>
-			</header>
-			<div id="content">
+				<div class="clear"></div>
+			</div>
+			<div id="border_search"></div>
+
+			<div id="search">
+				<div id="search_inner">
+					<div id="search_button"></div>
+					<div id="search_left"></div>
+					<form id="search_form">
+						<input id="search_text" name="search_query" type="text" />
+					</form>
+					<div id="search_right"></div>
+				</div>
+			</div>
+		</div>
+		<div class="clear"></div>
+	</div>
+</header>
+<script type="text/javascript" src="js/search.js"></script>
+<% //<script type="text/javascript" src="js/login.js"></script> %>

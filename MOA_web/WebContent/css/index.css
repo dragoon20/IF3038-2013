@@ -1,3 +1,4 @@
+@CHARSET "UTF-8";
 /*--- FORM ---*/
 #register_form input[type="text"], #register_form_wrap input[type="password"], #register_form_wrap input[type="file"]
 {

@@ -10,24 +10,17 @@ var datePicker =
 	today : null,
 	thisYear : null,
 	thisMonth : null,
-	date_id: null,
-	choosing: false,
 	
 	/*******************
 	  INITIALIZATIONS
 	********************/
 	// init dispatcher
-	init: function(calendarDiv, destinationForm, date_id) 
+	init: function(calendarDiv, destinationForm) 
 	{
 		this.calendarDiv = calendarDiv;
 		this.destinationForm = destinationForm;
 		this.initDate();
 		this.populateTable(thisMonth, thisYear);
-		this.date_id = date_id;
-		document.getElementById(date_id).onclick = function(event)
-		{
-			datePicker.showCalendar(event);
-		}
 	},
 	// create dynamic list of year choices
 	initDate : function() 
@@ -76,9 +69,11 @@ var datePicker =
 			{
 				var elem = (evt.target) ? evt.target : evt.srcElement;
 				var position = this.getElementPosition(elem.id);
-				this.calendarDiv.style.top = position.top + elem.offsetHeight + "px";
-				this.calendarDiv.style.left = position.left - (elem.offsetWidth/2) + 50 + "px";
+				this.calendarDiv.style.top = position.top + "px";
+				this.calendarDiv.style.left = position.left + elem.offsetWidth + "px";
 				this.calendarDiv.style.display = "block";
+				setTimeout(function () {datePicker.calendarDiv.style.width = "212px";}, 50);
+				setTimeout(function () {datePicker.calendarDiv.style.height = "216px";}, 150);
 			} else 
 			{
 				this.calendarDiv.style.display = "none";
@@ -160,28 +155,24 @@ var datePicker =
 	********************/
 	chooseDate : function(date, month, year) 
 	{
-		choosing = true;
 		var tempdate = (date<10) ? "0":"";
 		var temp = ((month+1)<10) ? "0":"";
 		var result = year + "-" + temp + (month+1) + "-" + tempdate + date;
-		document.getElementById(this.date_id).value = result;
+		this.destinationForm.birth_date.value = result;
 		this.blur();
 		
-		/*if ((birth_date.checkValidity()) && (check_date(birth_date.value)))
-			birth_date.className = "";
+		if ((birth_date.checkValidity()) && (check_date(birth_date.value)))
+			birth_date.style.backgroundImage = "url('images/valid.png')";
 		else
-			birth_date.className = "invalid";
-		check_submit();*/
-		choosing = false;
+			birth_date.style.backgroundImage = "url('images/warning.png')";
+		check_submit();
 	},
 	
 	blur: function()
 	{
-		setTimeout(function()
-		{
-			while(this.choosing);
-			datePicker.calendarDiv.style.display = "none";
-		},100);
+		setTimeout(function () {datePicker.calendarDiv.style.height = "0px";}, 250);
+		setTimeout(function () {datePicker.calendarDiv.style.width = "0px";}, 350);
+		setTimeout(function () {datePicker.calendarDiv.style.display = "none";}, 600);
 	},
 	
 	prevMonth: function()
@@ -210,4 +201,4 @@ var datePicker =
 		}
 		this.populateTable(thisMonth, thisYear);
 	}
-}
+};

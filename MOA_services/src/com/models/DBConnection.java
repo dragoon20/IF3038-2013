@@ -8,8 +8,12 @@ package com.models;
  *
  * @author Abraham Krisnanda
  */
-import java.io.*;
-import java.sql.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import org.json.simple.JSONArray;
@@ -19,7 +23,7 @@ import org.json.simple.JSONValue;
 public class DBConnection 
 {
     private static Connection connection = null;
-    private static boolean deployment = false;
+    private static final boolean deployment = false;
     
     public static Connection getConnection() 
     {
