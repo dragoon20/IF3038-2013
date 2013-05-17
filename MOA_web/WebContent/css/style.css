@@ -26,6 +26,18 @@ form button {padding: 0px; margin: 0px; cursor: pointer; /* ie6 doesn't always d
 {
 	clear: both;
 }
+.left
+{
+	float: left;
+}
+.right
+{
+	float: right;
+}
+.bold
+{
+	font-weight: bold;
+}
 
 @media (min-width: 900px) 
 {
@@ -342,6 +354,11 @@ header a
 	font-size: 87%;
 	font-weight: 400;
 }
+.row span
+{
+	font-size: 87%;
+	font-weight: 400;
+}
 .row input:hover
 {
 	border: 1px solid #999999 !important;
@@ -604,4 +621,25 @@ a.date_button:hover
 	color: #258AAF;
 	border: 1px solid #666;
 	background-color: #ffdf4f;
+}
+
+/*--- PROFILE HEADER ---*/
+#login_link
+{
+	padding: 0;
+	margin: 0 !important;
+}
+#profile_head_picture
+{
+	float: left;
+	height: 30px;
+	padding: 0;
+	margin: 0;
+}
+#profile_head_username
+{
+	float: left;
+	padding-left: 10px;
+	line-height: 30px;
+	display: block;
 }

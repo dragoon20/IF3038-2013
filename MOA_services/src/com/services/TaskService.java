@@ -1030,11 +1030,12 @@ public class TaskService extends BasicServlet
             {
                 Task task = (Task)Task.getModel().find("id_task = ?", new Object[]{Integer.parseInt(request.getParameter("id_task"))}, new String[]{"integer"}, null);
                 
-                HashMap<String,String> hashMap = new HashMap<String, String>();
+                HashMap<String,Object> hashMap = new HashMap<String, Object>();
                 hashMap.put("id_task", ""+task.getId_task());
                 hashMap.put("nama_task", task.getNama_task());
                 hashMap.put("deadline", DBSimpleRecord.sdf.format(task.getDeadline()));
                 hashMap.put("nama_kategori", task.getCategory().getNama_kategori());
+                hashMap.put("status", task.isStatus());
                 
                 JSONObject ret = new JSONObject(hashMap);
                 PrintWriter pw = response.getWriter();

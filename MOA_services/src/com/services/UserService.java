@@ -49,17 +49,17 @@ public class UserService extends BasicServlet
 			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
 				if (("POST".equals(request.getMethod())) &&
-	    		(request.getParameter("username")!=null) && (request.getParameter("email")!=null) && 
-	    		(request.getParameter("fullname")!=null) && (request.getParameter("avatar")!=null) &&
-	    		(request.getParameter("password")!=null) && (request.getParameter("birthdate")!=null))
+	    		(request.getParameter("email")!=null) && 
+	    		(request.getParameter("fullname")!=null) &&
+	    		(request.getParameter("birthdate")!=null))
 				{
 					User new_user = (User)User.getModel().find("id_user = ?", new Object[]{id_user}, new String[]{"integer"}, null);
                     new_user.addData(request.getParameterMap());
                     new_user.putData("confirm_password", new_user.getPassword());
+                    new_user.setBirthdate(new Date(DBSimpleRecord.sdf.parse(request.getParameter("birthdate")).getTime()));
                     
 					if (!new_user.checkValidity())
 					{
-						new_user.hashPassword();
 						if (new_user.save())
 						{
 							Map<String, Boolean> map = new HashMap<String, Boolean>();
@@ -110,7 +110,7 @@ public class UserService extends BasicServlet
 				{
 					User new_user = (User)User.getModel().find("id_user = ?", new Object[]{id_user}, new String[]{"integer"}, null);
 					
-					if (new_user.getPassword()==DBSimpleRecord.MD5(request.getParameter("password")))
+					if (new_user.getPassword().equals(DBSimpleRecord.MD5(request.getParameter("password"))))
 					{
 	                    new_user.addData(request.getParameterMap());
 	                    new_user.setPassword(request.getParameter("new_password"));
@@ -212,29 +212,26 @@ public class UserService extends BasicServlet
     {
         try
 		{
-			int id_user;
-			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((id_user = GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			if ((request.getParameter("token")!=null) && (request.getParameter("app_id")!=null) && (request.getParameter("username")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
 			{
-                            User user = new User();
-                            user.setId_user(id_user);
+                User user = User.getModel().findByUsername(request.getParameter("username"));
 
-                            Task [] arrayOfTask = user.getAssignedTasks();
-                            List<Map<String, String>> listOfTask = new ArrayList<Map<String, String>>();
-                            for (Task task : arrayOfTask)
-                                {
-                                        Map<String, String> map = new HashMap<String, String>();
-                                        map.put("id_task",""+task.getId_task());
-                                        map.put("nama_task",task.getNama_task());
-                                        map.put("status",""+task.isStatus());
-                                        map.put("deadline",""+task.getDeadline());
-                                        map.put("id_kategori",""+task.getId_kategori());
-                                        map.put("id_user",""+task.getId_user());
-                                        listOfTask.add(map);
-                                }
+                Task [] arrayOfTask = user.getAssignedTasks();
+                List<Map<String, String>> listOfTask = new ArrayList<Map<String, String>>();
+                for (Task task : arrayOfTask)
+                {
+                    Map<String, String> map = new HashMap<String, String>();
+                    map.put("id_task",""+task.getId_task());
+                    map.put("nama_task",task.getNama_task());
+                    map.put("status",""+task.isStatus());
+                    map.put("deadline",""+task.getDeadline());
+                    map.put("id_kategori",""+task.getId_kategori());
+                    listOfTask.add(map);
+                }
 
-                            PrintWriter pw = response.getWriter();
-                            pw.println(JSONValue.toJSONString(listOfTask));
-                            pw.close();
+                PrintWriter pw = response.getWriter();
+                pw.println(JSONValue.toJSONString(listOfTask));
+                pw.close();
 			}
 			else
 			{
@@ -242,14 +239,14 @@ public class UserService extends BasicServlet
 			}
 		} catch(Exception e)
 		{
-                    e.printStackTrace();
-                    Map<String, Boolean> map = new HashMap<String, Boolean>();
-                    map.put("success", false);
-                    JSONObject ret = new JSONObject(map);
-
-                    PrintWriter pw = response.getWriter();
-                    pw.print(ret.toJSONString());
-                }
+	        e.printStackTrace();
+	        Map<String, Boolean> map = new HashMap<String, Boolean>();
+	        map.put("success", false);
+	        JSONObject ret = new JSONObject(map);
+	
+	        PrintWriter pw = response.getWriter();
+	        pw.print(ret.toJSONString());
+	    }
     }
     
     public void get_categories(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException

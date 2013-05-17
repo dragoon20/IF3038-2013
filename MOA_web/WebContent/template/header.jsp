@@ -67,7 +67,13 @@
 				%>
 					<nav id="login_button">
 						<ul>
-							<li> <a id="login_link" href="#">Keluar</a> </li>
+							<!-- <li> <a id="login_link" href="logout">Keluar</a> </li> -->
+							<li> 
+								<a id="login_link" href="logout">
+									<img id="profile_head_picture" src="<%= MainApp.currentUser(session).getAvatar() %>" />
+									<span id="profile_head_username"><%= MainApp.currentUser(session).getUsername() %></span>
+								</a>
+							</li>
 						</ul>
 					</nav>
 				<%
@@ -82,7 +88,7 @@
 					<div id="search_button"></div>
 					<div id="search_left"></div>
 					<form id="search_form">
-						<input id="search_text" name="search_query" type="text" />
+						<input id="search_text" name="search_query" type="text" autocomplete="off"/>
 					</form>
 					<div id="search_right"></div>
 				</div>
@@ -92,4 +98,5 @@
 	</div>
 </header>
 <script type="text/javascript" src="js/search.js"></script>
+<script type="text/javascript" src="js/functions.js"></script>
 <% //<script type="text/javascript" src="js/login.js"></script> %>

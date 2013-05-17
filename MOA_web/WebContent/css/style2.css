@@ -1071,6 +1071,28 @@ a.date_button:hover
 	float: left;
 }
 
+
+
+#commentsList
+{
+	transition-property: height;
+	transition-duration: 1s;
+	transition-timing-function: linear;
+	-moz-transition-property: height;
+	-moz-transition-duration: 1s;
+	-moz-transition-timing-function: linear;
+	-ms-transition-property: height;
+	-ms-transition-duration: 1s;
+	-ms-transition-timing-function: linear;
+	-webkit-transition-property: height;
+	-webkit-transition-duration: 1s;
+	-webkit-transition-timing-function: linear;
+	-o-transition-property: height;
+	-o-transition-duration: 1s;
+	-o-transition-timing-function: linear;
+}
+
+
 .clear
 {
 	clear: both;
@@ -1127,23 +1149,4 @@ a.date_button:hover
 }
 #auto_comp_assignee ul li:hover a, #auto_comp_tag ul li:hover a {
 	color: HighlightText;
-}
-
-#commentsList
-{
-	transition-property: height;
-	transition-duration: 1s;
-	transition-timing-function: linear;
-	-moz-transition-property: height;
-	-moz-transition-duration: 1s;
-	-moz-transition-timing-function: linear;
-	-ms-transition-property: height;
-	-ms-transition-duration: 1s;
-	-ms-transition-timing-function: linear;
-	-webkit-transition-property: height;
-	-webkit-transition-duration: 1s;
-	-webkit-transition-timing-function: linear;
-	-o-transition-property: height;
-	-o-transition-duration: 1s;
-	-o-transition-timing-function: linear;
 }

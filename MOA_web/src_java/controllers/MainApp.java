@@ -53,8 +53,8 @@ public class MainApp extends HttpServlet
     public static final String appId = "0d2d2a7531376b3b05ff4203aeaa6b41";
     public static final String appName = "MOA";
     public static final String appTagline = "Multiuser Online Agenda";
-    //public static final String serviceURL = "http://localhost:8080/MOA_services/";
-    public static final String serviceURL = "http://moa-service.ap01.aws.af.cm/";
+    public static final String serviceURL = "http://localhost:8080/MOA_services/";
+    //public static final String serviceURL = "http://moa-service.ap01.aws.af.cm/";
     
     /**
      * @see HttpServlet#HttpServlet()
@@ -200,14 +200,19 @@ public class MainApp extends HttpServlet
 		request.getRequestDispatcher("pages/change_password.jsp").forward(request, response);
 	}
 
-	public void new_work(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	public void new_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/new_work.jsp").forward(request, response);
+		request.getRequestDispatcher("pages/new_task.jsp").forward(request, response);
 	}
 
-	public void tugas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	public void task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/tugas.jsp").forward(request, response);
+		request.getRequestDispatcher("pages/task.jsp").forward(request, response);
+	}
+	
+	public void edit_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		request.getRequestDispatcher("pages/edit_task.jsp").forward(request, response);
 	}   
 
 	public void search(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -282,7 +287,7 @@ public class MainApp extends HttpServlet
 				}
 				out.close();
 
-				response.sendRedirect("dashboard_fake");
+				response.sendRedirect("dashboard");
 			}
 			else
 			{
@@ -335,7 +340,7 @@ public class MainApp extends HttpServlet
 		}
 	}
 
-	public void new_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	public void new_task_impl(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if (!MainApp.LoggedIn(request.getSession()))
 		{
@@ -421,7 +426,7 @@ public class MainApp extends HttpServlet
 						out.close();
 					}
 				}
-				response.sendRedirect("tugas?id="+result);
+				response.sendRedirect("task?id="+result);
 			}
 			else
 			{
@@ -436,7 +441,7 @@ public class MainApp extends HttpServlet
 		}
 	}
 
-	public void edit_tugas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	public void edit_task_impl(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if (!MainApp.LoggedIn(request.getSession()))
 		{
@@ -482,7 +487,6 @@ public class MainApp extends HttpServlet
 					attachments.add(tempmap);
 				}
 			}
-
 
 			boolean check_task = false;
 			try {
@@ -590,7 +594,7 @@ public class MainApp extends HttpServlet
 							out.close();
 						}
 					}
-					response.sendRedirect("tugas?id="+(Integer)params.get("id_task"));
+					response.sendRedirect("task?id="+(Integer)params.get("id_task"));
 				}
 				else
 				{
@@ -648,7 +652,7 @@ public class MainApp extends HttpServlet
 						avatar = fi;
 						String extension = avatar.getName().split("\\.")[avatar.getName().split("\\.").length-1];
 						String new_filename = DBSimpleRecord.MD5(UUID.randomUUID().toString()).toUpperCase()+"."+extension;
-						params.put("avatar", MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+new_filename);
+						params.put("avatar", MainApp.appUrl(request.getSession())+"upload/user_profile_pict/"+new_filename);
 						params.put("avatar_filename", new_filename);
 					}
 				}
@@ -659,15 +663,13 @@ public class MainApp extends HttpServlet
 				HashMap<String, String> parameter = new HashMap<String,String>();
 				parameter.put("token", token(request.getSession()));
 				parameter.put("app_id", appId);
-				parameter.put("id_task", (String)params.get("id_task"));
-				parameter.put("username", (String)params.get("username"));
 				parameter.put("email", (String)params.get("email"));
 				parameter.put("fullname", (String)params.get("fullname"));
 				parameter.put("avatar", (String)params.get("avatar"));
 				parameter.put("password", (String)params.get("password"));
 				parameter.put("birthdate", (String)params.get("birthdate"));
 
-				String responseString = callRestfulWebService(serviceURL+"task/update_user", parameter, "", 0);
+				String responseString = callRestfulWebService(serviceURL+"user/update_user", parameter, "", 0);
 				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
 				success = (Boolean)ret.get("success");
 				
@@ -679,7 +681,18 @@ public class MainApp extends HttpServlet
 						param.put("app_id", appId);
 						String responseStr = callRestfulWebService(serviceURL+"user/get_user_data", parameter, "", 0);
 						JSONObject retjs = (JSONObject)JSONValue.parse(responseStr);
-
+						
+						InputStream in = avatar.getInputStream();
+						FileOutputStream out = new FileOutputStream(new File(MainApp.fullPath(request.getSession())+"upload/user_profile_pict/"+params.get("avatar_filename")));
+						
+						int read = 0;
+						byte[] bytes = new byte[1024];
+						while ((read = in.read(bytes)) != -1)
+						{
+							out.write(bytes, 0, read);
+						}
+						out.close();
+						
 						User user = new User();
 						user.setUsername((String)retjs.get("username"));
 						user.setAvatar((String)retjs.get("avatar"));
@@ -744,7 +757,7 @@ public class MainApp extends HttpServlet
 				parameter.put("new_password", request.getParameter("new_password"));
 				parameter.put("confirm_password", request.getParameter("confirm_password"));
 
-				String responseString = callRestfulWebService(serviceURL+"task/update_user", parameter, "", 0);
+				String responseString = callRestfulWebService(serviceURL+"user/update_password", parameter, "", 0);
 				JSONObject ret = (JSONObject)JSONValue.parse(responseString);
 				success = (Boolean)ret.get("success");
 			} catch(Exception exc) {
@@ -800,10 +813,14 @@ public class MainApp extends HttpServlet
 
 	private static String buildWebQuery(Map<String, String> parameters) throws Exception {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : parameters.entrySet()) {
-            String key = URLEncoder.encode(entry.getKey(), "UTF-8");
-            String value = URLEncoder.encode(entry.getValue(), "UTF-8");
-            sb.append(key).append("=").append(value).append("&");
+        for (Map.Entry<String, String> entry : parameters.entrySet()) 
+        {
+        	if (entry.getValue()!=null)
+        	{
+	            String key = URLEncoder.encode(entry.getKey(), "UTF-8");
+	            String value = URLEncoder.encode(entry.getValue(), "UTF-8");
+	            sb.append(key).append("=").append(value).append("&");
+        	}
         }
         return sb.toString().substring(0, sb.length() - 1);
     }

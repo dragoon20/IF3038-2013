@@ -99,20 +99,20 @@ public class User extends DBSimpleRecord
             TreeMap<String, String> parameter = new TreeMap<String,String>();
             parameter.put("token", token);
             parameter.put("app_id", MainApp.appId);
+            parameter.put("username", getUsername());
             String response = MainApp.callRestfulWebService(MainApp.serviceURL+"user/get_assigned_tasks", parameter, "", 0);
             JSONArray resp_obj = (JSONArray)JSONValue.parse(response);
             ArrayList<Task> listOfTask = new ArrayList<Task>();
             for (Object obj : resp_obj)
             {
-                    JSONObject js_obj = (JSONObject) obj;
-                    Task tsk = new Task();
-                    tsk.setNama_task((String)js_obj.get("nama_task"));
-                    tsk.setDeadline(Date.valueOf(js_obj.get("deadline").toString()));
-                    tsk.setId_kategori(Integer.parseInt(js_obj.get("id_kategori").toString()));
-                    tsk.setId_task(Integer.parseInt(js_obj.get("id_task").toString()));
-                    tsk.setId_user(Integer.parseInt(js_obj.get("id_user").toString()));
-                    tsk.setStatus(Boolean.parseBoolean(js_obj.get("status").toString()));
-                    listOfTask.add(tsk);
+                JSONObject js_obj = (JSONObject) obj;
+                Task tsk = new Task();
+                tsk.setNama_task((String)js_obj.get("nama_task"));
+                tsk.setDeadline(Date.valueOf(js_obj.get("deadline").toString()));
+                tsk.setId_kategori(Integer.parseInt(js_obj.get("id_kategori").toString()));
+                tsk.setId_task(Integer.parseInt(js_obj.get("id_task").toString()));
+                tsk.setStatus(Boolean.parseBoolean(js_obj.get("status").toString()));
+                listOfTask.add(tsk);
             }
             
             Task [] tasks = new Task[listOfTask.size()];

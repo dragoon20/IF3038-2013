@@ -337,15 +337,9 @@ public class User extends DBSimpleRecord
     /**
      * @return the birthdate
      */
-    public java.sql.Date getBirthdate() 
+    public Date getBirthdate() 
     {
-        try {
-            String [] date = data.get("birthdate").toString().split("-");
-            return (new java.sql.Date(Integer.parseInt(date[0]), Integer.parseInt(date[1]), Integer.parseInt(date[2])));
-        } catch (Exception ex) {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+        return (Date)data.get("birthdate");
     }
 
     /**

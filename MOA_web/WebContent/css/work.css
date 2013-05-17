@@ -13,8 +13,6 @@
 	}
 	#new_task_form_wrap input[type="text"], #new_task_form_wrap input[type="file"], #new_task_form_wrap select
 	{
-		margin-top: 2px;
-		margin-left: 10px;
 		width: 200px;
 		height: 26px;
 		border: 1px solid #d9d9d9;
@@ -27,7 +25,7 @@
 		-moz-border-radius: 1px;
 		border-radius: 1px;
 	}
-	#new_task_form_wrap label, #edit_task_form_wrap label, #comment_form_wrap label
+	#new_task_form_wrap label, #new_task_form_wrap span, #edit_task_form_wrap label, #edit_task_form_wrap span, #comment_form_wrap label
 	{
 		float: left;
 		display: block;
@@ -36,8 +34,6 @@
 	}
 	#edit_task_form_wrap input[type="text"], #edit_task_form_wrap input[type="file"], #edit_task_form_wrap select
 	{
-		margin-top: 2px;
-		margin-left: 10px;
 		width: 200px;
 		height: 26px;
 		border: 1px solid #d9d9d9;
@@ -54,8 +50,6 @@
 
 	#task_form_wrap input[type="text"], #task_form_wrap input[type="file"], #task_form_wrap select
 	{
-		margin-top: 2px;
-		margin-left: 10px;
 		width: 200px;
 		height: 26px;
 		border: 1px solid #d9d9d9;
@@ -100,7 +94,7 @@
 	}
 	#comment_input
 	{
-		width: 310px;
+		width: 380px;
 		display: block;
 		height: 70px;
 	}
@@ -124,8 +118,6 @@
 	}
 	#new_task_form_wrap input[type="text"], #new_task_form_wrap input[type="file"], #new_task_form_wrap select
 	{
-		margin-top: 2px;
-		margin-left: 10px;
 		width: 50%;
 		height: 26px;
 		border: 1px solid #d9d9d9;
@@ -138,7 +130,7 @@
 		-moz-border-radius: 1px;
 		border-radius: 1px;
 	}
-	#new_task_form_wrap label, #edit_task_form_wrap label, #comment_form_wrap label
+	#new_task_form_wrap label, #new_task_form_wrap span, #edit_task_form_wrap label, #edit_task_form_wrap span, #comment_form_wrap label
 	{
 		float: left;
 		display: block;
@@ -147,8 +139,6 @@
 	}
 	#edit_task_form_wrap input[type="text"], #edit_task_form_wrap input[type="file"], #edit_task_form_wrap select
 	{
-		margin-top: 2px;
-		margin-left: 10px;
 		width: 50%;
 		height: 26px;
 		border: 1px solid #d9d9d9;
@@ -165,8 +155,6 @@
 
 	#task_form_wrap input[type="text"], #task_form_wrap input[type="file"], #task_form_wrap select
 	{
-		margin-top: 2px;
-		margin-left: 10px;
 		width: 50%;
 		height: 26px;
 		border: 1px solid #d9d9d9;
@@ -211,7 +199,7 @@
 	}
 	#comment_input
 	{
-		width: 50%;
+		width: 40%;
 		display: block;
 	}
 }
@@ -289,13 +277,22 @@
 #task_form_wrap
 {
 	padding: 15px;
+	height: 450px;
+	overflow: hidden;
+}
+#task_form_wrap:hover
+{
+	overflow-y: scroll;
 }
 #task_form_wrap span
 {
 	float: left;
 	display: block;
 	line-height: 32px;
+	margin-top: 2px;
+	margin-left: 10px;
 }
+
 
 /*work*/
 #work_title
@@ -329,4 +326,111 @@
 #comments:hover
 {
 	overflow-y: scroll;
+}
+
+/* KOMENTAR */
+.comment
+{
+	margin: 10px 0;
+}
+.comment a
+{
+	text-decoration: none;
+	color: #557777;
+}
+.comment p
+{
+	margin-left: 80px;
+	display: block;
+}
+.icon_pict
+{
+	margin-right: 10px;
+	padding: 0;
+	height: 30px;
+	float: left;
+}
+
+#commentsList
+{
+	transition-property: height;
+	transition-duration: 1s;
+	transition-timing-function: linear;
+	-moz-transition-property: height;
+	-moz-transition-duration: 1s;
+	-moz-transition-timing-function: linear;
+	-ms-transition-property: height;
+	-ms-transition-duration: 1s;
+	-ms-transition-timing-function: linear;
+	-webkit-transition-property: height;
+	-webkit-transition-duration: 1s;
+	-webkit-transition-timing-function: linear;
+	-o-transition-property: height;
+	-o-transition-duration: 1s;
+	-o-transition-timing-function: linear;
+}
+
+#auto_comp_assignee, #auto_comp_tag
+{
+	display: none;
+	z-index: 100;
+	position: absolute;
+	background-color: white;
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	margin-top: 0px;
+	margin-left: 160px;
+	width: 175px;
+	position: absolute;
+	background: white;
+	font-size: 14px;
+	padding: 3px 0;
+}
+
+.status_done
+{
+	color: green;
+	font-weight: bold !important;
+}
+
+.status_not_done
+{
+	color: red;
+	font-weight: bold !important;
+}
+
+#auto_comp_assignee ul, #auto_comp_tag ul
+{
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+#auto_comp_assignee ul li, #auto_comp_tag ul li
+{
+	margin: 0;
+	padding: 5px 5px;
+}
+#auto_comp_assignee ul li:hover, #auto_comp_tag ul li:hover
+{
+	background: Highlight;
+}
+
+#auto_comp_assignee ul li a, #auto_comp_tag ul li a
+{
+	text-decoration: none;
+	color: #111;
+	display: block;
+}
+#auto_comp_assignee ul li:hover a, #auto_comp_tag ul li:hover a {
+	color: HighlightText;
+}
+
+#task_attachment
+{
+	margin-left: 170px;
+}
+
+.atchmt
+{
+	width: 200px;
 }

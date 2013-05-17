@@ -56,8 +56,8 @@
 					Map<String, Map<String, String>> breadcrumbs_main = new HashMap<String, Map<String, String>>();
 					Map<String, String> beranda = new HashMap<String, String>();
 					beranda.put("href", "index");
-					daftar.put("class", "active");
-					menu_main.put("Beranda", beranda);
+					beranda.put("class", "active");
+					breadcrumbs_main.put("Beranda", beranda);
 					request.setAttribute("breadcrumbs", breadcrumbs_main);
 				%>
 				<%@ include file="../template/footer.jsp" %>
@@ -169,15 +169,15 @@
 						else if (event.keyCode=="39")
 							next_image();
 		
-					}
+					};
 					function go_to_image(index)
 					{
 						current_image = index;
 						document.getElementById("content_wrap_inner").style.left = (-1*width*(current_image-1))+"px";
 						go_to_bullet(current_image);
 					}
-					document.getElementById("slide_left").onclick = function() {prev_image()};
-					document.getElementById("slide_right").onclick = function() {next_image()};
+					document.getElementById("slide_left").onclick = function() {prev_image();};
+					document.getElementById("slide_right").onclick = function() {next_image();};
 				</script>
 				<script type="text/javascript">	
 					window.onload = function() 

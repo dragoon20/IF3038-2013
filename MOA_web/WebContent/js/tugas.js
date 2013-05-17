@@ -1,12 +1,10 @@
-var Day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-var Mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Des"];
-
 var delete_task = document.getElementById("removeTaskLink");
-if (delete_task != undefined) 
+if (delete_task != undefined)
+{
 	delete_task.onclick = function()
 	{
 		var serialized = "task_id="+id_task;
-		var req = Rp.ajaxRequest('api/delete_task');
+		var req = ajax();
 		req.onreadystatechange = function() {
 			switch (req.readyState) {
 				case 1:
@@ -15,7 +13,7 @@ if (delete_task != undefined)
 					break;
 				case 4:
 					try {
-						response = Rp.parseJSON(req.responseText);
+						response = JSON.parse(req.responseText);
 						if (response.success)
 						{
 							window.location = "dashboard";
@@ -27,141 +25,94 @@ if (delete_task != undefined)
 					break;
 			}
 		};
-		req.post(serialized);
+		req.post("api/delete_task", serialized);
 		return false;
 	};
+}
 
+var edit_task_status = document.getElementById("editTaskStatusLink");
+if (edit_task_status != undefined)
+{
+	edit_task_status.onclick = function()
+	{
+		var serialized = "taskID="+id_task+"&completed="+checked;
+		var req = ajax();
+		req.onreadystatechange = function() {
+			switch (req.readyState) {
+				case 1:
+				case 2:
+				case 3:
+					break;
+				case 4:
+					try {
+						response = JSON.parse(req.responseText);
+						if (response.done == 0)
+						{
+							checked = true;
+							document.getElementById("task_status").innerHTML = "belum selesai";
+							document.getElementById("task_status").className = "status_not_done";
+						}
+						else if (response.done == 1)
+						{
+							checked = false;
+							document.getElementById("task_status").innerHTML = "selesai";
+							document.getElementById("task_status").className = "status_done";
+						}
+					}
+					catch (e) {
+	
+					}
+					break;
+			}
+		};
+		req.post("api/mark_task", serialized);
+		return false;
+	};
+}
+
+function retrieve_detail_task()
+{
+	var month = ["January","February","March","April","May","June",
+				"July","August","September","October","November","December"];
+	var req = ajax();
+	req.onreadystatechange = function() 
+	{
+		switch (req.readyState) {
+			case 1:
+			case 2:
+			case 3:
+				break;
+			case 4:
+				try {
+					response = JSON.parse(req.responseText);
+					document.getElementById("task_name").innerHTML = response.nama_task;
+					date = new Date(response.deadline.substr(0,4),(parseInt(response.deadline.substr(5,2)))-1,parseInt(response.deadline.substr(8,2)));
+					document.getElementById("birth_date").innerHTML = date.getDate()+" "+month[date.getMonth()]+" "+date.getFullYear();
+					var string = "";
+					for (var i in response.asignee)
+					{
+						string += "<a href='profile?id="+response.asignee[i].id_user+"'>"+response.asignee[i].username+"</a>,";
+					}
+					string = string.substr(0,string.length-1);
+					document.getElementById("task_username").innerHTML = string;
+					var tag_string = "";
+					for (var i in response.tag)
+					{
+						tag_string += response.tag[i]+",";
+					}
+					tag_string = tag_string.substr(0,tag_string.length-1);
+					document.getElementById("task_tag").innerHTML = tag_string;
+				}
+				catch (e) {
+
+				}
+				break;
+		}
+	};
+	req.get('api/get_task?id_task=' + id_task);
+}
 
 window.onload = function()
 {
-	datePicker.init(document.getElementById("calendar"), document.getElementById("new_tugas"), "deadline");
+	setInterval(function(){retrieve_detail_task();},10000);
 };
-
-var asignee = document.getElementById("assignee");
-asignee.setAttribute('autocomplete', 'off');
-asignee.onkeyup = function()
-{
-	var value = asignee.value;
-	var req = Rp.ajaxRequest();
-	req.onreadystatechange = function() {
-		switch (req.readyState) {
-			case 1:
-			case 2:
-			case 3:
-				Rp('#assignee').addClass('loading');
-				break;
-			case 4:
-				Rp('#assignee').removeClass('loading');
-				try {
-					response = Rp.parseJSON(req.responseText);
-					var elm = document.getElementById("auto_comp_assignee");
-					var inflate = document.getElementById("auto_comp_inflate_assignee");
-					inflate.innerHTML = "";
-					var temp = 0;
-					for (var i in response)
-					{
-						temp++;
-						var newLi = document.createElement("li");
-						newLi.innerHTML = "<a href='javascript:choose_assignee(\""+response[i]+"\")'>"+
-											response[i]+"</a>";
-						inflate.insertBefore(newLi, inflate.firstChild);
-					}
-					
-					if (temp!=0)
-						elm.style.display = "block";
-				}
-				catch (e) {
-
-				}
-				break;
-		}
-	};
-	req.get('api/get_username?username=' + value);
-};
-
-function choose_assignee(username)
-{
-	var elm = document.getElementById("auto_comp_assignee");
-	var value = asignee.value;
-	value = value.substr(0, value.lastIndexOf(",")+1);
-	value += username;
-	asignee.value = value;
-	elm.style.display = "none";
-}
-
-var tag = document.getElementById("tag");
-tag.onkeyup = function()
-{
-	var value = tag.value;
-	var req = Rp.ajaxRequest();
-	req.onreadystatechange = function() {
-		switch (req.readyState) {
-			case 1:
-			case 2:
-			case 3:
-				Rp('#tag').addClass('loading');
-				break;
-			case 4:
-				Rp('#tag').removeClass('loading');
-				try {
-					response = Rp.parseJSON(req.responseText);
-					var elm = document.getElementById("auto_comp_tag");
-					var inflate = document.getElementById("auto_comp_inflate_tag");
-					inflate.innerHTML = "";
-					var temp = 0;
-					for (var i in response)
-					{
-						temp ++;
-						var newLi = document.createElement("li");
-						newLi.innerHTML = "<a href='javascript:choose_tag(\""+response[i]+"\")'>"+
-											response[i]+"</a>";
-						inflate.insertBefore(newLi, inflate.firstChild);
-					}
-					
-					if (temp!=0)
-						elm.style.display = "block";
-				}
-				catch (e) {
-
-				}
-				break;
-		}
-	};
-	req.get('api/get_tag?tag=' + value);
-};
-
-function choose_tag(temptag)
-{
-	var elm = document.getElementById("auto_comp_tag");
-	var value = tag.value;
-	value = value.substr(0, value.lastIndexOf(",")+1);
-	value += temptag;
-	tag.value = value;
-	elm.style.display = "none";
-}
-
-// checkbox
-
-handleTaskCheckbox = function(e) {
-	Rp('.task-checkbox input[data-task-id]').prop('disabled', true);
-	taskID = this.getAttribute('data-task-id');
-	checked = this.checked;
-	mark = Rp.ajaxRequest('api/mark_task')
-	.complete(function() {
-		Rp('.task-checkbox input[data-task-id]').prop('disabled', false);
-		response = this.responseJSON();
-		console.log(response.success);
-		if (response.success) {
-			Rp('.task-checkbox input[data-task-id]').prop('checked', response.done);
-		}
-		else {
-			console.log('Failure to update status of task.');
-		}
-	})
-	.post({
-		'taskID': taskID,
-		'completed': checked
-	});
-};
-
-Rp('.task-checkbox input[data-task-id]').on('change', handleTaskCheckbox);

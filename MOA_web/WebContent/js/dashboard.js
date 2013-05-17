@@ -1,420 +1,376 @@
-var currentCat;
-var canDelete;
-var taskCache;
-
-Rp(function() 
+function createTaskElement(task) 
 {
+	// Parse and validate param
+	if (task.tags === undefined)
+		task.tags = [];
+	if (task.done === undefined)
+		task.done = false;
+	if (task.date === undefined)
+		task.date = '';
 
-	if (currentCat === undefined || !currentCat) {
-		Rp('#addTaskLi').hide();
-		currentCat = 0;
-	}
+	var tempstring = "";
+		tempstring += "<li>";
+			tempstring += '<div class="dashboard_tugas_element">';
+				tempstring += '<div class="dashboard_tugas_judul">';
+					tempstring += "<a class='task_link' href='task?id="+task.id+"'>";
+						tempstring += task.name;
+					tempstring += "</a>";
+				tempstring += '</div>';
+				tempstring += '<div class="dashboard_tugas_tanda">';
+					tempstring += "<a href='javascript:void(0);' onclick='checkTask("+task.id+","+!task.done+");'>";
+						if (task.done)
+						{
+							tempstring += "&lt&lt&lt&lt";
+						}
+						else
+						{
+							tempstring += "&gt&gt&gt&gt";
+						}
+					tempstring += "</a>";
+				tempstring += '</div>';
+				tempstring += '<div class="dashboard_tugas_tanggal">Deadline: '+task.deadline+'</div>';
+				tempstring += '<div class="dashboard_tugas_tag_area">';
+					tempstring += "<ul>";	
+						var tags = task.tags;
+						for (var j=0;j<tags.length;++j)
+						{
+							tempstring += "<li>";
+							tempstring += tags[j];
+							tempstring += "</li>";
+						}
+					tempstring += "</ul>";
+				tempstring += "</div>";
+			tempstring += "</div>";	
+		tempstring += "</li>";
+	
+	return tempstring;
+}
 
-	if (canDelete === undefined || !canDelete) {
-		Rp('#deleteCategoryLi').hide();
-		canDelete = false;
-	}
-
-	createTaskElement = function(task) 
+function fillTasks(tasks) 
+{
+	not_donetasksList = document.getElementById('not_done_tasks');
+	not_donetasksList.innerHTML = "";
+	
+	donetasksList = document.getElementById('done_tasks');
+	donetasksList.innerHTML = "";
+	
+	tasks.forEach(function(task) 
 	{
-		// Parse and validate param
-		if (task.tags === undefined)
-			task.tags = [];
-		if (task.done === undefined)
-			task.done = false;
-		if (task.date === undefined)
-			task.date = '';
-
-		// Main logic
-		article = Rp.factory('article').addClass('task').attr('data-task-id', task.id);
-
-		header = Rp.factory('header');
-		h1 = Rp.factory('h1');
-		label = Rp.factory('label');
-		checkboxSpan = Rp.factory('span').addClass('task-checkbox');
-		checkbox = Rp.factory('input')
-			.addClass('task-checkbox')
-			.prop('type', 'checkbox')
-			.prop('checked', task.done)
-			.attr('data-task-id', task.id)
-			.on('click', handleTaskCheckbox);
-		space = document.createTextNode(' ');
-		mainLink = Rp.factory('a').prop('href', 'tugas?id=' + task.id).text(task.name);
-
-		detailsDiv = Rp.factory('div').addClass('details');
-
-		deadlineP = Rp.factory('p').addClass('deadline');
-		deadlineContentSpan = Rp.factory('span').addClass('detail-content').text(task.deadline);
-
-		tagsP = Rp.factory('p').addClass('tags');
-		task.tags.forEach(function(tag) {
-			tagSpan = Rp.factory('span').addClass('tag').text(tag);
-			tagsP.append(tagSpan);
-			tagsP.html(tagsP.html() + ' ');
-		})
-
-		checkboxSpan.append(checkbox);
-		label.append(checkboxSpan).append(space).append(mainLink);
-		h1.append(label);
-		header.append(h1);
-
-		deadlineP.append(deadlineContentSpan);
-		detailsDiv.append(deadlineP).append(tagsP);
-
-		if (task.deletable) {
-			delP = Rp.factory('p').addClass('delete');
-			delA = Rp.factory('a')
-			.attr('data-task-id', task.id)
-			.prop('href', 'delete?task_id=' + task.id)
-			.text('delete');
-			delA.on('click', deleteTask);
-			delP.append(delA);
-			detailsDiv.append(delP);
+		if (task.done)
+		{
+			donetasksList.innerHTML += createTaskElement(task);
 		}
+		else
+		{
+			not_donetasksList.innerHTML += createTaskElement(task);
+		}
+	});
+}
 
-		article.append(header).append(detailsDiv);	
-		return article;
-	}
-
-	createCategoryElement = function(cat) {
-		if (cat.id == undefined)
-			cat.id = 0;
-		li = Rp.factory('li').prop('id', 'categoryLi' + cat.id);
-		a = Rp
-			.factory('a')
-			.attr('href', 'dashboard?cat=' + cat.id)
-			.attr('data-category-id', cat.id)
-			.attr('data-deletable', cat.canDeleteCategory ? 'true' : 'false')
-			.text(cat.name);
-
-		li.append(a);
-
-		return li;
-	}
-
-	fillTasks = function(tasks) {
-		tasksList = Rp('#tasksList');
-		tasksList.empty();
-		completedTasksList = Rp('#completedTasksList');
-		completedTasksList.empty();
-		tasks.forEach(function(task) {
-			if (task.done)
-				completedTasksList.append(createTaskElement(task));
-			else
-				tasksList.append(createTaskElement(task));
-		});
-	}
-
-	fillCategories = function(cats) {
-		catsList = Rp('#categoryList');
-		catsList.empty();
-		catsList.append("<li id=\"categoryLi0\"><a href=\"dashboard\" data-category-id=\"0\">All Tasks</a></li>");
-		cats.forEach(function(cat) {
-			catsList.append(createCategoryElement(cat));
-		});
-	}
-
-	catreq = Rp.ajaxRequest();
-	catreq.onreadystatechange = function() {
-		if (catreq.readyState == 4) {
-			// Loaded
-			response = catreq.responseText;
-			taskCache = response;
-			response = Rp.parseJSON(response);
-			Rp('#dashboardPrimary').removeClass('loading');
-			if (response.success) {
+function checkCat(id_kategori, obj)
+{
+	var ajax_req = ajax();
+	ajax_req.onreadystatechange = function()
+	{
+		if (ajax_req.readyState == 4) 
+		{
+			var response = JSON.parse(ajax_req.responseText);
+			if (response.success)
+			{
 				fillTasks(response.tasks);
 
-				Rp('#categoryList li.active').removeClass('active');
-				if (response.categoryID) 
+				var new_task_link = document.getElementById("new_task_link");
+				if (response.canEditCategory)
 				{
-					Rp('#categoryTasks').show();
-					li = Rp('#categoryLi' + response.categoryID);
-					li.addClass('active');
-					Rp('#pageTitle').text(response.categoryName);
+					new_task_link.style.display = "block";
+					new_task_link.href = "new_task";
+						new_task_link.href += "?cat="+(id_kategori);
+				}
+				else
+				{
+					new_task_link.style.display = "none";
+				}
+				
+				
+            	var categories = document.getElementById("categories");
+            	
+            	for (var j=0;j<categories.childNodes.length;++j)
+				{
+            		if (categories.childNodes[j].nodeName!="#text")
+					{
+						categories.childNodes[j].className = "dashboard_category_element";
+					}
+				}
+            	
+            	if (obj!=null)
+				{
+            		obj.parentNode.className = "dashboard_category_element_aktif";
+				}
+				else if (id_kategori==0)
+				{
+					var total = categories.childNodes.length;
+					var j = 0;
+					var check = true;
+					while ((check) && (j<total))
+					{
+						if (categories.childNodes[j].nodeName!="#text")
+						{
+							categories.childNodes[j].className = "dashboard_category_element_aktif";
+							check = false;
+						}
+						j++;
+					}
+				}
+            	
+            	currentCat = id_kategori;
+			}
+			else 
+			{
+				checkCat(0);
+			}
+		}
+		else if (ajax_req.readyState > 0) 
+		{
+			// Still loading
+		}
+	};
+	
+	if (id_kategori!=0)
+	{
+		ajax_req.get('api/retrieve_tasks?category_id=' + id_kategori);
+	}
+	else
+	{
+		ajax_req.get('api/retrieve_tasks');
+    }
+}
 
-					if (response.canDeleteCategory)
+function checkTask(id_task, checked)
+{
+	var ajax_req = ajax();
+	ajax_req.onreadystatechange = function()
+	{
+		if (ajax_req.readyState == 4) 
+		{
+			var response = JSON.parse(ajax_req.responseText);
+			if (response.success) 
+			{
+				checkCat(currentCat, null);
+			}
+			else 
+			{
+				console.log('Failure to update status of task.');
+			}
+		}
+		else if (ajax_req.readyState > 0) 
+		{
+			// Still loading
+		}
+	};
+	ajax_req.post('api/mark_task', {
+		'taskID': id_task,
+		'completed': checked
+	});
+}
+
+var new_category_name = document.getElementById("new_category_name");
+
+new_category_name.onkeyup = function()
+{
+	if ((this.checkValidity()))
+		this.style.backgroundImage = "url('images/valid.png')";
+	else
+		this.style.backgroundImage = "url('images/warning.png')";
+	check_submit_category();
+};
+
+function check_submit_category()
+{
+	if (new_category_name.checkValidity())
+	{
+		document.getElementById("new_category_submit").disabled="";
+	}
+	else
+	{
+		document.getElementById("new_category_submit").disabled="disabled";
+	}
+}
+
+//Assignee
+var new_category_username = document.getElementById("new_category_username");
+new_category_username.setAttribute('autocomplete', 'off');
+new_category_username.onkeyup = function()
+{
+	var value = new_category_username.value;
+	var req = ajax();
+	req.onreadystatechange = function() 
+	{
+		switch (req.readyState) {
+			case 1:
+			case 2:
+			case 3:
+				break;
+			case 4:
+				try {
+					response = JSON.parse(req.responseText);
+					var elm = document.getElementById("auto_comp_assignee");
+					var inflate = document.getElementById("auto_comp_inflate_assignee");
+					inflate.innerHTML = "";
+					var temp = 0;
+					for (var i in response)
 					{
-						Rp('#addTaskLi').css('display', 'block');
-						Rp('#addTaskCat').prop('href', 'new_work?cat='+response.categoryID);
-						Rp('#deleteCategoryLi').css('display', 'block');
+						temp++;
+						var newLi = document.createElement("li");
+						newLi.innerHTML = "<a href='javascript:choose_assignee(\""+response[i]+"\")'>"+
+											response[i]+"</a>";
+						inflate.insertBefore(newLi, inflate.firstChild);
 					}
-					else if (response.canEditCategory)
-					{
-						Rp('#addTaskLi').css('display', 'block');
-						Rp('#addTaskCat').prop('href', 'new_work?cat='+response.categoryID);
-						Rp('#deleteCategoryLi').css('display', 'none');
-					}
-					else
-					{
-						Rp('#addTaskLi').css('display', 'none');
-						Rp('#deleteCategoryLi').css('display', 'none');
-					}
+					
+					if (temp!=0)
+						elm.style.display = "block";
+				}
+				catch (e) {
+
+				}
+				break;
+		}
+	};
+	req.get('api/get_username?username=' + value);
+	
+	check_submit_category();
+};
+
+function choose_assignee (username)
+{
+	var elm = document.getElementById("auto_comp_assignee");
+	var value = new_category_username.value;
+	value = value.substr(0, value.lastIndexOf(",")+1);
+	value += username;
+	new_category_username.value = value;
+	elm.style.display = "none";
+};
+
+function deleteCat(id_kategori, obj)
+{
+	var conf = confirm("Yakin ingin menghapus kategori ini?");
+	if (conf==true)
+	{
+		var ajax_req = ajax();
+		ajax_req.onreadystatechange = function()
+		{
+			if (ajax_req.readyState == 4) 
+			{
+				var response = JSON.parse(ajax_req.responseText);
+				if (response.success) 
+				{
+					checkCat(0, null);
+					obj.parentNode.style.display = "none";
 				}
 				else 
 				{
-					Rp('#addTaskLi').css('display', 'none');
-					Rp('#deleteCategoryLi').css('display', 'none');
-					Rp('#pageTitle').text('All Tasks');
-					li = Rp('#categoryLi0');
-					li.addClass('active');
+					console.log('Failure to update status of task.');
 				}
 			}
-			else {
-				loadCategory(0);
+			else if (ajax_req.readyState > 0) 
+			{
+				// Still loading
 			}
-		}
-		else if (catreq.readyState > 0) {
-			// Still loading
-			Rp('#dashboardPrimary').addClass('loading');
-		}
-	}
-
-	loadCategory = function(catid) 
-	{
-		currentCat = catid;
-		if (catid!=0) {
-			catreq.get('api/retrieve_tasks?category_id=' + catid);
-		}
-		else {
-			catreq.get('api/retrieve_tasks');
-		}
-	}
-
-	goToCategory = function(catid, catname) {
-		state = {
-			'categoryID' : catid,
-			'categoryName' : catname
 		};
-		if (catid != 0) {
-			history.pushState(state, catname, 'dashboard?cat=' + catid);
-		}
-		else {
-			history.pushState(state, 'Dashboard', 'dashboard');
-		}
-		loadCategory(catid);
+		ajax_req.post("api/delete_category", 'category_id=' + id_kategori);
 	}
+}
 
-	Rp('#categoryList li a').on('click', function(e) {
-		e.preventDefault();
-		catid = this.getAttribute('data-category-id');
-		goToCategory(catid, this.innerHTML);
-	});
+/*Bagian menampilkan pembuatan new_category dan new_task*/
+function new_category()
+{
+	document.getElementById("black_trans").className = "appear";
+	document.getElementById("new_category_area").className = "appear";
+	document.getElementById("close_button").className = "appear";
+	setTimeout(function()
+	{
+		document.getElementById("frame_new_category").className = "frame_new_category_enter";
+	}, 100);
+}
 
-	window.onpopstate = function(e) {
-		console.log(e);
-		if (!e.state)
-			loadCategory(0);
-		else {
-			catid = e.state.categoryID;
-			if (catid !== undefined)
-				loadCategory(catid);
-		}
-	}
+function close()
+{
+	document.getElementById("frame_new_category").className = "";
+	setTimeout(function()
+	{
+		document.getElementById("black_trans").className = "";
+		document.getElementById("new_category_area").className = "";
+		document.getElementById("close_button").className = "";
+	}, 400);
+}
 
-	showModal = function() {
-		Rp('#modalOverlay').css('display', 'block');
-		window.setTimeout(function() {
-			Rp('#modalOverlay').addClass('visible');
-		}, 100);
-	}
-	hideModal = function() {
-		Rp('#modalOverlay').removeClass('visible').css('display', 'none');
-	}
-	Rp('.modal-overlay .close').on('click', function() {
-		Rp(this.parentNode.parentNode).removeClass('visible').css('display', 'none');
-	})
+/*--- Bagian Validasi Pembuatan Kategori Baru ---*/
+var new_category_form = document.getElementById("new_category_form");
+new_category_form.onsubmit = function(e)
+{
+	e.preventDefault();
+	if (new_category_name.checkValidity())
+	{
+		var serialized = serialize2(this);
 
-	// Adding categories
-	Rp('#addCategoryButton').on('click', function() {
-		showModal();
-	});
-	Rp('#newCategoryForm').on('submit', function(e) {
-		e.preventDefault();
-
-		serialized = Rp(this).serialize();
-
-		req = Rp.ajaxRequest('api/add_category');
-		req.onreadystatechange = function() {
+		var req = ajax();
+		req.onreadystatechange = function() 
+		{
 			switch (req.readyState) {
 				case 1:
 				case 2:
 				case 3:
-					Rp('#newCategoryForm').addClass('loading');
 					break;
 				case 4:
-					Rp('#newCategoryForm').removeClass('loading');
 					try {
-						response = Rp.parseJSON(req.responseText);
-						fillCategories(response.categories);
-						goToCategory(response.categoryID, response.categoryName);
+						response = JSON.parse(req.responseText);
+						var categories = document.getElementById("categories");
+						categories.innerHTML = "";
+						
+						append_category("Semua Kategori", 0, false);	
+						response.forEach(function(cat) 
+						{
+							append_category(cat.nama_kategori, cat.id, cat.canDeleteCategory);	
+						});
+						
+						close();
+						new_category_form.reset();
+						new_category_name.style.backgroundImage = "";
+						new_category_username.style.backgroundImage = "";
 					}
 					catch (e) {
 						console.log(e);
 					}
-					hideModal();
 					break;
 			}
-		}
-		req.post(serialized);
-	});
-
-	// Delete category
-	deleteCategory = function(catid) {
-		qs = 'category_id=' + catid;
-		del = Rp.ajaxRequest('api/delete_category');
-		del.onreadystatechange = function() {
-			if (del.readyState == 4) {
-				Rp('#categoryList').removeClass('loading');
-				response = Rp.parseJSON(del.responseText);
-				if (response.success) {
-					Rp('#categoryLi' + catid).hide();
-					goToCategory(0, 'Dashboard');
-				}
-				else {
-					// error
-					console.log('Failed to delete category ' + catid);
-					Rp('#categoryList').removeClass('loading');
-				}
-			}
-			else {
-				Rp('#categoryList').addClass('loading');
-			}
-		}
-		del.post(qs);
+		};
+		req.post("api/add_category", serialized);
 	}
-
-	Rp('#deleteCategoryLink').on('click', function(e) {
-		e.preventDefault();
-		if (confirm('Yakin hapus kategori ini?'))
-			deleteCategory(currentCat);
-	});
-
-	// Task checkboxes
-
-	handleTaskCheckbox = function() {
-		Rp('.task-checkbox input[data-task-id]').prop('disabled', true);
-		taskID = this.getAttribute('data-task-id');
-		mark = Rp.ajaxRequest('api/mark_task');
-		mark.onreadystatechange = function() {
-			if (mark.readyState == 4) {
-				Rp('#dashboardPrimary').removeClass('loading');
-				response = Rp.parseJSON(mark.responseText);
-				if (response.success) {
-					loadCategory(currentCat);
-				}
-				else {
-					console.log('Failure to update status of task.');
-				}
-			}
-			else {
-				Rp('#dashboardPrimary').addClass('loading');
-			}
-		}
-		mark.post({
-			'taskID': taskID,
-			'completed': this.checked
-		});
-	}
-
-	Rp('.task-checkbox input[data-task-id]').on('change', handleTaskCheckbox);
-
-	delreq = Rp.ajax('api/delete_task')
-	.complete(function() {
-		r = this.responseJSON();
-		Rp('article[data-task-id=' + r.task_id + ']').removeClass('loading').hide();
-		loadCategory(currentCat);
-	});
-
-	deleteTask = function(e) {
-		e.preventDefault();
-		id = this.getAttribute('data-task-id');
-		Rp('#task' + id).addClass('loading');
-		delreq.post('task_id=' + parseInt(id));
-	}
-
-	Rp('p.delete a').on('click', deleteTask);
-
-	// Regular refresh
-	var ref;
-	intreq = Rp.ajax()
-		.complete(function() {
-			// Loaded
-			response = catreq.responseText;
-			if (response != taskCache) {
-				console.log('New tasks found.');
-				taskCache = response;
-				response = this.responseJSON();
-				if (response.success)
-					fillTasks(response.tasks);
-			}
-		});
-
-	refreshTasks = function() {
-		console.log('Checking for new tasks...');
-		catid = currentCat;
-		if (catreq.readyState)
-			return;
-		if (catid!=0) {
-			intreq.get('api/retrieve_tasks?category_id=' + catid + '&' + (new Date()).getTime());
-		}
-		else {
-			intreq.get('api/retrieve_tasks');
-		}
-	}
-
-	var ref = window.setInterval(refreshTasks, 5000);
-
-	// Assignee
-	var asignee = document.getElementById("usernames_list");
-	asignee.setAttribute('autocomplete', 'off');
-	asignee.onkeyup = function()
+	else
 	{
-		var value = asignee.value;
-		var req = Rp.ajaxRequest();
-		req.onreadystatechange = function() {
-			switch (req.readyState) {
-				case 1:
-				case 2:
-				case 3:
-					Rp('#assignee').addClass('loading');
-					break;
-				case 4:
-					Rp('#assignee').removeClass('loading');
-					try {
-						response = Rp.parseJSON(req.responseText);
-						var elm = document.getElementById("auto_comp_assignee");
-						var inflate = document.getElementById("auto_comp_inflate_assignee");
-						inflate.innerHTML = "";
-						var temp = 0;
-						for (var i in response)
-						{
-							temp++;
-							var newLi = document.createElement("li");
-							newLi.innerHTML = "<a href='javascript:choose_assignee(\""+response[i]+"\")'>"+
-												response[i]+"</a>";
-							inflate.insertBefore(newLi, inflate.firstChild);
-						}
-						
-						if (temp!=0)
-							elm.style.display = "block";
-					}
-					catch (e) {
-
-					}
-					break;
-			}
-		}
-		req.get('api/get_username?username=' + value);
+		alert("Ada kesalahan pada data yang dimasukkan");
 	}
+	return false;
+};
 
-	choose_assignee = function(username)
+function append_category(category_name, category_id, deleteable)
+{
+	var categories = document.getElementById("categories");
+	var tempstring = "";
+	tempstring += "<li class='dashboard_category_element";
+	if (category_id==currentCat)
 	{
-		var elm = document.getElementById("auto_comp_assignee");
-		var value = asignee.value;
-		value = value.substr(0, value.lastIndexOf(",")+1);
-		value += username;
-		asignee.value = value;
-		elm.style.display = "none";
+		tempstring += "_aktif";
 	}
-});
+	tempstring += "'>";
+		tempstring += "<a href='javascript:void(0);' onclick='checkCat("+category_id+", this);'>";
+			tempstring += category_name;
+		tempstring += "</a>";
+		if (deleteable)
+		{
+			tempstring += "<a href='javascript:void(0);' onclick='deleteCat("+category_id+", this);' class='bold right'>";
+				tempstring += "X";
+			tempstring += "</a>";
+		}
+	tempstring += "</li>";
+	categories.innerHTML += tempstring;
+}
