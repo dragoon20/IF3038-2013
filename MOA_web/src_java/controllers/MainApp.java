@@ -798,7 +798,7 @@ public class MainApp extends HttpServlet
     	}
 	}
 
-	private static String buildWebQuery(Map<String, String> parameters) throws Exception {
+    private static String buildWebQuery(Map<String, String> parameters) throws Exception {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : parameters.entrySet()) {
             String key = URLEncoder.encode(entry.getKey(), "UTF-8");

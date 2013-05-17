@@ -905,7 +905,13 @@ is divided into following sections:
     </target>
     <target if="do.depend.true" name="-compile-depend">
         <pathconvert property="build.generated.subdirs">
-            <dirset dir="${build.generated.sources.dir}" erroronmissingdir="false">
+            <dirset dir="${buil    <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-jar.properties}"/>
+            <param location="${project.MessageContainer}" name="call.subproject"/>
+            <param location="${project.MessageContainer}/build.xml" name="call.script"/>
+            <param name="call.target" value="jar"/>
+            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
+        </antcall"${build.generated.sources.dir}" erroronmissingdir="false">
                 <include name="*"/>
             </dirset>
         </pathconvert>
@@ -1398,3 +1404,10 @@ is divided into following sections:
         </ant>
     </target>
 </project>
+    <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-clean.properties}"/>
+            <param location="${project.MessageContainer}" name="call.subproject"/>
+            <param location="${project.MessageContainer}/build.xml" name="call.script"/>
+            <param name="call.target" value="clean"/>
+            <param name="transfer.built-clean.properties" value="${built-clean.properties}"/>
+        </antcall
