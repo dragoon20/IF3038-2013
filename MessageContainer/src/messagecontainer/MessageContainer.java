@@ -23,66 +23,56 @@ public class MessageContainer {
     private static final int STATUS_FAIL = 6;
 
     
-    private static List<Byte> construct_message(int code,List<Byte> list)
+    private static String construct_message(int code, String list)
     {
-        List<Byte> ret = new ArrayList<>();
+        String ret = "";
         for (int i=0;i<HEADER.length();++i)
         {
-            ret.add((byte)HEADER.charAt(i));
+            ret += HEADER.charAt(i);
         }
         
         for (int i=0;i<19-HEADER.length();++i)
         {
-            ret.add((byte)0);
+            ret += (char)0;
         }
         
-        ret.add((byte)LOGIN_REQUEST);
-        ret.addAll(list);
+        ret += (char)code;
+        ret += list;
 
         return ret;
     }
 
-    public static List<Byte> construct_message_login (String username, String password)
+    public static String construct_message_login (String username, String password)
     {
-        List<Byte> data = new ArrayList<Byte>();
+        String data = "";
         
-        data.add((byte)username.length());
-        
-        for(int i = 0; i<username.length(); i++)
-        {
-            data.add((byte)username.charAt(i));
-        }
-        
-        data.add((byte)password.length());
-        
-        for(int i = 0; i<password.length(); i++)
-        {
-            data.add((byte)password.charAt(i));
-        }
+        data += (char)username.length();
+        data += username;
+        data += (char)password.length();
+        data += password;
         
         return construct_message(LOGIN_REQUEST, data);
     }
     
-    public static List<Byte> construct_message_task (List<Task> ltask)
+    public static String construct_message_list_task (String username)
     { 
-        List<Byte> data = new ArrayList<Byte>();
+        String data = "";
         
-        for(int i = 0; i<ltask.size(); i++){
-            data.add((byte)ltask.get(i).gettaskid());
-        }
+        data += (char)username.length();
+        data += username;
         
-        return construct_message(LOGIN_REQUEST, data);
+        return construct_message(LIST_TASK_REQUEST, data);
     }
     
-    public static List<Byte> construct_message_status (List<Task> ltask)
+    public static String construct_message_status (String username, int idtugas)
     { 
-        List<Byte> data = new ArrayList<Byte>();
+        String data = "";
         
-        for(int i = 0; i<ltask.size(); i++){
-            data.add((byte)ltask.get(i).gettaskid());
-        }
+        data += (char)username.length();
+        data += username;
+        data += (char)idtugas;
         
-        return construct_message(LOGIN_REQUEST, data);
+        return construct_message(STATUS_REQUEST, data);
     }
             
 }
