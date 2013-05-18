@@ -2,7 +2,6 @@ package com.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -21,11 +20,12 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
 import com.custom.CategoryButton;
 import com.model.Category;
+import com.model.Tag;
 import com.model.Task;
 
 public class DashboardPanel extends JPanel implements ActionListener
@@ -39,6 +39,7 @@ public class DashboardPanel extends JPanel implements ActionListener
 	private List<Category> list_category;
 	private List<CategoryButton> list_category_buttons;
 	private List<Task> active_list_task;
+	private List<JButton> list_mark_buttons;
 	private int active_category_id;
 	
 	private JPanel panel_category;
@@ -128,7 +129,12 @@ public class DashboardPanel extends JPanel implements ActionListener
 		list_category.add(new Category(3, "kategori 3"));
 		list_category_buttons = new ArrayList<CategoryButton>();
 		active_list_task = new ArrayList<Task>();
-		active_list_task.add(new Task(1, "tes", true, new Date()));
+		Task task = new Task(1, "tes", true, new Date());
+		task.add_tag(new Tag(1, "tes"));
+		task.add_tag(new Tag(2, "tes2"));
+		task.add_tag(new Tag(3, "tes3"));
+		active_list_task.add(task);
+		list_mark_buttons = new ArrayList<JButton>();
 		active_category_id = 0;
 		
 		refresh();
@@ -175,6 +181,7 @@ public class DashboardPanel extends JPanel implements ActionListener
 			{
 				if (list_category_buttons.get(i).getId()==active_category_id)
 				{
+					check = false;
 					list_category_buttons.get(i).setActive(true);
 					list_category_buttons.get(i).repaint();
 				}
@@ -182,30 +189,47 @@ public class DashboardPanel extends JPanel implements ActionListener
 			}
 			
 			panel_task.removeAll();
+			list_mark_buttons.removeAll(list_mark_buttons);
+			
 			for (int j=0;j<active_list_task.size();++j)
 			{
-				JPanel panel = new JPanel();
+				JPanel panel = new JPanel(new BorderLayout());
+				panel.setBorder(BorderFactory.createTitledBorder(active_list_task.get(j).getNama_task()));
+				panel.setPreferredSize(new Dimension(550, 80));
 				
-				JLabel judul_task = new JLabel(active_list_task.get(j).getNama_task());
-				judul_task.setFont(new Font("Serif", Font.ITALIC, 18));
-				panel.add(judul_task);
+				StringBuilder sb = new StringBuilder();
+				sb.append("{");
+				List<Tag> tags = active_list_task.get(j).getList_tag();
+				for (Tag t : tags)
+				{
+					sb.append(t.getTag_name() + ",");
+				}
+				sb.delete(sb.length()-1, sb.length());
+				sb.append("}");
+				JLabel asignee = new JLabel(sb.toString());
+				asignee.setFont(new Font("Serif", Font.PLAIN, 16));
+				panel.add(asignee, BorderLayout.WEST);
 				
-				SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
-				JLabel deadline_task = new JLabel(sdf.format(active_list_task.get(j).getDeadline()));
-				panel.add(deadline_task);
-				
-				JLabel status = new JLabel((active_list_task.get(j).getStatus())? "selesai" : "belum selesai");
+				JButton status = new JButton((active_list_task.get(j).getStatus())? "selesai" : "belum selesai");
+				status.setPreferredSize(new Dimension(150, 20));
 				if (active_list_task.get(j).getStatus())
 				{
 					status.setForeground(Color.GREEN);
-					status.setFont(new Font("Serif", Font.BOLD, 14));
 				}
 				else
 				{
 					status.setForeground(Color.RED);
-					status.setFont(new Font("Serif", Font.BOLD, 14));
 				}
-				panel.add(status);
+				status.setFont(new Font("Serif", Font.BOLD, 13));
+				status.addActionListener(this);
+				list_mark_buttons.add(status);
+				panel.add(status, BorderLayout.EAST);
+				
+				SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
+				JLabel deadline_task = new JLabel(sdf.format(active_list_task.get(j).getDeadline()));
+				deadline_task.setFont(new Font("Serif", Font.PLAIN, 16));
+				deadline_task.setHorizontalAlignment(SwingConstants.CENTER);
+				panel.add(deadline_task, BorderLayout.CENTER);
 				
 				panel_task.add(panel);
 			}
@@ -235,12 +259,15 @@ public class DashboardPanel extends JPanel implements ActionListener
 			}
 			else
 			{
+				boolean check = true;
+				
 				list_category_buttons.get(0).setActive(false);
 				list_category_buttons.get(0).repaint();
 				for (int i=1;i<list_category_buttons.size();++i)
 				{
 					if (list_category_buttons.get(i).equals(arg0.getSource()))
 					{
+						check = false;
 						list_category_buttons.get(i).setActive(true);
 						active_category_id = list_category_buttons.get(i).getId();
 					}
@@ -249,6 +276,48 @@ public class DashboardPanel extends JPanel implements ActionListener
 						list_category_buttons.get(i).setActive(false);
 					}
 					list_category_buttons.get(i).repaint();
+				}
+				
+				int i = 0;
+				boolean check2 = true;
+				while ((check2) && (i<list_category_buttons.size()))
+				{
+					if (list_category_buttons.get(i).getId()==active_category_id)
+					{
+						check2 = false;
+						list_category_buttons.get(i).setActive(true);
+						list_category_buttons.get(i).repaint();
+					}
+					++i;
+				}
+				
+				if (check)
+				{
+					i = 0;
+					check = true;
+					while ((check) && (i<list_mark_buttons.size()))
+					{
+						if (list_mark_buttons.get(i).equals(arg0.getSource()))
+						{
+							check = false;
+						}
+						++i;
+					}
+					--i;
+					if (!check)
+					{
+						active_list_task.get(i).setStatus(!active_list_task.get(i).getStatus());
+						list_mark_buttons.get(i).setText((active_list_task.get(i).getStatus())? "selesai" : "belum selesai");
+						if (active_list_task.get(i).getStatus())
+						{
+							list_mark_buttons.get(i).setForeground(Color.GREEN);
+						}
+						else
+						{
+							list_mark_buttons.get(i).setForeground(Color.RED);
+						}
+						list_mark_buttons.get(i).revalidate();
+					}
 				}
 			}
 		}

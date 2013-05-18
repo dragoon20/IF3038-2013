@@ -20,6 +20,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import com.main.MOA_client;
+
 public class LoginPanel extends JPanel implements ActionListener
 {
 
@@ -116,11 +118,12 @@ public class LoginPanel extends JPanel implements ActionListener
 			boolean login_success = true;
 			
 			String username = text_username.getText();
-			String password = text_password.getText();
+			String password = new String(text_password.getPassword());
 			
 			// TODO
 			// tentukan berhasil login atau tidak kemudian berikan hasil
 			// ke login_success
+			//MOA_client.sc.doLogin(username, password);
 			
 			if (login_success)
 			{

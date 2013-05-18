@@ -1,5 +1,6 @@
 package com.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class Task
     	this.nama_task = nama_task;
     	this.status = status;
     	this.deadline = deadline;
+    	this.list_tag = new ArrayList<Tag>();
     }
     
     public void add_tag(Tag tag)

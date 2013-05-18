@@ -3,8 +3,13 @@ package com.main;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-public class MOA_client {
+import com.connection.SocketClient;
 
+public class MOA_client 
+{
+
+	public static final SocketClient sc = new SocketClient("localhost", 25000);
+	
 	/**
 	 * @param args
 	 */

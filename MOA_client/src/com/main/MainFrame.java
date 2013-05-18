@@ -9,6 +9,7 @@ import java.net.URL;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import com.connection.SocketClient;
 import com.panels.LoginPanel;
 
 public class MainFrame extends JFrame implements WindowListener
@@ -35,7 +36,8 @@ public class MainFrame extends JFrame implements WindowListener
 
 		setVisible(true);
 		revalidate();
-		
+
+		//MOA_client.sc.establishConnection();
 		add(new LoginPanel());
 	}
 
