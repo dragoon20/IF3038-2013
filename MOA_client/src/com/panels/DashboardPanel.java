@@ -1,6 +1,8 @@
 package com.panels;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -9,7 +11,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -52,13 +56,11 @@ public class DashboardPanel extends JPanel implements ActionListener
 		panel_category.setPreferredSize(new Dimension(220, 600));
 		panel_category.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLoweredSoftBevelBorder(), 
 								"Kategori", TitledBorder.CENTER, TitledBorder.TOP, new Font("Serif", Font.BOLD, 16)));  
-		JScrollPane scroller = new JScrollPane(panel_category);
 		
 		panel_task = new JPanel(new FlowLayout());
 		panel_task.setPreferredSize(new Dimension(570, 600));
 		panel_task.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLoweredSoftBevelBorder(), 
 				"Tugas", TitledBorder.CENTER, TitledBorder.TOP, new Font("Serif", Font.BOLD, 16)));  
-		JScrollPane scroller2 = new JScrollPane(panel_task);
 		
 		JLabel label_app_name = new JLabel("Multiuser Online Agenda");
 		label_app_name.setFont(new Font("Serif", Font.BOLD, 22));
@@ -126,6 +128,7 @@ public class DashboardPanel extends JPanel implements ActionListener
 		list_category.add(new Category(3, "kategori 3"));
 		list_category_buttons = new ArrayList<CategoryButton>();
 		active_list_task = new ArrayList<Task>();
+		active_list_task.add(new Task(1, "tes", true, new Date()));
 		active_category_id = 0;
 		
 		refresh();
@@ -176,6 +179,35 @@ public class DashboardPanel extends JPanel implements ActionListener
 					list_category_buttons.get(i).repaint();
 				}
 				++i;
+			}
+			
+			panel_task.removeAll();
+			for (int j=0;j<active_list_task.size();++j)
+			{
+				JPanel panel = new JPanel();
+				
+				JLabel judul_task = new JLabel(active_list_task.get(j).getNama_task());
+				judul_task.setFont(new Font("Serif", Font.ITALIC, 18));
+				panel.add(judul_task);
+				
+				SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
+				JLabel deadline_task = new JLabel(sdf.format(active_list_task.get(j).getDeadline()));
+				panel.add(deadline_task);
+				
+				JLabel status = new JLabel((active_list_task.get(j).getStatus())? "selesai" : "belum selesai");
+				if (active_list_task.get(j).getStatus())
+				{
+					status.setForeground(Color.GREEN);
+					status.setFont(new Font("Serif", Font.BOLD, 14));
+				}
+				else
+				{
+					status.setForeground(Color.RED);
+					status.setFont(new Font("Serif", Font.BOLD, 14));
+				}
+				panel.add(status);
+				
+				panel_task.add(panel);
 			}
 		}
 		super.revalidate();

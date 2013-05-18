@@ -253,8 +253,9 @@
 												out.println("<img src=\""+MainApp.currentUser(session).getAvatar()+"\" alt=\""+MainApp.currentUser(session).getFullname()+"\" class=\"icon_pict\" >");
 											out.println("</a>");
 										%>
-										<textarea id="comment_input"></textarea>
+										<textarea id="comment_input" name="komentar"></textarea>
 									</div>
+									<input type="hidden" name="id_task" value="<%= task.getId_task() %>">
 									<input id="comment_submit" type="submit" value="Komen"/>
 								</form>
 							</div>

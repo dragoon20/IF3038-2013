@@ -69,9 +69,14 @@
 						<ul>
 							<!-- <li> <a id="login_link" href="logout">Keluar</a> </li> -->
 							<li> 
-								<a id="login_link" href="logout">
+								<a id="profile_link" href="profile">
 									<img id="profile_head_picture" src="<%= MainApp.currentUser(session).getAvatar() %>" />
 									<span id="profile_head_username"><%= MainApp.currentUser(session).getUsername() %></span>
+								</a>
+							</li>
+							<li> 
+								<a id="login_link" href="logout">
+									Keluar
 								</a>
 							</li>
 						</ul>

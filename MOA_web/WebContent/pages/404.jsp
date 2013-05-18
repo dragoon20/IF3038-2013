@@ -1,3 +1,4 @@
+<%@page import="java.util.ArrayList"%>
 <%@ page isErrorPage="true" import="java.io.*" contentType="text/plain"%>
 <%
 	ArrayList<String> javascripts = new ArrayList<String>();

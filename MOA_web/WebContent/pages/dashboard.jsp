@@ -103,11 +103,7 @@
 					dashboard.put("href", "dashboard");
 					dashboard.put("class", "active");
 					menu_main.put("Dashboard", dashboard);
-					
-					Map<String, String> profile = new  HashMap<String, String>();
-					profile.put("href", "profile");
-					menu_main.put("Profil", profile);
-					
+										
 					request.setAttribute("menu", menu_main);
 				%>
 				<%@ include file="../template/header.jsp" %>

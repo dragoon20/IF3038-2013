@@ -624,10 +624,10 @@ a.date_button:hover
 }
 
 /*--- PROFILE HEADER ---*/
-#login_link
+#profile_link
 {
 	padding: 0;
-	margin: 0 !important;
+	margin: 0 5px 0 0 !important;
 }
 #profile_head_picture
 {
