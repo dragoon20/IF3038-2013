@@ -47,7 +47,6 @@ public class MessageContainer {
         List<Byte> data = new ArrayList<Byte>();
         
         data.add((byte)username.length());
-        System.out.println("asd " + (byte)username.length());
         
         for(int i = 0; i<username.length(); i++)
         {
