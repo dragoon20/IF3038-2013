@@ -20,7 +20,9 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import com.account.LoginHistory;
 import com.main.MOA_client;
+import com.main.MainFrame;
 
 public class LoginPanel extends JPanel implements ActionListener
 {
@@ -131,6 +133,17 @@ public class LoginPanel extends JPanel implements ActionListener
 				parent.removeAll();
 				parent.add(new DashboardPanel(username));
 				parent.revalidate();
+				MainFrame.logged_in = true;
+				
+				try
+				{
+					LoginHistory history = new LoginHistory(username, password);
+					history.produce_xml();
+				}
+				catch (Exception exc)
+				{
+					exc.printStackTrace();
+				}
 			}
 			else
 			{

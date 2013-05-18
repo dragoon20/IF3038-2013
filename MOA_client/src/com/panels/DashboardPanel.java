@@ -2,6 +2,7 @@ package com.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -10,6 +11,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,6 +28,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
 import com.custom.CategoryButton;
+import com.main.MainFrame;
 import com.model.Category;
 import com.model.Tag;
 import com.model.Task;
@@ -46,6 +51,7 @@ public class DashboardPanel extends JPanel implements ActionListener
 	private JPanel panel_task;
 	
 	private JButton button_refresh;
+	private JButton button_logout;
 	
 	private boolean first;
 	
@@ -75,6 +81,9 @@ public class DashboardPanel extends JPanel implements ActionListener
 		button_refresh.setPreferredSize(new Dimension(30, 30));
 		button_refresh.addActionListener(this);
 		
+		button_logout = new JButton("Keluar");
+		button_logout.addActionListener(this);
+		
 		JPanel panel_top = new JPanel(new GridBagLayout());
 		
 		GridBagConstraints c = new GridBagConstraints();
@@ -86,7 +95,7 @@ public class DashboardPanel extends JPanel implements ActionListener
 		c.gridwidth = 2;
 		c.gridheight = 1;
 		c.weightx = 1;
-		c.insets = new Insets(10, 0, 10, 120);
+		c.insets = new Insets(10, 0, 10, 130);
 		panel_top.add(label_app_name, c);
 		c.weightx = 0;
 		
@@ -117,6 +126,16 @@ public class DashboardPanel extends JPanel implements ActionListener
 		c.weighty = 1;
 		c.insets = new Insets(0, 0, 0, 5);
 		panel_top.add(button_refresh, c);
+		
+		c.fill = GridBagConstraints.EAST;
+		c.anchor = GridBagConstraints.NORTHEAST;
+		c.gridx = 1;
+		c.gridy = 3;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		c.weighty = 1;
+		c.insets = new Insets(0, 15, 0, 0);
+		panel_top.add(button_logout, c);
 		
 		add(panel_top, BorderLayout.PAGE_START);
 		
@@ -243,6 +262,26 @@ public class DashboardPanel extends JPanel implements ActionListener
 		if (button_refresh.equals(arg0.getSource()))
 		{
 			refresh();
+		}
+		else if (button_logout.equals(arg0.getSource()))
+		{
+			Container parent = this.getParent();
+			parent.removeAll();
+			parent.add(new LoginPanel());
+			parent.revalidate();
+			MainFrame.logged_in = false;
+			
+			
+			try {
+				BufferedWriter br = new BufferedWriter(new FileWriter("loginhistory.txt"));
+				br.write(0);
+				br.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
 		}
 		else
 		{

@@ -9,7 +9,8 @@ import java.net.URL;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import com.connection.SocketClient;
+import com.account.LoginHistory;
+import com.panels.DashboardPanel;
 import com.panels.LoginPanel;
 
 public class MainFrame extends JFrame implements WindowListener
@@ -19,6 +20,8 @@ public class MainFrame extends JFrame implements WindowListener
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
+	public static boolean logged_in;
 	
 	public MainFrame()
 	{
@@ -37,8 +40,26 @@ public class MainFrame extends JFrame implements WindowListener
 		setVisible(true);
 		revalidate();
 
+		//TODO check connection
+		//get existing username
 		//MOA_client.sc.establishConnection();
-		add(new LoginPanel());
+		try
+		{
+			LoginHistory history = new LoginHistory();
+			if (history.parse_xml())
+			{
+				add(new DashboardPanel(history.getUsername()));
+			}
+			else
+			{
+				add(new LoginPanel());
+			}
+		}
+		catch (Exception exc)
+		{
+			exc.printStackTrace();
+			add(new LoginPanel());
+		}
 	}
 
 	@Override
