@@ -46,16 +46,17 @@ public class MessageContainer {
     {
         List<Byte> data = new ArrayList<Byte>();
         
+        data.add((byte)username.length());
+        System.out.println("asd " + (byte)username.length());
+        
         for(int i = 0; i<username.length(); i++)
-       data.add((byte)username.length());
-        System.out.println("asd " + (byte)username.length()length(); i++)
         {
             data.add((byte)username.charAt(i));
         }
         
+        data.add((byte)password.length());
+        
         for(int i = 0; i<password.length(); i++)
-        {
-  data.add((byte)password.length());); i++)
         {
             data.add((byte)password.charAt(i));
         }

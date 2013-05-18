@@ -6,31 +6,34 @@ package socketclient;
 
 import java.io.*;
 import java.net.*;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
-import java.util.List *
-import java.util.logging.Level;
-import java.util.logging.Logger *
  * @author User
  */
 public class SocketClient {
 
-    Socket myClientprivate Socket myClient = null;
+    private Socket myClient = null;
     private InetAddress address = null;
     private OutputStream os = null;
     private OutputStreamWriter osw = null;
     private BufferedWriter bw = null;
     
     private SocketClient(){
-    } SocketClient(String machinename, int port){
+    }
+    
+    private SocketClient(String machinename, int port){
         try{
-            myClient = new Socketaddress = InetAddress.getByName(machinename);
+            address = InetAddress.getByName(machinename);
             myClient = new Socket(address, port);
             //Send the message to the server
             os = myClient.getOutputStream();
             osw = new OutputStreamWriter(os);
-            bw = new BufferedWriter(osweption e){
+            bw = new BufferedWriter(osw);
+        }catch(IOException e){
             e.printStackTrace();
         }
     }
@@ -38,15 +41,15 @@ public class SocketClient {
     private void closeClient(){
         try{
             myClient.close();
-            AccInput.close();
-             }
+        }catch(IOException e){
+        }
+    }
     
-    public void doWrite(){
-        if(myClient != null &Login(String username, String password){
-        Ltry
+    public void doLogin(String username, String password){
+        try
         {
-           List<Byte> msgloginlist = messagecontainer.MessageContainer.construct_message_login(username, password);
-        by    byte[] msglogin = new byte[msgloginlist.size()];
+            List<Byte> msgloginlist = messagecontainer.MessageContainer.construct_message_login(username, password);
+            byte[] msglogin = new byte[msgloginlist.size()];
             for(int i = 0; i<msgloginlist.size(); i++)
             {
                 msglogin[i] = msgloginlist.get(i);
