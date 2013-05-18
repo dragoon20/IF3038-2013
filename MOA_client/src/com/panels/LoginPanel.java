@@ -16,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -28,7 +29,7 @@ public class LoginPanel extends JPanel implements ActionListener
 	private static final long serialVersionUID = 1L;
 
 	private JTextField text_username;
-	private JTextField text_password;
+	private JPasswordField text_password;
 	
 	private JButton button_login;
 	
@@ -44,7 +45,9 @@ public class LoginPanel extends JPanel implements ActionListener
 		label_password.setFont(new Font("Serif", Font.BOLD, 14));
 		
 		text_username = new JTextField(20);
-		text_password = new JTextField(20);
+		text_username.addActionListener(this);
+		text_password = new JPasswordField(20);
+		text_password.addActionListener(this);
 		
 		button_login = new JButton("Masuk");
 		button_login.setFont(new Font("Serif", Font.BOLD, 14));
@@ -108,7 +111,7 @@ public class LoginPanel extends JPanel implements ActionListener
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-		if (button_login.equals(e.getSource()))
+		if ((button_login.equals(e.getSource())) || (text_username.equals(e.getSource())) || (text_password.equals(e.getSource())))
 		{
 			boolean login_success = true;
 			
