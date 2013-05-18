@@ -16,20 +16,17 @@ import java.util.logging.Logger;
  */
 public class SocketServer {
 
-    private ServerSocket Server = null;
+    private SrverSocket Server = null;
     private Socket ServiceSocket = null;
-    private InputStream is = null;
-    private InputStreamReader isr = null;
-    private BufferedReader br = null;
+    private InputStream is = nullClientThread client= null;
     
-    public SocketServer(int port){
+    public SocketServer(String IPAddress, int port){
         try {
-             Server = new ServerSocket(port);
-             ServiceSocket = Server.accept();
-             is = ServiceSocket.getInputStream();
-             isr = new InputStreamReader(is);
-             br = new BufferedReader(isr);
-        } catch (IOException e) {
+             Server = new ServerSocket(port,0,InetAddress.getByName(IPAddress));
+             System.out.println("Server started, waiting for client...");
+             //is = ServiceSocket.getInputStream();
+             //isr = new InputStreamReader(is);
+             //       } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -43,8 +40,29 @@ public class SocketServer {
     
     private void doReceive(){
         try
-        {
-            while(true) 
+       ublic void doReceive(){
+        while(true){
+            try {
+                addThread(Server.accept());
+                System.out.println("Waiting for another client...");
+            } catch (IOException ex) {
+                Logger.getLogger(SocketServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    public void addThread(Socket socket){
+        try {
+            System.out.println("Client connected "+socket);
+            client = new ClientThread(socket);
+            client.open();
+            client.start();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    /*public         while(true) 
             {
                 //Reading the message from the client
                 String input = br.readLine();
@@ -52,8 +70,7 @@ public class SocketServer {
                     System.out.println("Message received from client is : "+input);
                 }
                 
-            }
-        }
+          (int)input.charAt(20)        }
         catch (Exception e) 
         {
             e.printStackTrace();
@@ -69,7 +86,7 @@ public class SocketServer {
     }
     
     /*----Function----*/
-    private static String buildWebQuery(Map<String, String> parameters) throws Exception {
+    private static String buildWebQuer*/y(Map<String, String> parameters) throws Exception {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : parameters.entrySet()) {
             String key = URLEncoder.encode(entry.getKey(), "UTF-8");
@@ -132,8 +149,7 @@ public class SocketServer {
 =======
 /*
  * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package socketserver;
-
-i
+ * and open the template"127.0.0.1",25000);
+        SR.doReceive();
+    }
+}
