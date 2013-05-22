@@ -533,7 +533,7 @@ public class RestApi extends HttpServlet
 		if (("POST".equals(request.getMethod().toUpperCase())) && (request.getParameter("username")!=null) &&
 				(request.getParameter("email")!=null) && (request.getParameter("password")!=null) && 
 				(request.getParameter("confirm_password")!=null) && (request.getParameter("fullname")!=null) && 
-				(request.getParameter("birthdate")!=null) && (request.getParameter("avatar")!=null))
+				(request.getParameter("birthdate")!=null))
 		{
 			try {
 				HashMap<String, String> parameter = new HashMap<String,String>();
@@ -544,7 +544,7 @@ public class RestApi extends HttpServlet
 				parameter.put("confirm_password", request.getParameter("confirm_password"));
 				parameter.put("fullname", request.getParameter("fullname"));
 				parameter.put("birthdate", request.getParameter("birthdate"));
-				parameter.put("avatar", request.getParameter("avatar"));
+				parameter.put("avatar", "avatar.jpg");
 
 				String responseString = MainApp.callRestfulWebService(MainApp.serviceURL+"user/register_check", parameter, "", 0);
 
@@ -558,7 +558,7 @@ public class RestApi extends HttpServlet
 		else
 		{
 			PrintWriter pw = response.getWriter();
-			pw.println("{status : \"fail\"}");
+			pw.println("{\"status\" : \"fail\"}");
 			pw.close();
 		}
 	}

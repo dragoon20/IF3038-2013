@@ -1,4 +1,4 @@
-*
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -6,6 +6,7 @@ package socketserver;
 
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,19 +15,20 @@ import java.util.logging.Logger;
  *
  * @author User
  */
-public class SocketServer {
+public class SocketServer{
 
-    private SrverSocket Server = null;
+    private ServerSocket Server = null;
     private Socket ServiceSocket = null;
-    private InputStream is = nullClientThread client= null;
+    private ClientThread client= null;
+    
+    public SocketServer(){
+    }
     
     public SocketServer(String IPAddress, int port){
         try {
              Server = new ServerSocket(port,0,InetAddress.getByName(IPAddress));
              System.out.println("Server started, waiting for client...");
-             //is = ServiceSocket.getInputStream();
-             //isr = new InputStreamReader(is);
-             //       } catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -38,9 +40,7 @@ public class SocketServer {
         }
     }
     
-    private void doReceive(){
-        try
-       ublic void doReceive(){
+    public void doReceive(){
         while(true){
             try {
                 addThread(Server.accept());
@@ -52,20 +52,23 @@ public class SocketServer {
     }
     
     public void addThread(Socket socket){
-        try {
-            System.out.println("Client connected "+socket);
-            client = new ClientThread(socket);
-            client.open();
-            client.start();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        System.out.println("Client connected "+socket);
+        client = new ClientThread(socket);
+        client.start();
     }
+
     
-    /*public         while(true) 
-            {
-                //Reading the message from the client
-                String input = br.readLine();
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        SocketServer SR = new SocketServer("127.0.0.1",25000);
+        //SocketServer SR = new SocketServer();
+        SR.doReceive();
+        //System.out.println(SR.callDatabase());
+    }
+}
+ input = br.readLine();
                 if(input!=null){
                     System.out.println("Message received from client is : "+input);
                 }

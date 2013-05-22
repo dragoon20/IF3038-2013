@@ -14,7 +14,7 @@ public class MessageContainer
     private static final int STATUS_FAIL = 6;
 
     
-    private static String construct_message(int code, String list)
+    private static byte[] construct_message(int code, String list)
     {
         String ret = "";
         for (int i=0;i<HEADER.length();++i)
@@ -33,7 +33,7 @@ public class MessageContainer
         return ret;
     }
 
-    public static String construct_message_login (String username, String password)
+    public static byte[] construct_message_login (String username, String password)
     {
         String data = "";
         
@@ -45,17 +45,14 @@ public class MessageContainer
         return construct_message(LOGIN_REQUEST, data);
     }
     
-    public static String construct_message_list_task (String username)
+    public static byte[] construct_message_list_task ()
     { 
         String data = "";
-        
-        data += (char)username.length();
-        data += username;
         
         return construct_message(LIST_TASK_REQUEST, data);
     }
     
-    public static String construct_message_status (int idtugas, boolean status, Date timestamp)
+    public static byte[] construct_message_status (int idtugas, boolean status, Date timestamp)
     { 
         String data = "";
         

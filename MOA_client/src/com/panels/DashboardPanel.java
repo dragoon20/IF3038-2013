@@ -309,7 +309,7 @@ public class DashboardPanel extends JPanel implements ActionListener
 			parent.removeAll();
 			parent.add(new LoginPanel());
 			parent.revalidate();
-			MainFrame.logged_in = false;
+			MOA_client.logged_in = false;
 			
 			try 
 			{

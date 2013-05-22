@@ -12,6 +12,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.crypto.Cipher;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -22,7 +23,6 @@ import javax.swing.SwingConstants;
 
 import com.account.LoginHistory;
 import com.main.MOA_client;
-import com.main.MainFrame;
 
 public class LoginPanel extends JPanel implements ActionListener
 {
@@ -119,8 +119,21 @@ public class LoginPanel extends JPanel implements ActionListener
 		{
 			boolean login_success = false;
 			
-			String username = text_username.getText();
-			String password = new String(text_password.getPassword());
+			String username = "";
+			String password = "";
+			try
+			{
+				Cipher cipher = Cipher.getInstance("RSA");
+	            cipher.init(Cipher.ENCRYPT_MODE, MOA_client.public_key);
+	            username = new String(cipher.doFinal(text_username.getText().getBytes()));
+	            password = new String(cipher.doFinal(new String(text_password.getPassword()).getBytes()));
+			}
+			catch (Exception exc)
+			{
+				exc.printStackTrace();
+			}
+			System.out.println(username.length()+" "+password.length());
+			System.out.println(username.getBytes().length+" "+password.getBytes().length);
 			
 			login_success = MOA_client.sc.doLogin(username, password);
 			
@@ -135,7 +148,7 @@ public class LoginPanel extends JPanel implements ActionListener
 					parent.removeAll();
 					parent.add(new DashboardPanel(history));
 					parent.revalidate();
-					MainFrame.logged_in = true;
+					MOA_client.logged_in = true;
 				}
 				catch (Exception exc)
 				{

@@ -1,6 +1,7 @@
 package com.connection;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.InetAddress;
@@ -117,9 +118,8 @@ public class SocketClient implements Runnable
                     {
                     	while (LOCK) ;
                     	LOCK = true;
-                        PrintWriter out = null;
-                        out = new PrintWriter(myClient.getOutputStream());
-                        out.println("papa I'm alive");
+                        OutputStream out = myClient.getOutputStream();
+                        myClient.getOutputStream().write("papa I'm alive".getBytes());
                         out.flush();
 
                         Scanner in = new Scanner(myClient.getInputStream());
@@ -245,6 +245,7 @@ public class SocketClient implements Runnable
         		LOCK = true;
 	            String sendMessage = MessageContainer.construct_message_login(username, password);
 	            PrintWriter out = new PrintWriter(myClient.getOutputStream());
+	            System.out.println(sendMessage.length());
 	            out.println(sendMessage);
 	            out.flush();
 	            System.out.println("Message sent to the server : "+ sendMessage);

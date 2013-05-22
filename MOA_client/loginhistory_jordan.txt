@@ -1,2 +1,0 @@
-<username>jordan</username>
-<password>tesdoang</password>

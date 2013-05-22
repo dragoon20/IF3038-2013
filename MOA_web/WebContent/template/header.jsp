@@ -88,16 +88,23 @@
 			</div>
 			<div id="border_search"></div>
 
-			<div id="search">
-				<div id="search_inner">
-					<div id="search_button"></div>
-					<div id="search_left"></div>
-					<form id="search_form">
-						<input id="search_text" name="search_query" type="text" autocomplete="off"/>
-					</form>
-					<div id="search_right"></div>
+			<%
+				if (MainApp.LoggedIn(session))
+				{
+			%>
+				<div id="search">
+					<div id="search_inner">
+						<div id="search_button"></div>
+						<div id="search_left"></div>
+						<form id="search_form" action="search">
+							<input id="search_text" name="search_query" type="text" autocomplete="off"/>
+						</form>
+						<div id="search_right"></div>
+					</div>
 				</div>
-			</div>
+			<%
+				}
+			%>
 		</div>
 		<div class="clear"></div>
 	</div>

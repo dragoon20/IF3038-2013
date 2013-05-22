@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -889,6 +891,82 @@ public class TaskService extends BasicServlet
 
 			PrintWriter pw = response.getWriter();
 			pw.print("{success : false}");
+			pw.close();
+		}
+	}
+	
+	public void mark_task_with_timestamp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		try
+		{
+			if ((request.getParameter("token")!=null) &&(request.getParameter("app_id")!=null) && ((GeneralHelper.isLogin(request.getParameter("token"), request.getParameter("app_id")))!=-1))
+			{
+				if ((request.getParameter("taskID")!=null) && (request.getParameter("completed")!=null) && (request.getParameter("timestamp")!=null))
+				{
+					PrintWriter pw = response.getWriter();
+					HashMap<String, Object> ret = new HashMap<String, Object>();
+					
+					int id_task = Integer.parseInt(request.getParameter("taskID"));
+					int completed = ("true".equals(request.getParameter("completed"))) ? 1 : 0;
+					Timestamp timestamp = new Timestamp(Long.parseLong(request.getParameter("timestamp")));
+					
+					String select = "SELECT `last_change` FROM "+Task.getTableName()+" WHERE id_task = ?";
+					PreparedStatement temp_statement;
+					Connection conn = DBConnection.getConnection();
+					temp_statement = conn.prepareStatement(select);
+					temp_statement.setInt(1, id_task);
+					ResultSet rs = temp_statement.executeQuery();
+					rs.next();
+					Timestamp old_timestamp = rs.getTimestamp(1);
+					rs.close();
+				
+					if (timestamp.after(old_timestamp))
+					{
+						String update = "UPDATE "+Task.getTableName()+" SET status = ?, last_change = ? WHERE id_task = ? ";
+						PreparedStatement statement;
+						
+						statement = conn.prepareStatement(update);
+						statement.setInt(1, completed);
+						statement.setTimestamp(2, timestamp);
+						statement.setInt(3, id_task);
+						int affectedrows = statement.executeUpdate();
+						
+						if (affectedrows >= 1)
+						{
+							ret.put("success", true);
+							ret.put("taskId", id_task);
+							ret.put("done", completed);
+						}
+						else
+						{
+							ret.put("success", false);
+						}
+						pw.println(new JSONObject(ret).toJSONString());
+					}
+					else
+					{
+						System.out.println("fail");
+						ret.put("success", true);
+						ret.put("taskId", id_task);
+						ret.put("done", completed);
+						pw.println(new JSONObject(ret).toJSONString());
+					}
+				}
+				else
+				{
+					throw new Exception();
+				}
+			}
+			else
+			{
+				throw new Exception();
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+
+			PrintWriter pw = response.getWriter();
+			pw.print("{\"success\" : false}");
 			pw.close();
 		}
 	}

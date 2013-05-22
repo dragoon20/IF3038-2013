@@ -53,8 +53,9 @@ public class MainApp extends HttpServlet
     public static final String appId = "0d2d2a7531376b3b05ff4203aeaa6b41";
     public static final String appName = "MOA";
     public static final String appTagline = "Multiuser Online Agenda";
-    public static final String serviceURL = "http://localhost:8080/MOA_services/";
-    //public static final String serviceURL = "http://moa-service.ap01.aws.af.cm/";
+    //public static final String serviceURL = "http://localhost:8080/MOA_services/";
+    public static final String serviceURL = "http://moa-service.ap01.aws.af.cm/";
+    public static final String appender = "";
     
     /**
      * @see HttpServlet#HttpServlet()
@@ -177,52 +178,52 @@ public class MainApp extends HttpServlet
 
 	public void index(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/index.jsp").forward(request, response);
+		request.getRequestDispatcher(appender+"pages/index.jsp").forward(request, response);
 	}
 
 	public void dashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/dashboard.jsp").forward(request, response);
+		request.getRequestDispatcher(appender+"pages/dashboard.jsp").forward(request, response);
 	}
 
 	public void profile(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/profile.jsp").forward(request, response);
+		request.getRequestDispatcher(appender+"pages/profile.jsp").forward(request, response);
 	}
 
 	public void edit_profile(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/edit_profile.jsp").forward(request, response);
+		request.getRequestDispatcher(appender+"pages/edit_profile.jsp").forward(request, response);
 	}
 
 	public void change_password(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/change_password.jsp").forward(request, response);
+		request.getRequestDispatcher(appender+"pages/change_password.jsp").forward(request, response);
 	}
 
 	public void new_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/new_task.jsp").forward(request, response);
+		request.getRequestDispatcher(appender+"pages/new_task.jsp").forward(request, response);
 	}
 
 	public void task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/task.jsp").forward(request, response);
+		request.getRequestDispatcher(appender+"pages/task.jsp").forward(request, response);
 	}
 	
 	public void edit_task(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/edit_task.jsp").forward(request, response);
+		request.getRequestDispatcher(appender+"pages/edit_task.jsp").forward(request, response);
 	}   
 
 	public void search(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/search.jsp").forward(request, response);
+		request.getRequestDispatcher(appender+"pages/search.jsp").forward(request, response);
 	}
 
 	public void search_partial(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		request.getRequestDispatcher("pages/search_partial.jsp").forward(request, response);
+		request.getRequestDispatcher(appender+"pages/search_partial.jsp").forward(request, response);
 	}
 
 	public void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException

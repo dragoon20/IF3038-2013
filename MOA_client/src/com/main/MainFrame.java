@@ -21,8 +21,6 @@ public class MainFrame extends JFrame implements WindowListener
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static boolean logged_in;
-	
 	public MainFrame()
 	{
 		URL url = ClassLoader.getSystemResource("images/icon.png");
