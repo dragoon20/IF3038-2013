@@ -18,15 +18,22 @@ import java.util.logging.Logger;
 public class LogBuilder 
 {
 	private List<Log> logs = new ArrayList<>();
+	private static final String log_path = "logs.txt";
+	
+    public Log get(int i)
+    {
+    	return logs.get(i);
+    }
+    
+    public int size()
+    {
+    	return logs.size();
+    }
     
     public LogBuilder()
     {
-    }
-    
-    public LogBuilder(String path)
-    {
         try {
-            parse_logs(path);
+            parse_logs();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(LogBuilder.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -39,6 +46,7 @@ public class LogBuilder
     public void add_log(byte id, String nama, boolean status)
     {
         Log newlog = new Log(id, nama, status);
+        System.out.println("Added log with id="+id+" name="+nama+" status="+status);
         logs.add(newlog);
     }
     
@@ -51,6 +59,11 @@ public class LogBuilder
     public void delete_log(int i)
     {
         logs.remove(i);
+    }
+    
+    public void delete_all_log()
+    {
+    	logs.removeAll(logs);
     }
     
     public void delete_last_log()
@@ -80,12 +93,14 @@ public class LogBuilder
         {
             osw.write(construct_log_message(logs.get(i)) + "\n");
         }
+        osw.flush();
         osw.close();
     }
     
-    public void parse_logs(String path) throws FileNotFoundException, IOException, ParseException
+    public void parse_logs() throws FileNotFoundException, IOException, ParseException
     {
-        BufferedReader br = new BufferedReader(new FileReader(path));
+    	delete_all_log();
+        BufferedReader br = new BufferedReader(new FileReader(log_path));
         String line;
         while ((line = br.readLine()) != null)
         {
@@ -133,7 +148,7 @@ public class LogBuilder
                 }
             }
             i += 3;
-            boolean statustugas = Boolean.getBoolean(temp);
+            boolean statustugas = Boolean.parseBoolean(temp);
             
             // parse id tugas
             temp = "";

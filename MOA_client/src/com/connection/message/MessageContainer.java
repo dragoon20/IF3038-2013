@@ -1,5 +1,7 @@
 package com.connection.message;
 
+import java.util.Date;
+
 public class MessageContainer 
 {
     private static final String HEADER = "MOA";
@@ -53,13 +55,18 @@ public class MessageContainer
         return construct_message(LIST_TASK_REQUEST, data);
     }
     
-    public static String construct_message_status (String username, int idtugas)
+    public static String construct_message_status (int idtugas, boolean status, Date timestamp)
     { 
         String data = "";
         
-        data += (char)username.length();
-        data += username;
         data += (char)idtugas;
+        if (status)
+        	data += "1";
+        else
+        	data += "0";
+        String time = timestamp.toString();
+        data += (char)time.length();
+        data += time;
         
         return construct_message(STATUS_REQUEST, data);
     }

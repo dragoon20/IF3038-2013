@@ -9,6 +9,7 @@ public class MOA_client
 {
 
 	public static final SocketClient sc = new SocketClient("localhost", 25000);
+	public static final Thread conn_thread = new Thread(sc);
 	
 	/**
 	 * @param args

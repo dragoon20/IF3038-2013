@@ -37,18 +37,13 @@ public class MainFrame extends JFrame implements WindowListener
 		addWindowListener(this);
 		setLocationRelativeTo(null);
 
-		setVisible(true);
-		revalidate();
-
-		//TODO check connection
-		//get existing username
-		//MOA_client.sc.establishConnection();
+		MOA_client.conn_thread.start();
 		try
 		{
 			LoginHistory history = new LoginHistory();
 			if (history.parse_xml())
 			{
-				add(new DashboardPanel(history.getUsername()));
+                add(new DashboardPanel(history));
 			}
 			else
 			{
@@ -60,6 +55,8 @@ public class MainFrame extends JFrame implements WindowListener
 			exc.printStackTrace();
 			add(new LoginPanel());
 		}
+		setVisible(true);
+		revalidate();
 	}
 
 	@Override

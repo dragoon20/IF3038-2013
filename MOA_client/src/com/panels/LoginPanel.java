@@ -117,28 +117,25 @@ public class LoginPanel extends JPanel implements ActionListener
 	{
 		if ((button_login.equals(e.getSource())) || (text_username.equals(e.getSource())) || (text_password.equals(e.getSource())))
 		{
-			boolean login_success = true;
+			boolean login_success = false;
 			
 			String username = text_username.getText();
 			String password = new String(text_password.getPassword());
 			
-			// TODO
-			// tentukan berhasil login atau tidak kemudian berikan hasil
-			// ke login_success
-			//MOA_client.sc.doLogin(username, password);
+			login_success = MOA_client.sc.doLogin(username, password);
 			
 			if (login_success)
 			{
-				Container parent = this.getParent();
-				parent.removeAll();
-				parent.add(new DashboardPanel(username));
-				parent.revalidate();
-				MainFrame.logged_in = true;
-				
 				try
 				{
 					LoginHistory history = new LoginHistory(username, password);
 					history.produce_xml();
+					
+					Container parent = this.getParent();
+					parent.removeAll();
+					parent.add(new DashboardPanel(history));
+					parent.revalidate();
+					MainFrame.logged_in = true;
 				}
 				catch (Exception exc)
 				{

@@ -16,7 +16,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -27,10 +26,12 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
+import com.account.LoginHistory;
+import com.connection.SocketClient;
 import com.custom.CategoryButton;
+import com.main.MOA_client;
 import com.main.MainFrame;
 import com.model.Category;
-import com.model.Tag;
 import com.model.Task;
 
 public class DashboardPanel extends JPanel implements ActionListener
@@ -53,11 +54,14 @@ public class DashboardPanel extends JPanel implements ActionListener
 	private JButton button_refresh;
 	private JButton button_logout;
 	
+	private LoginHistory history;
+	
 	private boolean first;
 	
-	public DashboardPanel(String username)
+	public DashboardPanel(LoginHistory history)
 	{
 		super(new BorderLayout());
+		this.history = history;
 		
 		panel_category = new JPanel(new FlowLayout());
 		panel_category.setPreferredSize(new Dimension(220, 600));
@@ -73,7 +77,7 @@ public class DashboardPanel extends JPanel implements ActionListener
 		label_app_name.setFont(new Font("Serif", Font.BOLD, 22));
 		JLabel label_hello = new JLabel("Halo, ");
 		label_hello.setFont(new Font("Serif", Font.PLAIN, 14));
-		JLabel label_username = new JLabel(username);
+		JLabel label_username = new JLabel(history.getUsername());
 		label_username.setFont(new Font("Serif", Font.BOLD, 14));
 
 		ImageIcon refresh_icon = new ImageIcon(ClassLoader.getSystemResource("images/refresh.png"));
@@ -142,25 +146,26 @@ public class DashboardPanel extends JPanel implements ActionListener
 		add(panel_category, BorderLayout.WEST);
 		add(panel_task, BorderLayout.CENTER);
 		
-		list_category = new ArrayList<Category>();
-		list_category.add(new Category(1, "kategori 1"));
-		list_category.add(new Category(2, "kategori 2"));
-		list_category.add(new Category(3, "kategori 3"));
+		list_category = history.getCategories();
 		list_category_buttons = new ArrayList<CategoryButton>();
 		active_list_task = new ArrayList<Task>();
-		Task task = new Task(1, "tes", true, new Date());
-		task.add_tag(new Tag(1, "tes"));
-		task.add_tag(new Tag(2, "tes2"));
-		task.add_tag(new Tag(3, "tes3"));
-		active_list_task.add(task);
 		list_mark_buttons = new ArrayList<JButton>();
 		active_category_id = 0;
-		
+
 		refresh();
 	}
 	
 	public void refresh()
 	{
+		if (!MOA_client.sc.logged_in)
+		{
+			MOA_client.sc.doLogin(history.getUsername(), history.getPassword());
+		}
+		List<Category> temp = MOA_client.sc.doList();
+		if (temp!=null)
+		{
+			list_category = temp;
+		}
 		revalidate();
 	}
 	
@@ -193,6 +198,7 @@ public class DashboardPanel extends JPanel implements ActionListener
 				list_category_buttons.add(button);
 				panel_category.add(button);
 			}
+			panel_category.repaint();
 			
 			int i = 0;
 			boolean check = true;
@@ -207,6 +213,30 @@ public class DashboardPanel extends JPanel implements ActionListener
 				++i;
 			}
 			
+			if (active_category_id==0)
+			{
+				active_list_task = new ArrayList<Task>(); 
+				for (i=0;i<list_category.size();++i)
+				{
+					active_list_task.addAll(list_category.get(i).getList_task());
+				}
+			}
+			else
+			{
+				i = 0;
+				check = true;
+				while ((check) && (i<list_category.size()))
+				{
+					if (list_category.get(i).getId_kategori()==active_category_id)
+					{
+						check = false;
+						active_list_task = list_category.get(i).getList_task();
+						System.out.println(active_list_task.size());
+					}
+					++i;
+				}
+			}
+			
 			panel_task.removeAll();
 			list_mark_buttons.removeAll(list_mark_buttons);
 			
@@ -217,14 +247,15 @@ public class DashboardPanel extends JPanel implements ActionListener
 				panel.setPreferredSize(new Dimension(550, 80));
 				
 				StringBuilder sb = new StringBuilder();
-				sb.append("{");
+				/*sb.append("{");
 				List<Tag> tags = active_list_task.get(j).getList_tag();
 				for (Tag t : tags)
 				{
 					sb.append(t.getTag_name() + ",");
 				}
 				sb.delete(sb.length()-1, sb.length());
-				sb.append("}");
+				sb.append("}");*/
+				
 				JLabel asignee = new JLabel(sb.toString());
 				asignee.setFont(new Font("Serif", Font.PLAIN, 16));
 				panel.add(asignee, BorderLayout.WEST);
@@ -252,6 +283,15 @@ public class DashboardPanel extends JPanel implements ActionListener
 				
 				panel_task.add(panel);
 			}
+			panel_task.repaint();
+
+			history.setCategories(list_category);
+			try {
+				history.produce_xml();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		super.revalidate();
 	}
@@ -271,8 +311,8 @@ public class DashboardPanel extends JPanel implements ActionListener
 			parent.revalidate();
 			MainFrame.logged_in = false;
 			
-			
-			try {
+			try 
+			{
 				BufferedWriter br = new BufferedWriter(new FileWriter("loginhistory.txt"));
 				br.write(0);
 				br.close();
@@ -280,8 +320,6 @@ public class DashboardPanel extends JPanel implements ActionListener
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			
 		}
 		else
 		{
@@ -295,6 +333,7 @@ public class DashboardPanel extends JPanel implements ActionListener
 					list_category_buttons.get(i).setActive(false);
 					list_category_buttons.get(i).repaint();
 				}
+				revalidate();
 			}
 			else
 			{
@@ -339,6 +378,22 @@ public class DashboardPanel extends JPanel implements ActionListener
 						if (list_mark_buttons.get(i).equals(arg0.getSource()))
 						{
 							check = false;
+							try
+							{
+								SocketClient.LB.parse_logs();
+							}
+							catch (Exception e)
+							{
+								e.printStackTrace();
+							}
+							SocketClient.LB.add_log((byte)active_list_task.get(i).getId_task(), active_list_task.get(i).getNama_task(), !active_list_task.get(i).getStatus());
+							try 
+							{
+								SocketClient.LB.save_logs();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 						}
 						++i;
 					}
@@ -356,7 +411,12 @@ public class DashboardPanel extends JPanel implements ActionListener
 							list_mark_buttons.get(i).setForeground(Color.RED);
 						}
 						list_mark_buttons.get(i).revalidate();
+						revalidate();
 					}
+				}
+				else
+				{
+					revalidate();
 				}
 			}
 		}
