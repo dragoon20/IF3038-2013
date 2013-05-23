@@ -30,7 +30,6 @@ import com.account.LoginHistory;
 import com.connection.SocketClient;
 import com.custom.CategoryButton;
 import com.main.MOA_client;
-import com.main.MainFrame;
 import com.model.Category;
 import com.model.Task;
 
@@ -75,10 +74,8 @@ public class DashboardPanel extends JPanel implements ActionListener
 		
 		JLabel label_app_name = new JLabel("Multiuser Online Agenda");
 		label_app_name.setFont(new Font("Serif", Font.BOLD, 22));
-		JLabel label_hello = new JLabel("Halo, ");
+		JLabel label_hello = new JLabel("Selamat Datang");
 		label_hello.setFont(new Font("Serif", Font.PLAIN, 14));
-		JLabel label_username = new JLabel(history.getUsername());
-		label_username.setFont(new Font("Serif", Font.BOLD, 14));
 
 		ImageIcon refresh_icon = new ImageIcon(ClassLoader.getSystemResource("images/refresh.png"));
 		button_refresh = new JButton(refresh_icon);
@@ -111,15 +108,6 @@ public class DashboardPanel extends JPanel implements ActionListener
 		c.gridheight = 1;
 		c.insets = new Insets(0, 0, 0, 0);
 		panel_top.add(label_hello, c);
-		
-		c.fill = GridBagConstraints.EAST;
-		c.anchor = GridBagConstraints.NORTHEAST;
-		c.gridx = 5;
-		c.gridy = 2;
-		c.gridwidth = 1;
-		c.gridheight = 1;
-		c.insets = new Insets(0, 0, 0, 25);
-		panel_top.add(label_username, c);
 		
 		c.fill = GridBagConstraints.EAST;
 		c.anchor = GridBagConstraints.NORTHEAST;

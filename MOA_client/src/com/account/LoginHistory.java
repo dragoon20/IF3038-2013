@@ -21,18 +21,18 @@ import com.model.Task;
 
 public class LoginHistory 
 {
-    private String username;
-    private String password;
+    private byte[] username;
+    private byte[] password;
     private List<Category> categories;
     
     public LoginHistory()
     {
-        username = "";
-        password = "";
+        username = new byte[0];
+        password = new byte[0];
         categories = new ArrayList<Category>();
     }
     
-    public LoginHistory(String user, String pass)
+    public LoginHistory(byte[] user, byte[] pass)
     {
         username = user;
         password = pass;
@@ -52,8 +52,20 @@ public class LoginHistory
             {
             	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             	JSONObject main = (JSONObject)JSONValue.parse(line);
-	            username = (String)main.get("username");
-	            password = (String)main.get("password");
+	            String[] split = ((String)main.get("username")).split(",");
+	            username = new byte[split.length];
+	            for (int i=0;i<split.length;++i)
+	            {
+	            	username[i] = Byte.parseByte(split[i]);
+	            }
+	            
+	            split = ((String)main.get("password")).split(",");
+	            password = new byte[split.length];
+	            for (int i=0;i<split.length;++i)
+	            {
+	            	password[i] = Byte.parseByte(split[i]);
+	            }
+	            
 	            categories = new ArrayList<Category>();
 	            
 		      	JSONArray temp_categories = (JSONArray)main.get("categories");
@@ -77,8 +89,8 @@ public class LoginHistory
         catch (Exception e)
         {
             System.out.println("error : " + e);
-            username = "";
-            password = "";
+            username = new byte[0];
+            password = new byte[0];
             categories = new ArrayList<Category>();
         }        
         
@@ -91,8 +103,23 @@ public class LoginHistory
         OutputStreamWriter osw = new FileWriter("loginhistory.txt");
         
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("username", username);
-        map.put("password", password);
+        StringBuilder sb = new StringBuilder();
+        for (int i=0;i<username.length;++i)
+        {
+        	sb.append(username[i]);
+        	sb.append(",");
+        }
+        sb.delete(sb.length()-1, sb.length());
+        map.put("username", sb.toString());
+
+        sb = new StringBuilder();
+        for (int i=0;i<password.length;++i)
+        {
+        	sb.append(password[i]);
+        	sb.append(",");
+        }
+        sb.delete(sb.length()-1, sb.length());
+        map.put("password", sb.toString());
         
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         if (categories!=null)
@@ -128,28 +155,28 @@ public class LoginHistory
     /**
      * @return the username
      */
-    public String getUsername() {
+    public byte[] getUsername() {
         return username;
     }
 
     /**
      * @param username the username to set
      */
-    public void setUsername(String username) {
+    public void setUsername(byte[] username) {
         this.username = username;
     }
 
     /**
      * @return the password
      */
-    public String getPassword() {
+    public byte[] getPassword() {
         return password;
     }
 
     /**
      * @param password the password to set
      */
-    public void setPassword(String password) {
+    public void setPassword(byte[] password) {
         this.password = password;
     }
 

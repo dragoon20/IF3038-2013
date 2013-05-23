@@ -119,21 +119,21 @@ public class LoginPanel extends JPanel implements ActionListener
 		{
 			boolean login_success = false;
 			
-			String username = "";
-			String password = "";
+			byte[] username = new byte[0];
+			byte[] password = new byte[0];
 			try
 			{
 				Cipher cipher = Cipher.getInstance("RSA");
 	            cipher.init(Cipher.ENCRYPT_MODE, MOA_client.public_key);
-	            username = new String(cipher.doFinal(text_username.getText().getBytes()));
-	            password = new String(cipher.doFinal(new String(text_password.getPassword()).getBytes()));
+	            byte[] temp = text_username.getText().getBytes();
+        		username = cipher.doFinal(temp);
+        		temp = new String(text_password.getPassword()).getBytes();
+	            password = cipher.doFinal(temp);
 			}
 			catch (Exception exc)
 			{
 				exc.printStackTrace();
 			}
-			System.out.println(username.length()+" "+password.length());
-			System.out.println(username.getBytes().length+" "+password.getBytes().length);
 			
 			login_success = MOA_client.sc.doLogin(username, password);
 			

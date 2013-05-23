@@ -119,7 +119,7 @@ public class SocketClient implements Runnable
                     	while (LOCK) ;
                     	LOCK = true;
                         OutputStream out = myClient.getOutputStream();
-                        myClient.getOutputStream().write("papa I'm alive".getBytes());
+                        out.write(MessageContainer.construct_message_keep_alive());
                         out.flush();
 
                         Scanner in = new Scanner(myClient.getInputStream());
@@ -174,11 +174,11 @@ public class SocketClient implements Runnable
 	                        	LOCK = true;
 	                            
 	                        	System.out.println("Syncing status with id="+LB.get(0).getIdtugas()+" status="+LB.get(0).getStatustugas());
-		                        String message = MessageContainer.construct_message_status(LB.get(0).getIdtugas(), LB.get(0).getStatustugas(), LB.get(0).getWaktuperubahan());
-			            		PrintWriter out2 = new PrintWriter(myClient.getOutputStream());
-			    	            out2.println(message);
+		                        byte[] message = MessageContainer.construct_message_status(LB.get(0).getIdtugas(), LB.get(0).getStatustugas(), LB.get(0).getWaktuperubahan());
+			            		OutputStream out2 = myClient.getOutputStream();
+			            		out2.write(message);
 			    	            out2.flush();
-			    	            System.out.println("Message sent to the server : "+ message);
+			    	            System.out.println("Message change status sent to the server");
 			    	            
 			    	            Scanner in2 = new Scanner(myClient.getInputStream());
 			    	            if (in2.hasNextLine())
@@ -231,7 +231,7 @@ public class SocketClient implements Runnable
         }
     }
     
-    public boolean doLogin(String username, String password)
+    public boolean doLogin(byte[] username, byte[] password)
     {
         try
         {
@@ -243,12 +243,12 @@ public class SocketClient implements Runnable
         	{
         		while (LOCK);
         		LOCK = true;
-	            String sendMessage = MessageContainer.construct_message_login(username, password);
-	            PrintWriter out = new PrintWriter(myClient.getOutputStream());
-	            System.out.println(sendMessage.length());
-	            out.println(sendMessage);
+	            byte[] sendMessage = MessageContainer.construct_message_login(username, password);
+	            System.out.println(sendMessage.length);
+	            OutputStream out = myClient.getOutputStream();
+	            out.write(sendMessage);
 	            out.flush();
-	            System.out.println("Message sent to the server : "+ sendMessage);
+	            System.out.println("Message login sent to the server");
 	            
 	            Scanner in = new Scanner(myClient.getInputStream());
 	            if (in.hasNextLine())
@@ -294,11 +294,11 @@ public class SocketClient implements Runnable
         	{
         		while (LOCK);
         		LOCK = true;
-	            String sendMessage = MessageContainer.construct_message_list_task(username);
-	            PrintWriter out = new PrintWriter(myClient.getOutputStream());
-	            out.println(sendMessage);
+	            byte[] sendMessage = MessageContainer.construct_message_list_task();
+	            OutputStream out = myClient.getOutputStream();
+	            out.write(sendMessage);
 	            out.flush();
-	            System.out.println("Message sent to the server : "+ sendMessage);
+	            System.out.println("Message list sent to the server");
 	            
 	            Scanner in = new Scanner(myClient.getInputStream());
 	            if (in.hasNextLine())
